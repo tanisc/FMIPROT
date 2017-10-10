@@ -1,3 +1,7 @@
+Version 0.15.1 (Beta)
+Number of FTP connections are not available for Windows anymore. Due to a bug, it is disabled until it is solved.
+Instead of one file (only 'fmiprot' or 'fmiprot.exe'), the program is distributed also with library files. (Does not affect the usage, altough it is faster to initialize now.) The structure is changed for the program to be able to run in the computers with strict restrictions in user control.
+
 Version 0.15.0 (Beta)
 Versions are named as "V#.#" anymore, "#.#.#" are used from now on.
 License agreement is added.

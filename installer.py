@@ -55,14 +55,20 @@ class installer_gui(Tkinter.Tk):
 		if not os.path.isfile(os.path.join(BinDir,'filelist.lst')):
 			tkMessageBox.showerror('Error','File list is missing or not readable. Installation can not continue.')
 			self.destroy()
-		if not os.path.isfile(os.path.join(BinDir,'files',self.bfile)):
-			tkMessageBox.showerror('Error',os.path.join(BinDir,'files',self.bfile)+' is missing or not readable. Installation can not continue.')
+		if not os.path.isfile(os.path.join(BinDir,'dirlist.lst')):
+			tkMessageBox.showerror('Error','Directory list is missing or not readable. Installation can not continue.')
 			self.destroy()
 		for line in open(os.path.join(BinDir,'filelist.lst')):
 			fname = os.path.join(BinDir,'files')
-			for ffname in line.split():
-				fname = os.path.join(fname,ffname)
+			fname = os.path.join(fname,line.replace('\n',''))
 			if not os.path.isfile(fname):
+				tkMessageBox.showerror('Error',fname+' is missing or not readable. Installation can not continue.')
+				self.destroy()
+				break
+		for line in open(os.path.join(BinDir,'dirlist.lst')):
+			fname = os.path.join(BinDir,'files')
+			fname = os.path.join(fname,line.replace('\n',''))
+			if not os.path.exists(fname):
 				tkMessageBox.showerror('Error',fname+' is missing or not readable. Installation can not continue.')
 				self.destroy()
 				break
@@ -264,12 +270,16 @@ class installer_gui(Tkinter.Tk):
 			if binex and binup:
 				self.message.set('Removing old binaries and libraries...')
 				try:
-					if os.path.exists(os.path.join(self.binpath.get(),self.bfile)):
-						os.remove(os.path.join(self.binpath.get(),self.bfile))
-					if os.path.exists(os.path.join(self.binpath.get(),'resources')):
-						shutil.rmtree(os.path.join(self.binpath.get(),'resources'))
-					if os.path.exists(os.path.join(self.binpath.get(),'doc')):
-						shutil.rmtree(os.path.join(self.binpath.get(),'doc'))
+					for line in open(os.path.join(BinDir,'dirlist.lst')):
+						dname = self.binpath.get()
+						dname = os.path.join(dname,line.replace('\n',''))
+						if os.path.exists(dname):
+							shutil.rmtree(dname)
+					for line in open(os.path.join(BinDir,'filelist.lst')):
+						fname = self.binpath.get()
+						fname = os.path.join(fname,line.replace('\n',''))
+						if os.path.exists(fname):
+							os.remove(fname)
 				except:
 					self.message.set('Error: Error in removing old binaries and libraries...')
 					fail = True
@@ -280,6 +290,20 @@ class installer_gui(Tkinter.Tk):
 					shutil.copytree(os.path.join(BinDir,'files','resources'),os.path.join(self.binpath.get(),'resources'))
 					shutil.copytree(os.path.join(BinDir,'files','doc'),os.path.join(self.binpath.get(),'doc'))
 					shutil.copy(os.path.join(BinDir,'files',self.bfile),os.path.join(self.binpath.get(),self.bfile))
+					for line in open(os.path.join(BinDir,'dirlist.lst')):
+						dname1 = os.path.join(BinDir,'files')
+						dname2 = self.binpath.get()
+						dname1 = os.path.join(dname1,line.replace('\n',''))
+						dname2 = os.path.join(dname2,line.replace('\n',''))
+						if not os.path.exists(dname2):
+							shutil.copytree(dname1,dname2)
+					for line in open(os.path.join(BinDir,'filelist.lst')):
+						fname1 = os.path.join(BinDir,'files')
+						fname2 = self.binpath.get()
+						fname1 = os.path.join(fname1,line.replace('\n',''))
+						fname2 = os.path.join(fname2,line.replace('\n',''))
+						if not os.path.exists(fname2):
+							shutil.copy(fname1,fname2)
 				except:
 					self.message.set('Error: Error in copying binaries and libraries...')
 					fail = True
@@ -377,17 +401,21 @@ class installer_gui(Tkinter.Tk):
 					pass
 
 			BinDir = os.path.split(os.path.realpath(os.sys.argv[0]))[0]
-			if not os.path.isfile(os.path.join(self.binpath.get(),self.bfile)) or not filecmp.cmp(os.path.join(BinDir,'files',self.bfile),os.path.join(self.binpath.get(),self.bfile)):
-				self.message.set(os.path.join(BinDir,'files',self.bfile)+' was not succesfully copied to '+os.path.join(self.binpath.get(),self.bfile)+'.')
-				fail=True
 			for line in open(os.path.join(BinDir,'filelist.lst')):
 				fname1 = os.path.join(BinDir,'files')
 				fname2 = self.binpath.get()
-				for ffname in line.split():
-					fname1 = os.path.join(fname1,ffname)
-					fname2 = os.path.join(fname2,ffname)
+				fname1 = os.path.join(fname1,line.replace('\n',''))
+				fname2 = os.path.join(fname2,line.replace('\n',''))
 				if not os.path.isfile(fname2) or not filecmp.cmp(fname1,fname2):
 					self.message.set(fname1+' was not succesfully copied to '+fname2+'.')
+					fail=True
+			for line in open(os.path.join(BinDir,'dirlist.lst')):
+				dname1 = os.path.join(BinDir,'files')
+				dname2 = self.binpath.get()
+				dname1 = os.path.join(dname1,line.replace('\n',''))
+				dname2 = os.path.join(dname2,line.replace('\n',''))
+				if not os.path.exists(dname2):
+					self.message.set(dname1+' was not succesfully copied to '+dname2+'.')
 					fail=True
 			if fail:
 				self.message.set('Installation failed.')

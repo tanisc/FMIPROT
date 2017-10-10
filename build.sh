@@ -1,32 +1,40 @@
-VER="0.15.0"
+VER="0.15.1"
 rm -R dist
 rm -R build
 rm fmiprot.spec
 rm installer.spec
+rm filelist.lst
+rm dirlist.lst
 sh clean.sh
 mkdir vers/$VER
-mkdir vers/$VER/files
-mkdir vers/$VER/files/resources
-cp src/resources/* vers/$VER/files/resources/
-mkdir vers/$VER/files/previews
-cp src/previews/0-MONIMET* vers/$VER/files/previews/
-mkdir vers/$VER/files/doc
-cp doc/readme.txt vers/$VER/files/doc/readme.txt
-cp doc/usermanual.pdf vers/$VER/files/doc/usermanual.pdf
-cp doc/license.txt vers/$VER/files/doc/license.txt
-cp doc/history.txt vers/$VER/files/doc/history.txt
-cp doc/readme.txt vers/$VER/readme.txt
-cp doc/usermanual.pdf vers/$VER/usermanual.pdf
-cp doc/license.txt vers/$VER/license.txt
-cp doc/history.txt vers/$VER/history.txt
-pyinstaller src/fmiprot.py --onefile
-cp dist/fmiprot vers/$VER/files/fmiprot
+rm -R vers/$VER/lin
+mkdir vers/$VER/lin
+mkdir vers/$VER/lin/files
+mkdir vers/$VER/lin/files/resources
+cp src/resources/* vers/$VER/lin/files/resources/
+mkdir vers/$VER/lin/files/previews
+cp src/previews/0-MONIMET* vers/$VER/lin/files/previews/
+mkdir vers/$VER/lin/files/doc
+cp doc/readme.txt vers/$VER/lin/files/doc/readme.txt
+cp doc/usermanual.pdf vers/$VER/lin/files/doc/usermanual.pdf
+cp doc/license.txt vers/$VER/lin/files/doc/license.txt
+cp doc/history.txt vers/$VER/lin/files/doc/history.txt
+cp doc/readme.txt vers/$VER/lin/readme.txt
+cp doc/usermanual.pdf vers/$VER/lin/usermanual.pdf
+cp doc/license.txt vers/$VER/lin/license.txt
+cp doc/history.txt vers/$VER/lin/history.txt
+pyinstaller src/fmiprot.py
+python lister.py
+cp filelist.lst vers/$VER/lin/filelist.lst
+cp dirlist.lst vers/$VER/lin/dirlist.lst
+rm filelist.lst
+rm dirlist.lst
+cp -R dist/fmiprot/* vers/$VER/lin/files/
 rm -R dist
 rm -R build
 rm fmiprot.spec
-pyinstaller installer.py --onefile
-cp dist/installer vers/$VER/install_linux
-cp filelist.lst vers/$VER/filelist.lst
+pyinstaller installer.py
+cp -R dist/installer/* vers/$VER/lin/
 rm -R dist
 rm -R build
 rm installer.spec
