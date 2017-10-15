@@ -1789,7 +1789,7 @@ class monimet_gui(Tkinter.Tk):
 			self.MenuItem1.delete(0,"end")
 			source = self.setup[self.AnalysisNoVariable.get()-1]['source']
 			if source['protocol'] == 'LOCAL':
-				imglist = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection,  self.imagespath.get(), [0,0,0,0], online=True)[0]
+				imglist = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection,  self.imagespath.get(), [0,0,0,0, "All"], online=True)[0]
 				for i,v in enumerate(imglist):
 					imglist[i] = os.path.split(v)[-1]
 			else:
@@ -4300,6 +4300,7 @@ class monimet_gui(Tkinter.Tk):
 				break
 		self.setup[self.AnalysisNoVariable.get()-1].update({'name':name})
 		self.LoadValues()
+		self.UpdatePictures()
 		self.Message.set("Selected scenario is duplicated without masking.")
 
 
@@ -4746,7 +4747,7 @@ class monimet_gui(Tkinter.Tk):
 		webbrowser.open(os.path.join(BinDir,'doc','usermanual.pdf'),new=2)
 
 	def About(self):
-		tkMessageBox.showinfo("About...", "FMIPROT (Finnish Meteorological Institute Image Processing Tool) is a toolbox to analyze the images from multiple camera networks and developed under the project MONIMET, funded by EU Life Programme.\nCurrent version is 0.15.1 (Beta).\nFor more information, contact Cemal.Melih.Tanis@fmi.fi.")
+		tkMessageBox.showinfo("About...", "FMIPROT (Finnish Meteorological Institute Image Processing Tool) is a toolbox to analyze the images from multiple camera networks and developed under the project MONIMET, funded by EU Life Programme.\nCurrent version is 0.15.2 (Beta).\nFor more information, contact Cemal.Melih.Tanis@fmi.fi.")
 
 	def WebMONIMET(self):
 		webbrowser.open("http://monimet.fmi.fi",new=2)
@@ -4764,7 +4765,7 @@ class monimet_gui(Tkinter.Tk):
 
 if __name__ == "__main__":
 	app = monimet_gui(None)
-	app.title('FMIPROT 0.15.1 (Beta)')
+	app.title('FMIPROT 0.15.2 (Beta)')
 	if os.path.sep != "/":
 		app.iconbitmap(os.path.join(ResourcesDir,'monimet.ico'))
 	app.mainloop()

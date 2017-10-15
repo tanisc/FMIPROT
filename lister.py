@@ -26,15 +26,16 @@ for dp, dn, filenames in os.walk('doc'):
         fle.write(os.path.join('.',dp,fname)[2:])
         fle.write('\n')
 os.chdir('src')
-for dp, dn, filenames in os.walk('resources'):
+for dp, dn, filenames in os.walk('previews'):
     for fname in filenames:
         fle.write(os.path.join('.',dp,fname)[2:])
         fle.write('\n')
-for dp, dn, filenames in os.walk('previews'):
+for dp, dn, filenames in os.walk('resources'):
     for fname in filenames:
         fle.write(os.path.join('.',dp,fname)[2:])
         if filenames.index(fname) != len(filenames)-1:
             fle.write('\n')
+
 os.chdir('..')
 fle.close()
 dle.close()
