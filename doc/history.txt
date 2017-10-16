@@ -1,7 +1,7 @@
 Version 0.15.2 (Beta)
 Minor bugs are fixed:
 - Installer error on copying preview images.
-- Random letters near polygon numbers in setup reports in Windows.
+- Listing preview pictures for cameras which has images in local directories.
 - Old polygons on the preview image were still visible after "Duplicate without masking".
 Content and format of the preview images in setup reports are modified. Image showing polygon numbers are provided without the background to increase visibility.
 
