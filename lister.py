@@ -12,8 +12,8 @@ for dp, dn, filenames in os.walk('.'):
         continue
     dle.write(dp[2:])
     dle.write('\n')
-dle.write('previews')
-dle.write('\n')
+# dle.write('previews')
+# dle.write('\n')
 dle.write('resources')
 dle.write('\n')
 dle.write('doc')
@@ -26,10 +26,10 @@ for dp, dn, filenames in os.walk('doc'):
         fle.write(os.path.join('.',dp,fname)[2:])
         fle.write('\n')
 os.chdir('src')
-for dp, dn, filenames in os.walk('previews'):
-    for fname in filenames:
-        fle.write(os.path.join('.',dp,fname)[2:])
-        fle.write('\n')
+# for dp, dn, filenames in os.walk('previews'):
+#     for fname in filenames:
+#         fle.write(os.path.join('.',dp,fname)[2:])
+#         fle.write('\n')
 for dp, dn, filenames in os.walk('resources'):
     for fname in filenames:
         fle.write(os.path.join('.',dp,fname)[2:])

@@ -1,4 +1,4 @@
-FMIPROT 0.15.1 (Beta)
+FMIPROT 0.15.2 (Beta)
 ***************************************************************
 FMI Image processing tool (FMIPROT) is software designed as a toolbox for image processing for phenological and meteorological purposes, under the MONIMET Project, funded by EU Life+ Programme (2013-2017) (http://monimet.fmi.fi). The purpose of the software was to create a platform that communicates with the MONIMET project camera network in Finland, as linking the cameras from the network and downloading images according to temporal criteria automatically. At the moment FMIPROT can communicate with multiple camera networks. The software provides a graphical interface to select all relevant criteria to analyze the images and view results on plots and maps. The software is expandable by adding various processing algorithms of images taken by cameras by users. Current functions of the software are,
 (1) Communication with multiple camera networks

@@ -3916,7 +3916,7 @@ class monimet_gui(Tkinter.Tk):
 				if pfn not in os.listdir(PreviewsDir):
 					continue
 				img = mahotas.imread(os.path.join(PreviewsDir,pfn))
-				rat = 320.0/img.shape[1]
+				rat = 160.0/img.shape[1]
 				tshape = (int(img.shape[1]*rat),int(img.shape[0]*rat))
 				mask = Image.new("RGB", tshape[0:2], "white")
 				mask2 = Image.new("RGB", (img.shape[1], img.shape[0]), "white")
@@ -3951,16 +3951,12 @@ class monimet_gui(Tkinter.Tk):
 						p.append(p[1])
 						draw2.line(tuple(map(int,p)), fill='black', width=linewidth)
 						draw3.line(tuple(map(int,p)), fill=self.PolygonColor1.get(), width=linewidth)
-						texty1 = [np.array(texty).max()+int(8*rat),np.array(texty).min()-int(80*rat)][np.array([tshape[1]-np.array(texty).max(),np.array(texty).min()]).argmax()]
-						texty2 = [np.array(texty).max()+int(8*rat),np.array(texty).min()-int(80*rat)][np.array([tshape[1]-np.array(texty).max(),np.array(texty).min()]).argmin()]
-						draw.text(((np.array(textx).mean()).astype(int),texty1),str(p_i+1),'black',font=ImageFont.load_default())
-						draw.text(((np.array(textx).mean()).astype(int),texty2),str(p_i+1),'black',font=ImageFont.load_default())
 						draw.text(((np.array(textx).mean()).astype(int),(np.array(texty).mean()).astype(int)),str(p_i+1),'black',font=ImageFont.load_default())
 				mask = mask.resize(img.shape[0:2][::-1])
 				mask = np.array(list(mask.getdata())).reshape(img.shape)	#black text
 				mask2 = np.array(list(mask2.getdata())).reshape(img.shape)	#black polygons
 				mask3 = np.array(list(mask3.getdata())).reshape(img.shape)	#polycolor polygons
-				mahotas.imsave(maskfiles1,((255-img)*((mask2<100)+(mask<100))+img*((mask2>=100)*(mask>=100))).astype('uint8'))
+				mahotas.imsave(maskfiles1,(255-((255)*((mask2<100)+(mask<100)))).astype('uint8'))
 				mahotas.imsave(maskfiles2,(mask3*(mask2<100)+img*(mask2>=100)).astype('uint8'))
 				mahotas.imsave(maskfiles3,img.astype('uint8'))
 				mahotas.imsave(maskfiles4,mask2.astype('uint8'))
