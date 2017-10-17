@@ -743,8 +743,11 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 			imglist[i] = os.path.join(pathlist[i],imglist[i])
 
 	#sort according to time
-	imglist = [ilist for dlist, ilist in sorted(zip(datetimelist, imglist))]
-	datetimelist = [dlist for dlist, ilist in sorted(zip(datetimelist, imglist))]
+	imglistv = [ilist for dlist, ilist in sorted(zip(datetimelist, imglist))]
+	datetimelistv = [dlist for dlist, ilist in sorted(zip(datetimelist, imglist))]
+	imglist = imglistv
+	datetimelist = datetimelistv
+
 	if len(datetimelist) > 0 and care_tz: #false used for checkQuantity
 		if 'timezone' in source:
 			if '%z' in filenameformat:
