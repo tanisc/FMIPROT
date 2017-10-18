@@ -4761,7 +4761,7 @@ class monimet_gui(Tkinter.Tk):
 
 if __name__ == "__main__":
 	app = monimet_gui(None)
-	app.title('FMIPROT 0.15.2 (Beta)')
+	app.title('FMIPROT 0.15.3 (Beta)')
 	if os.path.sep != "/":
 		app.iconbitmap(os.path.join(ResourcesDir,'monimet.ico'))
 	app.mainloop()
