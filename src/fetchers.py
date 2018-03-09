@@ -1,6 +1,6 @@
 #if os.path.sep != '/':
 import multiprocessing
-import os
+import os, sys
 #from ftplib import FTP, ftplib.error_perm
 import ftplib
 from functools import partial
@@ -15,6 +15,16 @@ from uuid import uuid4
 from time import mktime
 from definitions import TmpDir
 from copy import deepcopy
+
+if "nogui" in sys.argv:
+	Tkinter = None
+	import noTk as Tkinter
+	import noTk as tk
+	#from noTk import Tkconstants, tkFileDialog, tkMessageBox, tkSimpleDialog
+	global nogui
+	nogui = True
+else:
+	nogui = False
 
 def fetchFile(tkobj,logger,localdir, localfile, protocol,host, username, password, file, proxy, connection):
 	if host == None:

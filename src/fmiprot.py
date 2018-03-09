@@ -36,6 +36,16 @@ import textwrap
 import gc
 import FileDialog
 
+if "nogui" in sys.argv:
+	Tkinter = None
+	import noTk as Tkinter
+	import noTk as tk
+	#from noTk import Tkconstants, tkFileDialog, tkMessageBox, tkSimpleDialog
+	global nogui
+	nogui = True
+else:
+	nogui = False
+
 class monimet_gui(Tkinter.Tk):
 	def __init__(self,parent):
 		Tkinter.Tk.__init__(self,parent)
@@ -194,15 +204,9 @@ class monimet_gui(Tkinter.Tk):
 		self.PictureFile2 = Tkinter.BooleanVar()
 		self.PictureFile2.set(False)
 
-
 		#settings
 		self.initSettings()
-
 		self.ActiveMenu.trace('w',self.callbackActiveMenu)
-		self.Menu_Base()
-		self.Menu_Menu()
-
-		self.Message.set("GUI initialized.")
 
 		global  scenario_def, setup_def ,temporal_modes, output_modes
 		(self.networklist,self.sourcelist) = sources.readSources(self, self.proxy, self.connection, self.Message)
@@ -217,28 +221,27 @@ class monimet_gui(Tkinter.Tk):
 		output_modes = ['New directory in results directory','Existing empty directory','Merge with existing results']
 		self.outputmodevariable.set(output_modes[0])
 
-		if len(sys.argv) > 1:
+		if nogui:
 			self.setupFileClear()
 			self.setupFileLoad()
-		else:
-			self.setupFileClear()
-
-		self.Menu_Main()
-		if "debug" in sys.argv:
 			if "offline" in sys.argv:
 				self.imagesdownload.set(False)
 			if "online" in sys.argv:
 				self.imagesdownload.set(True)
-
 			self.RunAnalyses()
-			try:
-				sys.exit()
-			except:
-				pass
-			try:
-				exit(1)
-			except:
-				pass
+			os._exit(1)
+		else:
+			self.Menu_Base()
+			self.Menu_Menu()
+
+			if len(sys.argv) > 1:
+				self.setupFileClear()
+				self.setupFileLoad()
+			else:
+				self.setupFileClear()
+
+			self.Menu_Main()
+			self.Message.set("GUI initialized.")
 
 		self.Message.set("Program initialized.|busy:False")
 
@@ -3760,9 +3763,11 @@ class monimet_gui(Tkinter.Tk):
 			self.setup = setup
 			(self.networklist,self.sourcelist, self.setup) = sources.fixSourcesBySetup(self.Message,self.networklist,self.sourcelist, self.setup)
 			self.setupFileVariable.set(ans)
+			self.Message.set("Setup file is loaded.")
+			if nogui:
+				return False
 			self.AnalysisNoVariable.set(1)
 			self.Menu_Main()
-			self.Message.set("Setup file is loaded.")
 
 		else:
 			self.Message.set("Loading cancelled.")
@@ -3868,6 +3873,8 @@ class monimet_gui(Tkinter.Tk):
 	def setupFileClear(self):
 		self.setupFileVariable.set("Untitled.cfg")
 		self.setup = []
+		if nogui:
+			return False
 		self.AnalysisNoNew()
 		self.Menu_Main()
 		self.Message.set("Setup is resetted.")
@@ -4017,7 +4024,8 @@ class monimet_gui(Tkinter.Tk):
 
 	def Run(self,scn=None):
 		logger = self.Message
-		self.UpdateSetup()
+		if not nogui:
+			self.UpdateSetup()
 		if scn == None:
 			runq = ("Run all scenarios","FMIPROT will now run all the scenarios. Depending on the options selected, it may take a long time. It is adviced to check your input before runs. 'Generate Report' option is quite handy to check everything about your input.\nFMIPROT will save your setup under the your results directory ("+self.resultspath.get()+") for any case. If your runs fail, you may load the setup from that directory.\nDo you want to proceed?")
 		else:
@@ -4187,9 +4195,11 @@ class monimet_gui(Tkinter.Tk):
 							csvlist[s][a].append([False])
 				if scn == None:
 					self.Message.set('Scenario: |progress:1|queue:'+str(s+1)+'|total:'+str(len(self.setup)))
-			self.ResultFolderNameVariable.set(resultspath)#xxx
 			if self.outputreportvariable.get():
 				self.setupFileReportFunc([os.path.join(resultspath,'report.html')]+csvlist)
+			if nogui:
+				return False
+			self.ResultFolderNameVariable.set(resultspath)#xxx result dir default problematic
 			self.Message.set("Running scenarios completed.|busy:False")
 			if self.outputmodevariable.get() == output_modes[0]:
 				self.callbackoutputmode()

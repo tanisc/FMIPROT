@@ -271,13 +271,15 @@ def vegInd(imglist,datetimelist,mask,logger, ebp,gf,rf,gei,grvi):
 				exmask = maskers.exmask(img,255)
 			else:
 				exmask = maskers.exmask(img,256)
-			(scsmask, scsth) = maskers.scsmask(img,mask,logger,escs)
+			if escs:
+				(scsmask, scsth) = maskers.scsmask(img,mask,logger,escs)
 
-			if np.sum(mask*thmask*exmask*scsmask) == 0:
-				logger.set("There is no pixels in the selected area inside thresholds. Image is discarded from the analysis. ("+str(datetimelist[i])+")")
-				continue
+			# if np.sum(mask*thmask*exmask*scsmask) == 0:
+			# 	logger.set("There is no pixels in the selected area inside thresholds. Image is discarded from the analysis. ("+str(datetimelist[i])+")")
+			# 	continue
+			# img = img*mask*thmask*exmask*scsmask	#mask 0#1
 
-			img = img*mask*thmask*exmask*scsmask	#mask 0#1
+			img = img*mask*thmask*exmask	#mask 0#1
 
 			r, g, b = img.transpose((2,0,1))
 			r = r.astype('int64')
@@ -309,7 +311,7 @@ def vegInd(imglist,datetimelist,mask,logger, ebp,gf,rf,gei,grvi):
 
 			time = np.append(time,str(datetimelist[i]))
 		except:
-			pass
+			logger.set("Analyzing " + fname + " failed.")
 		logger.set('Image: |progress:4|queue:'+str(i+1)+'|total:'+str(len(imglist)))
 	output = ["Time",time]
 	if gfp:
