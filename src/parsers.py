@@ -744,6 +744,14 @@ def readINI(inifile):
 
 
 def writeINI(inifile, dictlist,commonheader=True):
+	validini = False
+	for d,dicti in enumerate(dictlist):
+		if 'temporary' not in dicti or dicti['temporary'] is False:
+			validini = True
+			break
+	if not validini:
+		return 'Nothing to write in INI file.'
+
 	f = open(inifile,'w')
 	if commonheader:
 		keys = []
@@ -760,6 +768,8 @@ def writeINI(inifile, dictlist,commonheader=True):
 		f.write('\n')
 
 	for d,dicti in enumerate(dictlist):
+		if 'temporary' in dicti and dicti['temporary']:
+			continue
 		nedict = {}
 		if not commonheader:
 			keys = []
@@ -843,6 +853,7 @@ def writeINI(inifile, dictlist,commonheader=True):
 			f.write('\n')
 
 	f.close()
+	return 'Writing INI file successful.'
 
 
 def dwriteINI(inifile, dictlist,commonheader=True):

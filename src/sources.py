@@ -5,6 +5,10 @@ from os import path
 from shutil import copyfile
 from copy import deepcopy
 import tkMessageBox, tkFileDialog
+import sys
+if "nogui" in sys.argv:
+	import noTk as tkMessageBox
+	import noTk as tkSimpleDialog
 
 #read sources from network file #remember exceptions same name and cross ref
 def readSources(tkobj,proxy,connection, logger):
@@ -127,7 +131,7 @@ def fixSourcesBySetup(logger,networklist,sourcelist,setup):
 			while len(ids) > 0 and str(i)  in ids:
 				i += 1
 			nname = source_sce['network']
-			networklist.append({'id':str(i),'name':nname,'protocol':'LOCAL','host':None,'username':None,'password':None,'file':path.join(SourceDir,validateName(nname).lower()+'.ini'),'localfile':validateName(nname).lower()+'.ini'})
+			networklist.append({'temporary':True,'id':str(i),'name':nname,'protocol':'LOCAL','host':None,'username':None,'password':None,'file':path.join(SourceDir,validateName(nname).lower()+'.ini'),'localfile':validateName(nname).lower()+'.ini'})
 		validnames = listSources(logger,sourcelist,source_sce['network'])
 		for i,v in enumerate(validnames):
 			validnames[i] = validateName(v).lower()
@@ -137,12 +141,18 @@ def fixSourcesBySetup(logger,networklist,sourcelist,setup):
 			sourcedict = deepcopy(source_sce)
 			if source_sce['network'] not in sources_to_save:
 				sources_to_save.append(source_sce['network'])
-			sourcedict.update({'networkid':getSource(logger,networklist,source_sce['network'])['id']})
+			sourcedict.update({'temporary':True,'networkid':getSource(logger,networklist,source_sce['network'])['id']})
 			sourcelist.append(sourcedict)
 	if warn != '':
-		if tkMessageBox.askyesno('Changes in networks',warn+'Do you want to make changes permanent?'):
+		if 'noquestions' not in sys.argv and tkMessageBox.askyesno('Changes in networks',warn+'Do you want to make changes permanent?'):
+			for n,network in enumerate(networklist):
+				if 'temporary' in network and network['temporary']:
+					del networklist[n]['temporary']
 			writeINI(NetworklistFile,networklist)
 			for network in sources_to_save:
+				for s,source in enumerate(sourcelist):
+					if 'temporary' in source and source['temporary']:
+						del sourcelist[s]['temporary']
 				sourcedict = getSources(logger,sourcelist,network,'network')
 				network = getSource(logger,networklist,network)
 				if network['protocol'] == 'LOCAL':

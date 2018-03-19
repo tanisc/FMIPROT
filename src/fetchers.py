@@ -10,7 +10,7 @@ import numpy as np
 from definitions import BinDir, source_metadata_names
 from parsers import strptime2, validateName, convertTZ
 from shutil import copyfile, copystat
-import Tkinter, socket
+import Tkinter, socket, tkMessageBox,tkSimpleDialog
 from uuid import uuid4
 from time import mktime
 from definitions import TmpDir
@@ -20,7 +20,8 @@ if "nogui" in sys.argv:
 	Tkinter = None
 	import noTk as Tkinter
 	import noTk as tk
-	#from noTk import Tkconstants, tkFileDialog, tkMessageBox, tkSimpleDialog
+	import noTk as tkSimpleDialog
+	import noTk as tkMessageBox
 	global nogui
 	nogui = True
 else:
@@ -324,48 +325,39 @@ def listPathCrawl(remote_path,timec,timelimc):
 
 
 def getPassword(tkobj,logger,protocol,host,renew=False):
+	if 'noquestions' in sys.argv:
+		try:
+			exec('tkobj.'+validateName(protocol+host).lower()+'password.get()')
+			exec('tkobj.'+validateName(protocol+host).lower()+'username.get()')
+		except:
+			logger.set('Asking credentials is not supported in No-Questions mode. Using decoy credentials to fail the connection.')
+			exec('tkobj.'+validateName(protocol+host).lower()+'password = Tkinter.StringVar()')
+			exec('tkobj.'+validateName(protocol+host).lower()+'password.set(\'decoypassword\')')
+			exec('tkobj.'+validateName(protocol+host).lower()+'username = Tkinter.StringVar()')
+			exec('tkobj.'+validateName(protocol+host).lower()+'username.set(\'decoyusername\')')
+		return False
 	try:
 		exec('tkobj.'+validateName(protocol+host).lower()+'password.get()')
 		exec('tkobj.'+validateName(protocol+host).lower()+'username.get()')
 		if renew:
-			tkobj.passworddialog = Tkinter.Toplevel(tkobj,padx=10,pady=10)
 			exec('tkobj.'+validateName(protocol+host).lower()+'password = Tkinter.StringVar()')
 			exec("tkobj."+validateName(protocol+host).lower()+"password.set('')")
 			exec('tkobj.'+validateName(protocol+host).lower()+'username = Tkinter.StringVar()')
 			exec("tkobj."+validateName(protocol+host).lower()+"username.set('')")
-			tkobj.passworddialog.grab_set()
-			tkobj.passworddialog.wm_title('Enter username and password')
-			Tkinter.Label(tkobj.passworddialog ,anchor='w',wraplength=500,text='The password and/or the username on the host \''+protocol+'://'+host+'\' is incorrect. Please try again. The username and the password will be remembered for this session.').grid(sticky='w'+'e',row=1,column=1,columnspan=1)
-			Tkinter.Label(tkobj.passworddialog ,anchor='w',wraplength=500,text='Username:').grid(sticky='w'+'e',row=2,column=1,columnspan=1)
-			Tkinter.Entry(tkobj.passworddialog ,textvariable=eval('tkobj.'+validateName(protocol+host).lower()+'username')).grid(sticky='w'+'e',row=3,column=1,columnspan=1)
-			Tkinter.Label(tkobj.passworddialog ,anchor='w',wraplength=500,text='Password:').grid(sticky='w'+'e',row=4,column=1,columnspan=1)
-			Tkinter.Entry(tkobj.passworddialog ,textvariable=eval('tkobj.'+validateName(protocol+host).lower()+'password')).grid(sticky='w'+'e',row=5,column=1,columnspan=1)
-			Tkinter.Button(tkobj.passworddialog ,text='OK',command=tkobj.passworddialog.destroy).grid(sticky='w'+'e',row=6,column=1,columnspan=1)
-			#centerWindow(tkobj.passworddialog)
-			tkobj.passworddialog.wait_window()
+			tkMessageBox.showwarning('Enter username and password','The password and/or the username on the host \''+protocol+'://'+host+'\' is incorrect. Please try again in the next dialog. The username and the password will be remembered for this session.')
+			eval('tkobj.'+validateName(protocol+host).lower()+'username.set')(tkSimpleDialog.askstring('Enter username and password','Enter username on the host \''+protocol+'://'+host+'\'',initialvalue=eval('tkobj.'+validateName(protocol+host).lower()+'username.get()')))
+			eval('tkobj.'+validateName(protocol+host).lower()+'password.set')(tkSimpleDialog.askstring('Enter username and password','Enter password on the host \''+protocol+'://'+host+'\'',initialvalue=eval('tkobj.'+validateName(protocol+host).lower()+'password.get()')))
+
 	except:
-		tkobj.passworddialog = Tkinter.Toplevel(tkobj,padx=10,pady=10)
 		exec('tkobj.'+validateName(protocol+host).lower()+'password = Tkinter.StringVar()')
 		exec('tkobj.'+validateName(protocol+host).lower()+'username = Tkinter.StringVar()')
-		tkobj.passworddialog.grab_set()
-		tkobj.passworddialog.wm_title('Enter username and password')
-		Tkinter.Label(tkobj.passworddialog ,anchor='w',wraplength=500,text='Enter the username and the password for the username on the host \''+protocol+'://'+host+'\'. The username and the password will be remembered for this session.').grid(sticky='w'+'e',row=1,column=1,columnspan=1)
-		Tkinter.Label(tkobj.passworddialog ,anchor='w',wraplength=500,text='Username:').grid(sticky='w'+'e',row=2,column=1,columnspan=1)
-		Tkinter.Entry(tkobj.passworddialog ,textvariable=eval('tkobj.'+validateName(protocol+host).lower()+'username')).grid(sticky='w'+'e',row=3,column=1,columnspan=1)
-		Tkinter.Label(tkobj.passworddialog ,anchor='w',wraplength=500,text='Password:').grid(sticky='w'+'e',row=4,column=1,columnspan=1)
-		Tkinter.Entry(tkobj.passworddialog ,textvariable=eval('tkobj.'+validateName(protocol+host).lower()+'password')).grid(sticky='w'+'e',row=5,column=1,columnspan=1)
-		Tkinter.Button(tkobj.passworddialog ,text='OK',command=tkobj.passworddialog.destroy).grid(sticky='w'+'e',row=6,column=1,columnspan=1)
-		#centerWindow(tkobj.passworddialog)
-		tkobj.passworddialog.wait_window()
-		#tkobj.passworddialog.update_idletasks()
-		#sizet = tuple(int(_) for _ in tkobj.passworddialog.geometry().split('+')[0].split('x'))
-		#sizem = tuple(int(_) for _ in tkobj.geometry().split('+')[0].split('x'))
-		#x = tkobj.winfo_x() + sizem[0]/2 - sizet[0]/2
-		#y = tkobj.winfo_y() + sizem[1]/2 - sizet[1]/2
-		#tkobj.passworddialog.geometry("%dx%d+%d+%d" % (sizet + (x, y)))
+		tkMessageBox.showwarning('Enter username and password','Enter the username and the password for the username on the host \''+protocol+'://'+host+'\'. The username and the password will be remembered for this session.')
+		eval('tkobj.'+validateName(protocol+host).lower()+'username.set')(tkSimpleDialog.askstring('Enter username and password','Enter username on the host \''+protocol+'://'+host+'\'',initialvalue=eval('tkobj.'+validateName(protocol+host).lower()+'username.get()')))
+		eval('tkobj.'+validateName(protocol+host).lower()+'password.set')(tkSimpleDialog.askstring('Enter username and password','Enter password on the host \''+protocol+'://'+host+'\'',initialvalue=eval('tkobj.'+validateName(protocol+host).lower()+'password.get()')))
 
-def downloadFTP(proxy,connection, username,host,password,local_path,imglist,pathlist,dllist):
-	#logger.set('Establishing FTP connection...')
+def downloadFTP(proxy,connection, username,host,password,local_path,imglist,pathlist,dllist,logger):
+	if logger is not None:
+		logger.set('Establishing FTP connection...')
 	success = 0
 	fail = []
 	try:
@@ -378,8 +370,9 @@ def downloadFTP(proxy,connection, username,host,password,local_path,imglist,path
 			ftp = ftplib.FTP(host)
 			ftp.set_pasv(bool(int(connection['ftp_passive'])))
 			ftp.login(username, password)
-		#logger.set('Connection established.')
-		#logger.set('Downloading images...' )
+		if logger is not None:
+			logger.set('Connection established.')
+			logger.set('Downloading images...' )
 		for i in dllist:
 			f = imglist[i]
 			p = pathlist[i] +'/'
@@ -401,7 +394,8 @@ def downloadFTP(proxy,connection, username,host,password,local_path,imglist,path
 					os.remove(tmpfname)
 			except:
 				fail.append(i)
-				#logger.set("Downloading " + f + " failed.")
+				if logger is not None:
+					logger.set("Downloading " + f + " failed.")
 				try:
 					tmpfile.close()
 				except:
@@ -414,11 +408,14 @@ def downloadFTP(proxy,connection, username,host,password,local_path,imglist,path
 					os.remove(os.path.join(local_path, f))
 				except:
 					pass
+			logger.set('Image: |progress:4|queue:'+str(i+1)+'|total:'+str(len(dllist)))
 		#close connection
 		ftp.quit()
-		#logger.set('Disconnected from FTP.')
+		if logger is not None:
+			logger.set('Disconnected from FTP.')
 	except:
-		#logger.set('Connection failed.')
+		if logger is not None:
+			logger.set('Connection failed.')
 		for i in enumerate(dllist):
 			fail.append(i)
 
@@ -428,7 +425,10 @@ multiprocessing.freeze_support()
 
 def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=0, online=True, download=True, care_tz = True):
 	(protocol, host, username,password,name, remote_path, filenameformat) = (source['protocol'],source['host'],source['username'],source['password'],source['name'],source['path'],source['filenameformat'])
-	local_path = os.path.join(workdir,source['networkid']+'-'+validateName(source['network']))
+	if 'temporary' in source and source['temporary']:
+		local_path = os.path.join(os.path.join(TmpDir,'tmp_images'),validateName(source['network'])+'-'+source['protocol']+'-'+source['host']+'-'+validateName(source['username'])+'-'+validateName(source['path']))
+	else:
+		local_path = os.path.join(workdir,source['networkid']+'-'+validateName(source['network']))
 	local_path = os.path.join(local_path,validateName(source['name']))
 	if not os.path.exists(local_path):
 		os.makedirs(local_path)
@@ -563,11 +563,11 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 				logger.set('Opening connections and downloading images...')
 				num_con = int(connection['ftp_numberofconnections'])
 				if num_con == 1:
-					(success, fail) = downloadFTP(proxy,connection, username,host,password,local_path,imglist,pathlist,dllist)
+					(success, fail) = downloadFTP(proxy,connection, username,host,password,local_path,imglist,pathlist,dllist,logger)
 				else:
 					if len(dllist) < num_con:
 						num_con = len(dllist)
-					argvars = [proxy,connection, username,host,password,local_path,imglist,pathlist]
+					argvars = [proxy,connection, username,host,password,local_path,imglist,pathlist,None]
 					func = partial(downloadFTP, *argvars)
 					pool = multiprocessing.Pool()
 					arglist = []

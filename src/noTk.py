@@ -1,3 +1,4 @@
+import sys
 class Tk(object):
     def __init__(self,parent):
         return False
@@ -46,10 +47,11 @@ class Toplevel(object):
     def update_idletasks(self):
         return False
 
+    def grab_set(self):
+        return False
+
     def geometry(self,*args):
         return "100x100"
-
-
 
 class Scrollbar(object):
     def __init__(self,parent,width=0):
@@ -149,3 +151,42 @@ class DoubleVar(object):
 
     def trace_variable(self,mode,func):
         return False
+
+def showinfo(title,message):
+  print '| ' +"INFO: "+title+' |'
+  print message
+  raw_input('Press any key to continue...')
+
+def showwarning(title,message):
+  print '| ' +"WARNING: "+title+' |'
+  print message
+  raw_input('Press any key to continue...')
+
+def showerror(title,message):
+  print '| ' +"ERROR: "+title+' |'
+  print message
+  raw_input('Press any key to continue...')
+
+def askyesno(title,message):
+  print '| ' + title +' |'
+  print message
+  ans = ""
+  while ans not in ['y','n','Y','N']:
+      ans = raw_input('(y)es/(n)o?')
+      if ans not in ['y','n','Y','N']:
+          print 'Incorrect answer. ',
+  if ans in ['y','Y']:
+      return True
+  else:
+      return False
+
+def askstring(title,message,initialvalue=''):
+  print '| ' +title+' |'
+  print message + ' ['+initialvalue+']'
+  return raw_input() or initialvalue
+
+def open(file,new=2):
+    import __builtin__
+    f = __builtin__.open(file,'r')
+    print f.read()
+    f.close()

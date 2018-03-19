@@ -40,7 +40,9 @@ if "nogui" in sys.argv:
 	Tkinter = None
 	import noTk as Tkinter
 	import noTk as tk
-	#from noTk import Tkconstants, tkFileDialog, tkMessageBox, tkSimpleDialog
+	import noTk as tkMessageBox
+	import noTk as tkSimpleDialog
+	import noTk as webbrowser
 	global nogui
 	nogui = True
 else:
@@ -624,8 +626,12 @@ class monimet_gui(Tkinter.Tk):
 			self.manager_network_widget2.destroy()
 		except:
 			pass
-		self.manager_network_widget1 = Tkinter.OptionMenu(self.manager_network_window,self.manager_network_name_nxt,*sources.listNetworks(self.Message,self.manager_networklist),command=self.Networks_UpdateNetwork).grid(sticky='w'+'e',row=2,column=2,columnspan=4)
-		self.manager_network_widget2 = Tkinter.Label(self.manager_network_window,anchor='w',text='Number of camera networks: ' + str(len(self.manager_networklist))).grid(sticky='w'+'e',row=1,column=1)
+		networks_to_show = []
+		for network in sources.listNetworks(self.Message,self.manager_networklist):
+			if 'temporary' not in sources.getSource(self.Message,self.manager_networklist,network) or not sources.getSource(self.Message,self.manager_networklist,network)['temporary']:
+				networks_to_show.append(network)
+		self.manager_network_widget1 = Tkinter.OptionMenu(self.manager_network_window,self.manager_network_name_nxt,*networks_to_show,command=self.Networks_UpdateNetwork).grid(sticky='w'+'e',row=2,column=2,columnspan=4)
+		self.manager_network_widget2 = Tkinter.Label(self.manager_network_window,anchor='w',text='Number of camera networks: ' + str(len(networks_to_show))).grid(sticky='w'+'e',row=1,column=1)
 
 	def Networks_UpdateSourceLists(self,*args):
 		try:
@@ -940,7 +946,7 @@ class monimet_gui(Tkinter.Tk):
 						dictlist[d]['password'] = '*'
 					if isinstance(dictlist[d]['username'],str) and dictlist[d]['username'] == '*'+validateName(dictlist[d]['protocol']+dictlist[d]['host']).lower()+'*username*':
 						dictlist[d]['username'] = '*'
-					if dictlist[d]['file'] == None or (dictlist[d]['protocol'] == 'LOCAL' and not os.path.exists(dictlist[d]['file'])):
+					if dictlist[d]['file'] == None:# or (dictlist[d]['protocol'] == 'LOCAL' and not os.path.exists(dictlist[d]['file'])):
 						tkMessageBox.showwarning('Fail', dictlist[d]['name'] + ' CNIF can not be found or not set up. Check network parameters')
 						return False
 				self.networklist = deepcopy(self.manager_networklist[:])
@@ -1273,6 +1279,8 @@ class monimet_gui(Tkinter.Tk):
 		if not os.path.exists(self.imagespath.get()):
 			os.makedirs(self.imagespath.get())
 		for source in self.sourcelist:
+			if 'temporary' in source and source['temporary']:
+				continue
 			if source['protocol'] != 'LOCAL':
 				local_path = os.path.join(self.imagespath.get(),source['networkid']+'-'+validateName(source['network']))
 				if not os.path.exists(local_path):
@@ -3701,6 +3709,10 @@ class monimet_gui(Tkinter.Tk):
 
 	def UpdatePreviewPictureFiles(self,sources):
 		self.Message.set('Checking preview pictures...')
+		if nogui:
+			self.Message.set('Not supported in No-GUI mode. Checking preview pictures is skipped.')
+			return False
+
 		if not isinstance(sources,list):
 			sources = [sources]
 		for source in sources:#self.sourcelist:
@@ -3995,7 +4007,7 @@ class monimet_gui(Tkinter.Tk):
 				if tkMessageBox.askyesno("Report complete","Setup report completed. Do you want to open it in default browser?"):
 					webbrowser.open(ans,new=2)
 			else:
-				if tkMessageBox.askyesno("Run complete","Analyses are completed and setup report with results are created. Do you want to open it in default browser?"):
+				if not nogui and tkMessageBox.askyesno("Run complete","Analyses are completed and setup report with results are created. Do you want to open it in default browser?"):
 					webbrowser.open(ans,new=2)
 		else:
 			self.Message.set("Report generation cancelled.")
@@ -4030,7 +4042,7 @@ class monimet_gui(Tkinter.Tk):
 			runq = ("Run all scenarios","FMIPROT will now run all the scenarios. Depending on the options selected, it may take a long time. It is adviced to check your input before runs. 'Generate Report' option is quite handy to check everything about your input.\nFMIPROT will save your setup under the your results directory ("+self.resultspath.get()+") for any case. If your runs fail, you may load the setup from that directory.\nDo you want to proceed?")
 		else:
 			runq = ("Run scenario","FMIPROT will now run the scenario. Depending on the options selected, it may take a long time. It is adviced to check your input before runs. 'Generate Report' option is quite handy to check everything about your input.\nFMIPROT will save your setup under the your results directory ("+self.resultspath.get()+") for any case. If your runs fail, you may load the setup from that directory.\nDo you want to proceed?")
-		if tkMessageBox.askyesno(runq[0],runq[1]):
+		if 'noquestions' in sys.argv or tkMessageBox.askyesno(runq[0],runq[1]):
 			if self.outputmodevariable.get() == output_modes[1]:
 				if not self.checkemptyoutput(out=True):
 					self.Menu_Main_Output()
@@ -4656,6 +4668,14 @@ class monimet_gui(Tkinter.Tk):
 			self.Log.set(self.Log.get() + " ~ " + time + ": " + message)
 			self.LogLL.set(message)
 			self.update()
+		if "progress" in meta and meta['total'] != 1:
+			p_level = meta['progress']
+			p_fraction = float(10000*meta['queue']/meta['total'])/100
+			p_string = message + str(meta['queue'])+' of '+str(meta['total'])+' ('+(str(p_fraction))+'%)'
+			print '\r',p_string,p_fraction,
+			sys.stdout.flush()
+			if meta['queue']==meta['total']:
+				print ''
 		if self.LogText.winfo_exists():
 			if "progress" in meta and meta['total'] != 1:
 				p_level = meta['progress']
