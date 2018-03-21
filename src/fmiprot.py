@@ -1,5 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+# python version 2.7
+# Cemal Melih Tanis (C)
 #LIBS###############################################################################################################
 import os
 import shutil
@@ -36,17 +38,13 @@ import textwrap
 import gc
 import FileDialog
 
-if "nogui" in sys.argv:
+if not sysargv['gui']:
 	Tkinter = None
 	import noTk as Tkinter
 	import noTk as tk
 	import noTk as tkMessageBox
 	import noTk as tkSimpleDialog
 	import noTk as webbrowser
-	global nogui
-	nogui = True
-else:
-	nogui = False
 
 class monimet_gui(Tkinter.Tk):
 	def __init__(self,parent):
@@ -117,6 +115,8 @@ class monimet_gui(Tkinter.Tk):
 
 		self.ExceptionSwitches_ComingFromCallbackAnalysis = Tkinter.BooleanVar()
 		self.ExceptionSwitches_ComingFromCallbackAnalysis.set(True)
+		self.ExceptionSwitches_ComingFromStartupSetupFileSetupReset = Tkinter.BooleanVar()
+		self.ExceptionSwitches_ComingFromStartupSetupFileSetupReset.set(True)
 
 		self.RedLTVariable = Tkinter.DoubleVar()
 		self.RedUTVariable = Tkinter.DoubleVar()
@@ -214,34 +214,48 @@ class monimet_gui(Tkinter.Tk):
 		(self.networklist,self.sourcelist) = sources.readSources(self, self.proxy, self.connection, self.Message)
 		self.makeDirStorage()
 
-		scenario_def = {'source':self.sourcelist[0],'name':'Scenario-1','temporal':['01.01.1970','31.12.2026','00:00','23:59','All'],'polygonicmask':[0,0,0,0,0,0,0,0],'multiplerois':1,'thresholds':[0.0,1.0,0.0,1.0,0.0,1.0,0.0,1.0,0.0,255.0,0.0,255.0,0.0,255.0,0.0,1.0],'analyses':['analysis-1'],'analysis-1':{'id':calcids[calcids.index("0")],'name':calcnames[calcids.index("0")]}}
+		scenario_def = {'source':self.sourcelist[0],'name':'Scenario-1','previewimagetime':'','temporal':['01.01.1970','31.12.2026','00:00','23:59','All'],'polygonicmask':[0,0,0,0,0,0,0,0],'multiplerois':1,'thresholds':[0.0,1.0,0.0,1.0,0.0,1.0,0.0,1.0,0.0,255.0,0.0,255.0,0.0,255.0,0.0,1.0],'analyses':['analysis-1'],'analysis-1':{'id':calcids[calcids.index("0")],'name':calcnames[calcids.index("0")]}}
 		for i,v in enumerate(paramnames[calcids.index("0")]):
 			scenario_def['analysis-1'].update({paramnames[calcids.index("0")][i]:paramdefs[calcids.index("0")][i]})
 		setup_def = [scenario_def]
 
 		temporal_modes = ['All','Date and time intervals','Earliest date and time intervals','Latest date and time intervals','Yesterday only','Today only','Latest 1 hour only','Latest image only']
 		output_modes = ['New directory in results directory','Existing empty directory','Merge with existing results']
-		self.outputmodevariable.set(output_modes[0])
+		if sysargv['resultdir'] is not None:
+			if not os.path.exists(sysargv['resultdir']) or len(os.listdir(sysargv['resultdir'])) == 0:
+				os.makedirs(sysargv['resultdir'])
+				self.outputmodevariable.set(output_modes[1])
+			else:
+				self.outputmodevariable.set(output_modes[2])
+			self.outputpath.set(sysargv['resultdir'])
+		else:
+			self.outputmodevariable.set(output_modes[0])
 
-		if nogui:
+		if sysargv['online']:
+			self.imagesdownload.set(True)
+		else:
+			self.imagesdownload.set(False)
+
+		if not sysargv['gui']:
+			if sysargv['setupfile'] is None:
+				tkMessageBox.showerror('Usage error','Setup file must be provided if GUI is off.')
+				os._exit(1)
 			self.setupFileClear()
+			self.ExceptionSwitches_ComingFromStartupSetupFileSetupReset.set(False)
 			self.setupFileLoad()
-			if "offline" in sys.argv:
-				self.imagesdownload.set(False)
-			if "online" in sys.argv:
-				self.imagesdownload.set(True)
 			self.RunAnalyses()
 			os._exit(1)
 		else:
 			self.Menu_Base()
 			self.Menu_Menu()
 
-			if len(sys.argv) > 1:
+			if sysargv['setupfile'] is not None:
 				self.setupFileClear()
+				self.ExceptionSwitches_ComingFromStartupSetupFileSetupReset.set(False)
 				self.setupFileLoad()
+				sysargv['setupfile'] = None
 			else:
 				self.setupFileClear()
-
 			self.Menu_Main()
 			self.Message.set("GUI initialized.")
 
@@ -1279,15 +1293,18 @@ class monimet_gui(Tkinter.Tk):
 		if not os.path.exists(self.imagespath.get()):
 			os.makedirs(self.imagespath.get())
 		for source in self.sourcelist:
-			if 'temporary' in source and source['temporary']:
-				continue
 			if source['protocol'] != 'LOCAL':
-				local_path = os.path.join(self.imagespath.get(),source['networkid']+'-'+validateName(source['network']))
-				if not os.path.exists(local_path):
-					os.makedirs(local_path)
-				local_path = os.path.join(local_path,validateName(source['name']))
-				if not os.path.exists(local_path):
-					os.makedirs(local_path)
+				if 'temporary' in source and source['temporary']:
+					local_path = os.path.join(os.path.join(TmpDir,'tmp_images'),validateName(source['network'])+'-'+source['protocol']+'-'+source['host']+'-'+validateName(source['username'])+'-'+validateName(source['path']))
+					if not os.path.exists(local_path):
+						os.makedirs(local_path)
+				else:
+					local_path = os.path.join(self.imagespath.get(),source['networkid']+'-'+validateName(source['network']))
+					if not os.path.exists(local_path):
+						os.makedirs(local_path)
+					local_path = os.path.join(local_path,validateName(source['name']))
+					if not os.path.exists(local_path):
+						os.makedirs(local_path)
 
 	def migrateStorage(self,imgdirp,sourcelistp,imgdirn,sourcelistn):
 		if imgdirp != imgdirn and sourcelistp==sourcelistn:		#coming from storage settings
@@ -1738,10 +1755,18 @@ class monimet_gui(Tkinter.Tk):
 
 	def Menu_Main_Camera_Open(self):
 		source = self.setup[self.AnalysisNoVariable.get()-1]['source']
+		self.makeDirStorage()
 		if source['protocol'] == 'LOCAL':
-			webbrowser.open('file:///'+source['path'])
+			if 'temporary' in source and source['temporary']:
+				tkMessageBox.showwarning('No directory','Directory does not exist. This camera was temporarily added and the images of the camera refer to local directories and they do not exist. It probably means that the setup file loaded is saved in another computer with a camera network or camera which is not defined identically in this computer. To fix it, load the setup file again, confirm the permanent save of the camera/network and the open camera network manager and set up directories accordingly.')
+				return False
+			else:
+				webbrowser.open('file:///'+source['path'])
 		else:
-			webbrowser.open('file:///'+os.path.join(self.imagespath.get(),source['networkid']+'-'+fetchers.validateName(source['network']),fetchers.validateName(source['name'])))
+			if 'temporary' in source and source['temporary']:
+				webbrowser.open('file:///'+os.path.join(os.path.join(TmpDir,'tmp_images'),validateName(source['network'])+'-'+source['protocol']+'-'+source['host']+'-'+validateName(source['username'])+'-'+validateName(source['path'])))
+			else:
+				webbrowser.open('file:///'+os.path.join(self.imagespath.get(),source['networkid']+'-'+fetchers.validateName(source['network']),fetchers.validateName(source['name'])))
 
 	def Menu_Main_Camera_Metadata(self):
 		string = ''
@@ -1758,6 +1783,10 @@ class monimet_gui(Tkinter.Tk):
 		tkMessageBox.showwarning('Camera Metadata',string)
 
 	def Menu_Main_Camera_Picture(self):
+		source = self.setup[self.AnalysisNoVariable.get()-1]['source']
+		if source['protocol'] == 'LOCAL' and 'temporary' in source and source['temporary']:
+			tkMessageBox.showwarning('No directory','Directory does not exist. This camera was temporarily added and the images of the camera refer to local directories and they do not exist. It probably means that the setup file loaded is saved in another computer with a camera network or camera which is not defined identically in this computer. To fix it, load the setup file again, confirm the permanent save of the camera/network and the open camera network manager and set up directories accordingly.')
+			return False
 		self.ClearMenu()
 		self.ActiveMenu.set("Choose Picture for Preview")
 		self.Menu_Prev("Camera","self.Menu_Main_Camera")
@@ -1800,11 +1829,17 @@ class monimet_gui(Tkinter.Tk):
 			self.MenuItem1.delete(0,"end")
 			source = self.setup[self.AnalysisNoVariable.get()-1]['source']
 			if source['protocol'] == 'LOCAL':
+				if 'temporary' in source and source['temporary']:
+					tkMessageBox.showwarning('No directory','Directory does not exist. This camera was temporarily added and the images of the camera refer to local directories and they do not exist. It probably means that the setup file loaded is saved in another computer with a camera network or camera which is not defined identically in this computer. To fix it, load the setup file again, confirm the permanent save of the camera/network and the open camera network manager and set up directories accordingly.')
+					return False
 				imglist = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection,  self.imagespath.get(), [0,0,0,0, "All"], online=True)[0]
 				for i,v in enumerate(imglist):
 					imglist[i] = os.path.split(v)[-1]
 			else:
-				imglist = os.listdir(os.path.join(self.imagespath.get(),source['networkid']+'-'+fetchers.validateName(source['network']),fetchers.validateName(source['name'])))
+				if 'temporary' in source and source['temporary']:
+					imglist = os.listdir(os.path.join(os.path.join(TmpDir,'tmp_images'),validateName(source['network'])+'-'+source['protocol']+'-'+source['host']+'-'+validateName(source['username'])+'-'+validateName(source['path'])))
+				else:
+					imglist = os.listdir(os.path.join(self.imagespath.get(),source['networkid']+'-'+fetchers.validateName(source['network']),fetchers.validateName(source['name'])))
 			for item in imglist:
 				if keys == [] or keys=="":
 					self.MenuItem1.insert("end",item)
@@ -2274,6 +2309,10 @@ class monimet_gui(Tkinter.Tk):
 		self.grab_set()
 
 	def Menu_Main_Masking_Polygonic_Picture(self):
+		source = self.setup[self.AnalysisNoVariable.get()-1]['source']
+		if source['protocol'] == 'LOCAL' and 'temporary' in source and source['temporary']:
+			tkMessageBox.showwarning('No directory','Directory does not exist. This camera was temporarily added and the images of the camera refer to local directories and they do not exist. It probably means that the setup file loaded is saved in another computer with a camera network or camera which is not defined identically in this computer. To fix it, load the setup file again, confirm the permanent save of the camera/network and the open camera network manager and set up directories accordingly.')
+			return False
 		self.ClearMenu()
 		self.ActiveMenu.set("Choose Picture ")
 		self.Menu_Prev("Polygonic Masking","self.Menu_Main_Masking_Polygonic")
@@ -3456,7 +3495,8 @@ class monimet_gui(Tkinter.Tk):
 		except:
 			pass
 		if self.CameraNameVariable.get() != self.CameraNameVariablePre.get() or self.NetworkNameVariable.get() != self.NetworkNameVariablePre.get() or self.PictureFileName.get() == os.path.join(TmpDir,'testmask.jpg'):
-			self.UpdatePreviewPictureFiles([self.setup[self.AnalysisNoVariable.get()-1]['source']])
+			if not bool(self.ExceptionSwitches_ComingFromStartupSetupFileSetupReset.get()):
+				self.setup[self.AnalysisNoVariable.get()-1]['source'],self.setup[self.AnalysisNoVariable.get()-1] = self.UpdatePreviewPictureFiles(self.setup[self.AnalysisNoVariable.get()-1]['source'],self.setup[self.AnalysisNoVariable.get()-1])
 			self.UpdatePictureFileName()
 			self.UpdatePictures()
 		self.CameraNameVariablePre.set(self.CameraNameVariable.get())
@@ -3694,62 +3734,113 @@ class monimet_gui(Tkinter.Tk):
 	def ChangePictureFileName(self,*args):
 		fn = self.MenuItem1.get(self.MenuItem1.curselection())
 		source = self.setup[self.AnalysisNoVariable.get()-1]['source']
-		pfn = source['networkid']+'-'+validateName(source['network'])+'-'+validateName(source['name']) + os.path.splitext(source['filenameformat'])[1]
+		scenario = self.setup[self.AnalysisNoVariable.get()-1]
+		pfn_ts = '-' + parsers.dTime2sTime(parsers.strptime2(fn,source['filenameformat'])[0])
+		if 'temporary' in source and source['temporary']:
+			pfn = validateName(source['network'])+'-'+source['protocol']+'-'+source['host']+'-'+validateName(source['username'])+'-'+validateName(source['path']) + pfn_ts + os.path.splitext(source['filenameformat'])[1]
+			pfn_prev = [validateName(source['network'])+'-'+source['protocol']+'-'+source['host']+'-'+validateName(source['username'])+'-'+validateName(source['path']), os.path.splitext(source['filenameformat'])[1]]
+		else:
+			pfn = source['networkid']+'-'+validateName(source['network'])+'-'+validateName(source['name']) + pfn_ts + os.path.splitext(source['filenameformat'])[1]
+			pfn_prev = [source['networkid']+'-'+validateName(source['network'])+'-'+validateName(source['name']),os.path.splitext(source['filenameformat'])[1]]
 		if source['protocol'] == 'LOCAL':
 			self.PictureFileName.set(os.path.join(source['path'],fn))
 		else:
-			self.PictureFileName.set(os.path.join(self.imagespath.get(),source['networkid']+'-'+fetchers.validateName(source['network']),fetchers.validateName(source['name']),fn))
+			if 'temporary' in source and source['temporary']:
+				self.PictureFileName.set(os.path.join(os.path.join(TmpDir,'tmp_images'),validateName(source['network'])+'-'+source['protocol']+'-'+source['host']+'-'+validateName(source['username'])+'-'+validateName(source['path']),fn))
+			else:
+				self.PictureFileName.set(os.path.join(self.imagespath.get(),source['networkid']+'-'+fetchers.validateName(source['network']),fetchers.validateName(source['name']),fn))
+		self.setup[self.AnalysisNoVariable.get()-1].update({'previewimagetime':parsers.dTime2sTime(parsers.strptime2(fn,source['filenameformat'])[0])})
 		self.Message.set("Preview picture is changed.")
 		try:
 			shutil.copyfile(self.PictureFileName.get(),os.path.join(PreviewsDir,pfn))
+			for f in os.listdir(PreviewsDir):
+					if f != pfn and os.path.isfile(os.path.join(PreviewsDir,f)) and f.startswith(pfn_prev[0]) and f.endswith(pfn_prev[1]) and f.replace(pfn_prev[0],'').replace(pfn_prev[1],'') != '':
+						os.remove(os.path.join(PreviewsDir,f))
 			self.Message.set('Preview image file is updated camera: '+source['network'] + ' - ' + source['name'])
 		except:
-			self.Message.set('Preview image file could not be updated for camera: '+source['network'] + ' - ' + source['name'] + ' (it is still used as a preview image until another scenario is selected).')
+			self.Message.set('Preview image file could not be updated for camera: '+source['network'] + ' - ' + source['name'] + '.')
 		self.UpdatePictures()
 
-	def UpdatePreviewPictureFiles(self,sources):
+	def UpdatePreviewPictureFiles(self,source,scenario):
 		self.Message.set('Checking preview pictures...')
-		if nogui:
-			self.Message.set('Not supported in No-GUI mode. Checking preview pictures is skipped.')
-			return False
+		if 'temporary' in source and source['temporary'] and source['protocol'] == 'LOCAL':
+			tkMessageBox.showwarning('No directory','Directory does not exist. This camera was temporarily added and the images of the camera refer to local directories and they do not exist. It probably means that the setup file loaded is saved in another computer with a camera network or camera which is not defined identically in this computer. To fix it, load the setup file again, confirm the permanent save of the camera/network and the open camera network manager and set up directories accordingly.')
+			self.Message.set('Checking preview picture skipped due to temporarily added camera with protocol: LOCAL.')
+			return (source,scenario)
+		pfn_ts = ''
+		if 'previewimagetime' in scenario and scenario['previewimagetime'] != '' and scenario['previewimagetime'] is not None:
+			pfn_ts = '-' + scenario['previewimagetime']
+		else:
+			if 'previewimagetime' in source and source['previewimagetime'] != '' and source['previewimagetime'] is not None:
+				pfn_ts = '-' + source['previewimagetime']
+		if 'temporary' in source and source['temporary']:
+			pfn = validateName(source['network'])+'-'+source['protocol']+'-'+source['host']+'-'+validateName(source['username'])+'-'+validateName(source['path']) + pfn_ts + os.path.splitext(source['filenameformat'])[1]
+		else:
+			pfn = source['networkid']+'-'+validateName(source['network'])+'-'+validateName(source['name']) + pfn_ts + os.path.splitext(source['filenameformat'])[1]
 
-		if not isinstance(sources,list):
-			sources = [sources]
-		for source in sources:#self.sourcelist:
-			pfn = source['networkid']+'-'+validateName(source['network'])+'-'+validateName(source['name']) + os.path.splitext(source['filenameformat'])[1]
-			if pfn in os.listdir(PreviewsDir):
-				continue
-			else:
-				if tkMessageBox.askyesno('Missing preview image','Preview image is missing for '+source['network']+' '+source['name']+'. Do you want to fetch one?'):
-					self.Message.set('Updating preview image for camera: '+source['network'] + ' - ' + source['name'])
-					if 'previewimagetime' in source:
+		if pfn in os.listdir(PreviewsDir):
+			return (source,scenario)
+		else:
+			if not sysargv['prompt'] or tkMessageBox.askyesno('Missing preview image','Preview image is missing for '+source['network']+' '+source['name']+'. Do you want to fetch one?'):
+				self.Message.set('Updating preview image for camera: '+source['network'] + ' - ' + source['name'])
+				img = []
+				if 'previewimagetime' in scenario and scenario['previewimagetime'] != '' and scenario['previewimagetime'] is not None:
+					self.Message.set('Looking for the image for the ' + source_metadata_names['previewimagetime'] + ' provided by the setup file....' )
+					timec = [0,0,0,0]
+					timec[0] = scenario['previewimagetime'][6:8]+'.'+scenario['previewimagetime'][4:6]+'.'+scenario['previewimagetime'][0:4]
+					timec[2] = scenario['previewimagetime'][9:11]+':'+scenario['previewimagetime'][11:13]
+					timec[1] = scenario['previewimagetime'][6:8]+'.'+scenario['previewimagetime'][4:6]+'.'+scenario['previewimagetime'][0:4]
+					timec[3] = scenario['previewimagetime'][9:11]+':'+scenario['previewimagetime'][11:13]
+					img, ts = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), timec + ['Date and time intervals'], count=1, online=True)
+					if len(img) == 0:
+						del scenario['previewimagetime']
+						self.Message.set('Can not find the image for the ' + source_metadata_names['previewimagetime'] + ' provided by the setup file. It is removed from the setup.' )
+				else:
+					if 'previewimagetime' in source and source['previewimagetime'] != '' and source['previewimagetime'] is not None:
+						self.Message.set('Looking for the image for the ' + source_metadata_names['previewimagetime'] + ' provided by CNIF....' )
 						timec = [0,0,0,0]
 						timec[0] = source['previewimagetime'][6:8]+'.'+source['previewimagetime'][4:6]+'.'+source['previewimagetime'][0:4]
 						timec[2] = source['previewimagetime'][9:11]+':'+source['previewimagetime'][11:13]
 						timec[1] = source['previewimagetime'][6:8]+'.'+source['previewimagetime'][4:6]+'.'+source['previewimagetime'][0:4]
 						timec[3] = source['previewimagetime'][9:11]+':'+source['previewimagetime'][11:13]
+						img, ts = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), timec + ['Date and time intervals'], count=1, online=True)
+						if len(img) == 0:
+							self.Message.set('Can not find the image for the ' + source_metadata_names['previewimagetime'] + ' provided by CNIF.' )
 					else:
-						self.Message.set(source_metadata_names['previewimagetime'] + ' is not supplied in CNIF file. Looking for a suitable image...')
-						timec = [0,0,'11:30','12:30','All']
-					img = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), [0,0,'11:30','12:30','All'], count=1, online=True)[0]
-					if len(img) == 0:
-						img = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), [0,0,'00:00','23:59'], count=1, online=True)[0]
-					if len(img) == 0:
-						self.Message.set('No suitable file for preview image found for camera: '+source['network'] + ' - ' + source['name'])
-						continue
-					else:
-						try:
-							shutil.copyfile(img[0],os.path.join(PreviewsDir,pfn))
-							self.Message.set('Preview image downloaded/updated for camera: '+source['network'] + ' - ' + source['name'])
-							if len(sources) == 1:
-								self.PictureFileName.set(os.path.join(PreviewsDir,pfn))
-						except:
-							self.Message.set('Preview image could not be downloaded/updated for camera: '+source['network'] + ' - ' + source['name'])
+						self.Message.set(source_metadata_names['previewimagetime'] + ' is not supplied in CNIF file or the scenario.')
+				if len(img) == 0:
+					self.Message.set('Looking for a suitable image...')
+					img, ts = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), [0,0,'11:30','12:30','Date and time intervals'], count=1, online=True)
+				if len(img) == 0:
+					img, ts = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), [0,0,'00:00','23:59'], count=1, online=True)
+				if len(img) == 0:
+					self.Message.set('No suitable file for preview image found for camera: '+source['network'] + ' - ' + source['name'])
+					return (source,scenario)
+				else:
+					if pfn_ts is not '':
+						pfn = os.path.splitext(pfn)[0][:-len(pfn_ts)] + '-' + parsers.dTime2sTime(ts[0]) +  os.path.splitext(pfn)[1]
+					try:
+						shutil.copyfile(img[0],os.path.join(PreviewsDir,pfn))
+						self.Message.set('Preview image downloaded/updated for camera: '+source['network'] + ' - ' + source['name'])
+						self.PictureFileName.set(os.path.join(PreviewsDir,pfn))
+					except:
+						self.Message.set('Preview image could not be downloaded/updated for camera: '+source['network'] + ' - ' + source['name'])
+		return (source,scenario)
 		self.Message.set('Checking complete.')
 
 	def UpdatePictureFileName(self):
 		source = self.setup[self.AnalysisNoVariable.get()-1]['source']
-		pfn = source['networkid']+'-'+validateName(source['network'])+'-'+validateName(source['name']) + os.path.splitext(source['filenameformat'])[1]
+		scenario = self.setup[self.AnalysisNoVariable.get()-1]
+		pfn_ts = ''
+		if 'previewimagetime' in scenario and scenario['previewimagetime'] != '' and scenario['previewimagetime'] is not None:
+			pfn_ts = '-' + scenario['previewimagetime']
+		else:
+			if 'previewimagetime' in source and source['previewimagetime'] != '' and source['previewimagetime'] is not None:
+				pfn_ts = '-' + source['previewimagetime']
+		if 'temporary' in source and source['temporary']:
+			pfn = validateName(source['network'])+'-'+source['protocol']+'-'+source['host']+'-'+validateName(source['username'])+'-'+validateName(source['path']) + pfn_ts + os.path.splitext(source['filenameformat'])[1]
+		else:
+			pfn = source['networkid']+'-'+validateName(source['network'])+'-'+validateName(source['name']) + pfn_ts + os.path.splitext(source['filenameformat'])[1]
 		if pfn in os.listdir(PreviewsDir):
 			self.PictureFileName.set(os.path.join(PreviewsDir,pfn))
 		else:
@@ -3757,12 +3848,9 @@ class monimet_gui(Tkinter.Tk):
 
 
 	def setupFileLoad(self):
-		if len(sys.argv) > 1:
-			 ans = sys.argv[1]
-			 sys.argv.remove(sys.argv[1])
-			 startup = True
+		if sysargv['setupfile'] is not None:
+			 ans = sysargv['setupfile']
 		else:
-			startup = False
 			self.file_opt = options = {}
 			options['defaultextension'] = '.cfg'
 			options['filetypes'] = [ ('FMIPROT setup files', '.cfg'),('FMIPROT configuration files', '.cfg'),('all files', '.*')]
@@ -3770,13 +3858,13 @@ class monimet_gui(Tkinter.Tk):
 			ans = os.path.normpath(tkFileDialog.askopenfilename(**self.file_opt))
 		if ans != '' and ans != '.':
 			setup = self.setupFileRead(ans)
-			if not startup:
+			if sysargv['gui']:
 				self.Menu_Main()
 			self.setup = setup
 			(self.networklist,self.sourcelist, self.setup) = sources.fixSourcesBySetup(self.Message,self.networklist,self.sourcelist, self.setup)
 			self.setupFileVariable.set(ans)
 			self.Message.set("Setup file is loaded.")
-			if nogui:
+			if not sysargv['gui']:
 				return False
 			self.AnalysisNoVariable.set(1)
 			self.Menu_Main()
@@ -3885,7 +3973,7 @@ class monimet_gui(Tkinter.Tk):
 	def setupFileClear(self):
 		self.setupFileVariable.set("Untitled.cfg")
 		self.setup = []
-		if nogui:
+		if not sysargv['gui']:
 			return False
 		self.AnalysisNoNew()
 		self.Menu_Main()
@@ -3912,8 +4000,17 @@ class monimet_gui(Tkinter.Tk):
 				setup = [deepcopy(self.setup[s])]
 			for i,scenario in enumerate(setup):
 				source = scenario['source']
-				self.UpdatePreviewPictureFiles([source])
-				pfn = source['networkid']+'-'+validateName(source['network'])+'-'+validateName(source['name']) + os.path.splitext(source['filenameformat'])[1]
+				(source,scenario) = self.UpdatePreviewPictureFiles(source,scenario)
+				pfn_ts = ''
+				if 'previewimagetime' in scenario and scenario['previewimagetime'] != '' and scenario['previewimagetime'] is not None:
+					pfn_ts = '-' + scenario['previewimagetime']
+				else:
+					if 'previewimagetime' in source and source['previewimagetime'] != '' and source['previewimagetime'] is not None:
+						pfn_ts = '-' + source['previewimagetime']
+				if 'temporary' in source and source['temporary']:
+					pfn = validateName(source['network'])+'-'+source['protocol']+'-'+source['host']+'-'+validateName(source['username'])+'-'+validateName(source['path']) + pfn_ts + os.path.splitext(source['filenameformat'])[1]
+				else:
+					pfn = source['networkid']+'-'+validateName(source['network'])+'-'+validateName(source['name']) + pfn_ts + os.path.splitext(source['filenameformat'])[1]
 				if not os.path.exists(maskdir):
 					os.makedirs(maskdir)
 				maskfilet1 = os.path.join(maskdir,"Scenario_"+str(i+1)+"_Mask_Preview_1.jpg")
@@ -4007,7 +4104,7 @@ class monimet_gui(Tkinter.Tk):
 				if tkMessageBox.askyesno("Report complete","Setup report completed. Do you want to open it in default browser?"):
 					webbrowser.open(ans,new=2)
 			else:
-				if not nogui and tkMessageBox.askyesno("Run complete","Analyses are completed and setup report with results are created. Do you want to open it in default browser?"):
+				if sysargv['gui'] and tkMessageBox.askyesno("Run complete","Analyses are completed and setup report with results are created. Do you want to open it in default browser?"):
 					webbrowser.open(ans,new=2)
 		else:
 			self.Message.set("Report generation cancelled.")
@@ -4036,13 +4133,13 @@ class monimet_gui(Tkinter.Tk):
 
 	def Run(self,scn=None):
 		logger = self.Message
-		if not nogui:
+		if sysargv['gui']:
 			self.UpdateSetup()
 		if scn == None:
 			runq = ("Run all scenarios","FMIPROT will now run all the scenarios. Depending on the options selected, it may take a long time. It is adviced to check your input before runs. 'Generate Report' option is quite handy to check everything about your input.\nFMIPROT will save your setup under the your results directory ("+self.resultspath.get()+") for any case. If your runs fail, you may load the setup from that directory.\nDo you want to proceed?")
 		else:
 			runq = ("Run scenario","FMIPROT will now run the scenario. Depending on the options selected, it may take a long time. It is adviced to check your input before runs. 'Generate Report' option is quite handy to check everything about your input.\nFMIPROT will save your setup under the your results directory ("+self.resultspath.get()+") for any case. If your runs fail, you may load the setup from that directory.\nDo you want to proceed?")
-		if 'noquestions' in sys.argv or tkMessageBox.askyesno(runq[0],runq[1]):
+		if not sysargv['prompt'] or tkMessageBox.askyesno(runq[0],runq[1]):
 			if self.outputmodevariable.get() == output_modes[1]:
 				if not self.checkemptyoutput(out=True):
 					self.Menu_Main_Output()
@@ -4050,7 +4147,9 @@ class monimet_gui(Tkinter.Tk):
 			if self.outputmodevariable.get() == output_modes[2]:
 				outputsetup = self.checkoutputsetup(out=True)
 				if outputsetup is False:
-					if tkMessageBox.askyesno('Results can not be merged','Do you want to continue the analysis and store results in a new directory under results directory?'):
+					if not sysargv['prompt'] or tkMessageBox.askyesno('Results can not be merged','Results can not be merged. Do you want to continue the analysis and store results in a new directory under results directory?'):
+						if not sysargv['prompt']:
+							tkMessageBox.showwarning('Results can not be merged','Results can not be merged. Results will be stored in a new directory under results directory.')
 						self.outputmodevariable.set(output_modes[0])
 					else:
 						return False
@@ -4209,7 +4308,7 @@ class monimet_gui(Tkinter.Tk):
 					self.Message.set('Scenario: |progress:1|queue:'+str(s+1)+'|total:'+str(len(self.setup)))
 			if self.outputreportvariable.get():
 				self.setupFileReportFunc([os.path.join(resultspath,'report.html')]+csvlist)
-			if nogui:
+			if not sysargv['gui']:
 				return False
 			self.ResultFolderNameVariable.set(resultspath)#xxx result dir default problematic
 			self.Message.set("Running scenarios completed.|busy:False")
@@ -4672,7 +4771,7 @@ class monimet_gui(Tkinter.Tk):
 			p_level = meta['progress']
 			p_fraction = float(10000*meta['queue']/meta['total'])/100
 			p_string = message + str(meta['queue'])+' of '+str(meta['total'])+' ('+(str(p_fraction))+'%)'
-			print '\r',p_string,p_fraction,
+			print '\r',p_string,
 			sys.stdout.flush()
 			if meta['queue']==meta['total']:
 				print ''
@@ -4714,10 +4813,20 @@ class monimet_gui(Tkinter.Tk):
 						self.LogText.insert('end', "Program is busy, it will not respond until the process is complete.\n","hlr")
 						message += "\n"+time+" Program is busy, it will not respond until the process is complete."
 						self.LogWindow.grab_set()
+						self.LogWindow.lift()
+						self.BusyWindow = Tkinter.Toplevel(self,padx=10,pady=10)
+						self.BusyWindow.grab_set()
+						self.BusyWindow.lift()
+						self.BusyWindow.wm_title('Program is busy')
+						Tkinter.Label(self.BusyWindow,anchor='w',text='FMIPROT is busy, it will not respond until the process is complete...').grid(sticky='w'+'e',row=1,column=1)
+						self.centerWindow(self.BusyWindow)
 					else:
 						self.LogText.insert('end', "Program is responsive again.\n","hlg")
 						message += "\n"+time+" Program is responsive again."
+						self.BusyWindow.destroy()
 						self.grab_set()
+						self.lift()
+
 				self.LogText.config(state='disabled')
 				self.LogText.see('end')
 			self.LogWindow.update()

@@ -1,12 +1,12 @@
 from parsers import readINI,writeINI,validateName
 from fetchers import fetchFile
-from definitions import NetworklistFile, SourceDir, TmpDir
+from definitions import NetworklistFile, SourceDir, TmpDir,sysargv
 from os import path
 from shutil import copyfile
 from copy import deepcopy
 import tkMessageBox, tkFileDialog
 import sys
-if "nogui" in sys.argv:
+if not sysargv['gui']:
 	import noTk as tkMessageBox
 	import noTk as tkSimpleDialog
 
@@ -119,7 +119,8 @@ def readSources(tkobj,proxy,connection, logger):
 def fixSourcesBySetup(logger,networklist,sourcelist,setup):
 	warn = ''
 	sources_to_save = []
-	for scenario in setup:
+	scenarios_to_save = []
+	for sc,scenario in enumerate(setup):
 		source_sce = scenario['source']
 		if source_sce['network'] not in listNetworks(logger,networklist):
 			logger.set('New camera network ('+source_sce['network']+') found in setup, added the network.')
@@ -143,8 +144,10 @@ def fixSourcesBySetup(logger,networklist,sourcelist,setup):
 				sources_to_save.append(source_sce['network'])
 			sourcedict.update({'temporary':True,'networkid':getSource(logger,networklist,source_sce['network'])['id']})
 			sourcelist.append(sourcedict)
+			setup[sc]['source'].update({'temporary':True})
+			scenarios_to_save.append(sc)
 	if warn != '':
-		if 'noquestions' not in sys.argv and tkMessageBox.askyesno('Changes in networks',warn+'Do you want to make changes permanent?'):
+		if sysargv['prompt'] and tkMessageBox.askyesno('Changes in networks',warn+'Do you want to make changes permanent?'):
 			for n,network in enumerate(networklist):
 				if 'temporary' in network and network['temporary']:
 					del networklist[n]['temporary']
@@ -167,6 +170,8 @@ def fixSourcesBySetup(logger,networklist,sourcelist,setup):
 					ans = path.normpath(tkFileDialog.asksaveasfilename(**file_opt))
 					if ans != '' and ans != '.':
 						writeINI(ans,sourcedict)
+			for sc in scenarios_to_save:
+				del setup[sc]['source']['temporary']
 	return (networklist, sourcelist, setup)
 
 

@@ -13,19 +13,15 @@ from shutil import copyfile, copystat
 import Tkinter, socket, tkMessageBox,tkSimpleDialog
 from uuid import uuid4
 from time import mktime
-from definitions import TmpDir
+from definitions import TmpDir, sysargv
 from copy import deepcopy
 
-if "nogui" in sys.argv:
+if not sysargv['gui']:
 	Tkinter = None
 	import noTk as Tkinter
 	import noTk as tk
-	import noTk as tkSimpleDialog
 	import noTk as tkMessageBox
-	global nogui
-	nogui = True
-else:
-	nogui = False
+	import noTk as tkSimpleDialog
 
 def fetchFile(tkobj,logger,localdir, localfile, protocol,host, username, password, file, proxy, connection):
 	if host == None:
@@ -202,6 +198,7 @@ def filterImageListTemporal(logger,imglistv,pathlistv,fnameconv,timec,count):
 		date2 = strptime2(timec[1],'%d.%m.%Y')[1]
 		time1 = strptime2(timec[2],'%H:%M')[2]
 		time2 = strptime2(timec[3],'%H:%M')[2]
+	time2 = time2.replace(second=59)
 
 	today = datetime.date.today()
 	yesterday = today - datetime.timedelta(days=1)
@@ -215,12 +212,14 @@ def filterImageListTemporal(logger,imglistv,pathlistv,fnameconv,timec,count):
 		date2 = yesterday
 		time1 = strptime2('00:00','%H:%M')[2]
 		time2 = strptime2('23:59','%H:%M')[2]
+		time2 = time2.replace(second=59)
 
 	if timec[4] == 'Today only':
 		date1 =	today
 		date2 = today
 		time1 = strptime2('00:00','%H:%M')[2]
 		time2 = strptime2('23:59','%H:%M')[2]
+		time2 = time2.replace(second=59)
 
 	if timec[4] == 'Latest 1 hour only':
 		date1 = datetime.date(lastimagetime.year, lastimagetime.month, lastimagetime.day)
@@ -281,7 +280,7 @@ def listPathCrawl(remote_path,timec,timelimc):
 	if timec[0] == 0:
 		timec[0] = '01.01.1970'
 	if timec[1] == 0:
-		timec[1] = '12.12.2026'
+		timec[1] = '12.12.' + str(datetime.datetime.today().year+10)
 	if timec[2] == 0:
 		timec[2] = '00:00'
 	if timec[3] == 0:
@@ -325,7 +324,7 @@ def listPathCrawl(remote_path,timec,timelimc):
 
 
 def getPassword(tkobj,logger,protocol,host,renew=False):
-	if 'noquestions' in sys.argv:
+	if not sysargv['prompt']:
 		try:
 			exec('tkobj.'+validateName(protocol+host).lower()+'password.get()')
 			exec('tkobj.'+validateName(protocol+host).lower()+'username.get()')
@@ -373,7 +372,7 @@ def downloadFTP(proxy,connection, username,host,password,local_path,imglist,path
 		if logger is not None:
 			logger.set('Connection established.')
 			logger.set('Downloading images...' )
-		for i in dllist:
+		for d,i in enumerate(dllist):
 			f = imglist[i]
 			p = pathlist[i] +'/'
 			try:
@@ -408,7 +407,7 @@ def downloadFTP(proxy,connection, username,host,password,local_path,imglist,path
 					os.remove(os.path.join(local_path, f))
 				except:
 					pass
-			logger.set('Image: |progress:4|queue:'+str(i+1)+'|total:'+str(len(dllist)))
+			logger.set('Image: |progress:4|queue:'+str(d+1)+'|total:'+str(len(dllist)))
 		#close connection
 		ftp.quit()
 		if logger is not None:
@@ -429,7 +428,7 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 		local_path = os.path.join(os.path.join(TmpDir,'tmp_images'),validateName(source['network'])+'-'+source['protocol']+'-'+source['host']+'-'+validateName(source['username'])+'-'+validateName(source['path']))
 	else:
 		local_path = os.path.join(workdir,source['networkid']+'-'+validateName(source['network']))
-	local_path = os.path.join(local_path,validateName(source['name']))
+		local_path = os.path.join(local_path,validateName(source['name']))
 	if not os.path.exists(local_path):
 		os.makedirs(local_path)
 	if host == None:
@@ -648,7 +647,7 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 				try:
 					response = urllib2.urlopen(url).read()
 				except:
-					logger.set('Connection failed.')
+					#logger.set('Connection failed.')
 					continue
 
 				for img in pattern.findall(response):	#already includes full path to img

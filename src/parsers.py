@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import datetime
 from pytz import timezone
 from definitions import settings, settingsd, ResourcesDir, BinDir
@@ -15,6 +16,9 @@ def strptime2(text,conv):
 
 def cTime2sTime(cTime):
 	return datetime.datetime.strptime(cTime,"%Y%m%d_%H%M%S")
+
+def dTime2sTime(sTime):
+	return sTime.strftime('%Y%m%d_%H%M%S')
 
 def oTime2sTime(cTime): #utc only
 	if isinstance(cTime,list):
@@ -261,6 +265,7 @@ def writeConfig(logger,filename,config):
 def writeSetupReport(filename,setup,logger):
 	logger.set("Preparing report...")
 	res_data = False
+	writetime = str(datetime.datetime.utcnow())[:-7]
 	if isinstance(filename,list):
 		res_data = filename[1:]
 		filename = filename[0]
@@ -285,12 +290,15 @@ def writeSetupReport(filename,setup,logger):
 	report_f.write("table.hdr3{text-align:center;width:100%;color:black;background-color:rgb(255, 255, 255);}")
 	report_f.write("table.nrm3{width:100%;}")
 	report_f.write("</style>")
+	report_f.write("<title>FMIPROT Setup Report</title>")
 	if res_data is not False:
 		report_f.write("<script type='text/javascript' src='"+path.join(path.split(filename)[1].split('.')[0]+'_files','dygraph.js')+"'></script><script type='text/javascript' src='"+path.join(path.split(filename)[1].split('.')[0]+'_files','interaction-api.js')+"'></script><link rel='stylesheet' href='"+path.join(path.split(filename)[1].split('.')[0]+'_files','dygraph.css')+"' />")
 	report_f.write("</head><body>")
 	report_f.write("<table class='bg' style='margin: 0 auto;'><tbody>")
 	report_f.write("<tr><td>")
-	report_f.write("FMIPROT Setup Report")
+	report_f.write("FMIPROT Setup Report | Last processed: ")
+	report_f.write(writetime)
+	report_f.write(" | <a href='http://fmiprot.fmi.fi' target='_blank'>FMIPROT Webpage</a>")
 	report_f.write("</td></tr>")
 	report_f.write("<tr><td>")
 	report_f.write("<table class='hdr0'><tbody><tr><td>Go to:</td>")
@@ -877,3 +885,15 @@ def dwriteINI(inifile, dictlist,commonheader=True):
 		if dict != dictlist[-1]:
 			f.write('\n')
 	f.close()
+
+def debugDict(dic):
+	for key in dic:
+		if isinstance(dic[key],dict):
+			for key1 in dic[key]:
+				if isinstance(dic[key][key1],dict):
+					for key2 in dic[key][key1]:
+						print key,' : ', key1,' : ', key2,' : ', dic[key][key1][key2]
+				else:
+					print key,' : ', key1,' : ', dic[key][key1]
+		else:
+			print key,' : ', dic[key]

@@ -1,3 +1,25 @@
+#sysargv
+import argparse
+parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+parser.add_argument('-s','--setupfile', help="Path to setup file to be loaded.")
+parser.add_argument('-g','--gui', default='on', help="GUI 'on' or 'off'")
+parser.add_argument('-r','--resultdir', help="Path to directory that results will be stored. Directory should be empty or nonexisting for new results to be stored. If the directory is not empty, the results will be merged with the old results only if the setup is identical. Otherwise setup will not be run.")
+parser.add_argument('-p','--prompt', default='on', help="If prompts are allowed, for example asking yes no questions or prompting credentials. 'on' or 'off'. Only valid when GUI is off." )
+parser.add_argument('-o','--online', default='on', help="If the program is online, so that it checks and downloads images with online protocols, for example FTP or HTTP. If it is off, it will only consider images on the local directories. 'on' or 'off'")
+parser.add_argument('--version', action='version', version='%(prog)s 1.5.4 (Beta)')
+# parser.add_argument('-d','--dev', default='off', help="Devmode 'on' or 'off'")
+parser.print_help()
+global sysargv
+sysargv = vars(parser.parse_args())
+for arg in sysargv:
+    if sysargv[arg] == 'on':
+        sysargv[arg] = True
+    if sysargv[arg] == 'off':
+        sysargv[arg] = False
+    sysargv[arg]
+if 'dev' not in sysargv:
+    sysargv.update({'dev':False})
+
 #used in drawing polygons
 from colorsys import hsv_to_rgb
 COLORS = ['#ffffff']
@@ -31,12 +53,8 @@ import os, shutil
 BinDir = os.path.split(os.path.realpath(os.sys.argv[0]))[0]
 
 #developing mode for directories and settings
-dev = False
-if 'dev' in os.sys.argv:
-    os.sys.argv.remove('dev')
-    dev = True
 #dirs that requires hdd space
-if dev:
+if sysargv['dev']:
     if os.path.sep == '/':
         if os.path.exists('/home/tanisc/FMIPROT/dev_ext'):
             BinDir = '/home/tanisc/FMIPROT/dev_ext'
@@ -59,7 +77,7 @@ ResultsDir = os.path.join(BinDir,'results')
 ImagesDir = os.path.join(BinDir,'images')
 
 #dirs that does not require hdd space
-if dev:
+if sysargv['dev']:
     if os.path.sep == '/':
         if os.path.exists('/home/tanisc/FMIPROT/dev'):
             BinDir = '/home/tanisc/FMIPROT/dev'
@@ -76,7 +94,7 @@ SourceDir = os.path.join(BinDir,'sources')
 settingsFile = os.path.join(ResourcesDir,'settings.ini')
 NetworklistFile = os.path.join(SourceDir,'networklist.ini')
 
-if dev:
+if sysargv['dev']:
     BinDir = os.path.split(os.path.realpath(os.sys.argv[0]))[0]
     if os.path.exists(settingsFile):
         os.remove(settingsFile)
@@ -97,7 +115,7 @@ settingsd = ['','','','1',str(FTPNumCon),ResultsDir,ImagesDir,str(int(ImagesDown
 #create missing dirs and files
 dlist = [ResultsDir,ImagesDir,LogDir,PluginsDir,TmpDir,SourceDir]
 dlist = [LogDir,PluginsDir,TmpDir,SourceDir]
-if dev:
+if sysargv['dev']:
     dlist = [AuxDir,DEMDir,ResultsDir,ImagesDir,LogDir,PluginsDir,TmpDir,SourceDir]
 for d in dlist:
     if not os.path.exists(d):

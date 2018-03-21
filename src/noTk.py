@@ -1,4 +1,4 @@
-import sys
+from definitions import sysargv
 class Tk(object):
     def __init__(self,parent):
         return False
@@ -155,17 +155,20 @@ class DoubleVar(object):
 def showinfo(title,message):
   print '| ' +"INFO: "+title+' |'
   print message
-  raw_input('Press any key to continue...')
+  if sysargv['prompt']:
+      raw_input('Press any key to continue...')
 
 def showwarning(title,message):
   print '| ' +"WARNING: "+title+' |'
   print message
-  raw_input('Press any key to continue...')
+  if sysargv['prompt']:
+      raw_input('Press any key to continue...')
 
 def showerror(title,message):
   print '| ' +"ERROR: "+title+' |'
   print message
-  raw_input('Press any key to continue...')
+  if sysargv['prompt']:
+      raw_input('Press any key to continue...')
 
 def askyesno(title,message):
   print '| ' + title +' |'
