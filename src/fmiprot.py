@@ -4882,7 +4882,7 @@ class monimet_gui(Tkinter.Tk):
 		webbrowser.open(os.path.join(BinDir,'doc','usermanual.pdf'),new=2)
 
 	def About(self):
-		tkMessageBox.showinfo("About...", "FMIPROT (Finnish Meteorological Institute Image Processing Tool) is a toolbox to analyze the images from multiple camera networks and developed under the project MONIMET, funded by EU Life Programme.\nCurrent version is 0.15.2 (Beta).\nFor more information, contact Cemal.Melih.Tanis@fmi.fi.")
+		tkMessageBox.showinfo("About...", "FMIPROT (Finnish Meteorological Institute Image Processing Tool) is a toolbox to analyze the images from multiple camera networks and developed under the project MONIMET, funded by EU Life Programme.\nCurrent version is " + sysargv['version'] + ".\nFor more information, contact Cemal.Melih.Tanis@fmi.fi.")
 
 	def WebMONIMET(self):
 		webbrowser.open("http://monimet.fmi.fi",new=2)
@@ -4900,7 +4900,7 @@ class monimet_gui(Tkinter.Tk):
 
 if __name__ == "__main__":
 	app = monimet_gui(None)
-	app.title('FMIPROT 0.15.3 (Beta)')
+	app.title('FMIPROT ' + sysargv['version'])
 	if os.path.sep != "/":
 		app.iconbitmap(os.path.join(ResourcesDir,'monimet.ico'))
 	app.mainloop()

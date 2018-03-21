@@ -1,3 +1,4 @@
+version = '0.15.4 (Beta)'
 #sysargv
 import argparse
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -6,11 +7,12 @@ parser.add_argument('-g','--gui', default='on', help="GUI 'on' or 'off'")
 parser.add_argument('-r','--resultdir', help="Path to directory that results will be stored. Directory should be empty or nonexisting for new results to be stored. If the directory is not empty, the results will be merged with the old results only if the setup is identical. Otherwise setup will not be run.")
 parser.add_argument('-p','--prompt', default='on', help="If prompts are allowed, for example asking yes no questions or prompting credentials. 'on' or 'off'. Only valid when GUI is off." )
 parser.add_argument('-o','--online', default='on', help="If the program is online, so that it checks and downloads images with online protocols, for example FTP or HTTP. If it is off, it will only consider images on the local directories. 'on' or 'off'")
-parser.add_argument('--version', action='version', version='%(prog)s 1.5.4 (Beta)')
+parser.add_argument('--version', action='version', version='Version: ' + version)
 # parser.add_argument('-d','--dev', default='off', help="Devmode 'on' or 'off'")
 parser.print_help()
 global sysargv
 sysargv = vars(parser.parse_args())
+sysargv.append('version': version)
 for arg in sysargv:
     if sysargv[arg] == 'on':
         sysargv[arg] = True
