@@ -2891,7 +2891,17 @@ class monimet_gui(Tkinter.Tk):
 		self.Message.set('Checking consistency of the setup and the setup file in the output directory...')
 		if os.path.isfile(os.path.join(self.outputpath.get(),'setup.cfg')):
 			outputsetup = self.setupFileRead(os.path.join(self.outputpath.get(),'setup.cfg'))
-			setup = self.setup
+			setup = deepcopy(self.setup)
+			for s,scenario in enumerate(setup):
+				outputscenario = outputsetup[s]
+				if 'previewimagetime' in scenario and scenario['previewimagetime'] != '' and scenario['previewimagetime']:
+					del scenario['previewimagetime']
+				if 'previewimagetime' in outputscenario and outputscenario['previewimagetime'] != '' and outputscenario['previewimagetime']:
+					del outputscenario['previewimagetime']
+				if 'previewimagetime' in scenario['source'] and scenario['source']['previewimagetime'] != '' and scenario['source']['previewimagetime']:
+					del scenario['source']['previewimagetime']
+				if 'previewimagetime' in outputscenario['source'] and outputscenario['source']['previewimagetime'] != '' and outputscenario['source']['previewimagetime']:
+					del outputscenario['source']['previewimagetime']
 			if outputsetup == setup:
 				if not out:
 					tkMessageBox.showwarning('Setups consistent','Please read carefully!\nSetup found in the directory is identical with the current one. Results of the analysis will be merged with the ones in the directory.\nThe merging is done assuming that the files in the directory are not modified, which means the data files really belong to the setup file in the directory. If the data is modified, results can be inconsistent and incorrect.\nAlthough the setup file in the directory is checked, in case the current setup is changed before running the analysis, it will also be checked again before running the analyses. If they are inconsistent, analyses will not be run.\nOverlapping results will be skipped, only the images not analzed before will be analzed.')
