@@ -18,16 +18,19 @@ from data import *
 import calcfuncs
 import matplotlib, sys
 import numpy as np
-matplotlib.use('TkAgg')
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+if sysargv['gui']:
+	matplotlib.use('TkAgg')
+	from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+	import Tkinter, Tkconstants, tkFileDialog, tkMessageBox, tkSimpleDialog
+	import Tkinter as tk
+	import ttk
 import matplotlib.dates as mdate
-import Tkinter, Tkconstants, tkFileDialog, tkMessageBox, tkSimpleDialog
-import Tkinter as tk
-import ttk
 import PIL
-from PIL import Image,ImageTk, ImageDraw, ImageFont
-if os.path.sep == '/':
-	from PIL import _tkinter_finder
+from PIL import Image,ImageDraw, ImageFont
+if sysargv['gui']:
+	from PIL import ImageTk
+	if os.path.sep == '/':
+		from PIL import _tkinter_finder
 import mahotas
 from copy import deepcopy
 import subprocess
@@ -36,7 +39,8 @@ import webbrowser
 import h5py
 import textwrap
 import gc
-import FileDialog
+if sysargv['gui']:
+	import FileDialog
 
 if not sysargv['gui']:
 	Tkinter = None

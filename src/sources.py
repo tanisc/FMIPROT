@@ -4,11 +4,12 @@ from definitions import NetworklistFile, SourceDir, TmpDir,sysargv
 from os import path
 from shutil import copyfile
 from copy import deepcopy
-import tkMessageBox, tkFileDialog
 import sys
 if not sysargv['gui']:
 	import noTk as tkMessageBox
 	import noTk as tkSimpleDialog
+else:
+	import tkMessageBox, tkFileDialog
 
 #read sources from network file #remember exceptions same name and cross ref
 def readSources(tkobj,proxy,connection, logger):

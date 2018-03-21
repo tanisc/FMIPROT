@@ -1,4 +1,4 @@
-SET VER=0.15.3
+SET VER=0.15.4
 rmdir dist /s /q
 rmdir build /s /q
 del fmiprot.spec

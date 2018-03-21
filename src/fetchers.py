@@ -7,10 +7,12 @@ from functools import partial
 import datetime
 from pytz import timezone
 import numpy as np
-from definitions import BinDir, source_metadata_names
+from definitions import BinDir, source_metadata_names,sysargv
 from parsers import strptime2, validateName, convertTZ
 from shutil import copyfile, copystat
-import Tkinter, socket, tkMessageBox,tkSimpleDialog
+if sysargv['gui']:
+	import Tkinter, tkMessageBox,tkSimpleDialog
+import socket
 from uuid import uuid4
 from time import mktime
 from definitions import TmpDir, sysargv
@@ -128,7 +130,7 @@ def fetchFile(tkobj,logger,localdir, localfile, protocol,host, username, passwor
 				authhandler = urllib2.HTTPBasicAuthHandler(passman)
 				opener = urllib2.build_opener(authhandler)
 				urllib2.install_opener(opener)
-			cfg = urllib2.urlopen(inifile)
+			cfg = urllib2.urlopen(inifile,timeout = 5)
 			cfg_loc = open(os.path.join(localdir,localfile),'wb')
 			cfg_loc.write(cfg.read())
 			cfg_loc.close()
