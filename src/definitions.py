@@ -7,12 +7,13 @@ parser.add_argument('-g','--gui', default='on', help="GUI 'on' or 'off'")
 parser.add_argument('-r','--resultdir', help="Path to directory that results will be stored. Directory should be empty or nonexisting for new results to be stored. If the directory is not empty, the results will be merged with the old results only if the setup is identical. Otherwise setup will not be run.")
 parser.add_argument('-p','--prompt', default='on', help="If prompts are allowed, for example asking yes no questions or prompting credentials. 'on' or 'off'. Only valid when GUI is off." )
 parser.add_argument('-o','--online', default='on', help="If the program is online, so that it checks and downloads images with online protocols, for example FTP or HTTP. If it is off, it will only consider images on the local directories. 'on' or 'off'")
+parser.add_argument('-c','--cleantemp',action='store_true', help="Clean temporary files. DO NOT USE THAT OPTION IF ANY INSTANCE OF THE PROGRAM IS RUNNING. These files also include images downloaded for temporarily added cameras and camera networks. Exits after cleaning.")
 parser.add_argument('--version', action='version', version='Version: ' + version)
 # parser.add_argument('-d','--dev', default='off', help="Devmode 'on' or 'off'")
 parser.print_help()
 global sysargv
 sysargv = vars(parser.parse_args())
-sysargv.append('version': version)
+sysargv.update({'version': version})
 for arg in sysargv:
     if sysargv[arg] == 'on':
         sysargv[arg] = True
@@ -101,6 +102,24 @@ if sysargv['dev']:
     if os.path.exists(settingsFile):
         os.remove(settingsFile)
 
+#clean temporary files
+if sysargv['cleantemp']:
+    print 'Cleaning temporary files. DO NOT USE THAT OPTION IF ANY INSTANCE OF THE PROGRAM IS RUNNING. These files also include images downloaded for temporarily added cameras and camera networks. Exits after cleaning.'
+    print 'Are you sure?'
+    ans = ''
+    while ans not in ['y','n','Y','N']:
+        ans = raw_input('(y)es/(n)o?')
+        if ans not in ['y','n','Y','N']:
+            print 'Incorrect answer.'
+    if ans in ['y','Y']:
+        if os.path.exists(TmpDir):
+            shutil.rmtree(TmpDir)
+        if not os.path.exists(TmpDir):
+            os.makedirs(TmpDir)
+        print 'Done.'
+    else:
+        print 'Cancelled.'
+    os._exit(1)
 #definitions, labels, keys for sources
 settings = ['http_proxy','https_proxy','ftp_proxy','ftp_passive','ftp_numberofconnections','results_path','images_path','images_download','timezone','convert_timezone']
 source_metadata_hidden = ['host','username','password','path','filenameformat','networkid']
