@@ -391,6 +391,8 @@ class monimet_gui(Tkinter.Tk):
 		setupmenu.add_command(label="Load..", command=self.setupFileLoad)
 		setupmenu.add_command(label="Save", command=self.setupFileSave)
 		setupmenu.add_command(label="Save As...", command=self.setupFileSaveas)
+		setupmenu.add_command(label="Save As...", command=self.setupFileSaveas)
+		setupmenu.add_command(label="Save a copy with modified sources...", command=self.setupFileSaveasModified)
 		setupmenu.add_separator()
 		setupmenu.add_command(label="Generate report", command=self.setupFileReport)
 		setupmenu.add_separator()
@@ -531,6 +533,87 @@ class monimet_gui(Tkinter.Tk):
 	def Networks_SetUpSources(self):
 		if self.Networks_UpdateNetwork():
 			self.Networks_SourceManager()
+
+	def modifySourcesInSetup(self,setup):
+		for s,scenario in enumerate(setup):
+			self.modify_source_window = Tkinter.Toplevel(self,padx=10,pady=10)
+			self.modify_source_window.grab_set()
+			self.modify_source_window.wm_title('Edit Sources')
+			self.modify_source_window.columnconfigure(2, minsize=100)
+			self.modify_source_window.columnconfigure(3, minsize=100)
+			self.modify_source_window.columnconfigure(4, minsize=100)
+			self.modify_source_window.columnconfigure(5, minsize=100)
+			self.modify_source_window.columnconfigure(6, minsize=25)
+
+			self.modify_source_source = deepcopy(scenario['source'])
+			self.modify_source_name = Tkinter.StringVar()
+			self.modify_source_protocol = Tkinter.StringVar()
+			self.modify_source_host = Tkinter.StringVar()
+			self.modify_source_username = Tkinter.StringVar()
+			self.modify_source_password = Tkinter.StringVar()
+			self.modify_source_path = Tkinter.StringVar()
+			self.modify_source_filenameformat = Tkinter.StringVar()
+			self.modifySourcesInSetup_loadSource()
+
+			r = 0
+			r += 1
+			Tkinter.Label(self.modify_source_window,bg="RoyalBlue4",fg='white',anchor='w',text='Edit camera parameters').grid(sticky='w'+'e',row=r,column=1,columnspan=6)
+			r += 1
+			Tkinter.Label(self.modify_source_window,anchor='w',text="Camera name:").grid(sticky='w'+'e',row=r,column=1)
+			Tkinter.Entry(self.modify_source_window,textvariable=self.modify_source_name).grid(sticky='w'+'e',row=r,column=2,columnspan=4)
+			Tkinter.Button(self.modify_source_window,text='?',command=lambda: tkMessageBox.showinfo('Edit Sources','Name of the camera can be edited here. It should not be same as or similar (e.g. Helsinki North, HelsinkiNorth, Helsinki-North etc.) to any other camera name. The manage will warn you in such case.\n')).grid(sticky='w'+'e',row=r,column=6)
+			r += 1
+			Tkinter.Label(self.modify_source_window,anchor='w',text='Camera Communication Protocol:').grid(sticky='w'+'e',row=r,column=1)
+			Tkinter.OptionMenu(self.modify_source_window,self.modify_source_protocol,'FTP','HTTP','LOCAL').grid(sticky='w'+'e',row=r,column=2,columnspan=4)
+			Tkinter.Button(self.modify_source_window,text='?',command=lambda: tkMessageBox.showinfo('Edit Sources','The communication protocol to fetch camera images. If the images are/will be in this computer, select LOCAL.')).grid(sticky='w'+'e',row=r,column=6)
+			r += 1
+			Tkinter.Label(self.modify_source_window,anchor='w',text='Image archive Host:').grid(sticky='w'+'e',row=r,column=1)
+			Tkinter.Entry(self.modify_source_window,textvariable=self.modify_source_host).grid(sticky='w'+'e',row=r,column=2,columnspan=4)
+			Tkinter.Button(self.modify_source_window,text='?',command=lambda: tkMessageBox.showinfo('Edit Sources','Host address of the server that bears the images. \nDo not include the protocol here. For example, do not enter \'ftp://myserver.com\' but enter \'myserver.com\' instead.\nLeave empty if protocol is LOCAL.')).grid(sticky='w'+'e',row=r,column=6)
+			r += 1
+			Tkinter.Label(self.modify_source_window,anchor='w',text='Username for host:').grid(sticky='w'+'e',row=r,column=1)
+			Tkinter.Entry(self.modify_source_window,textvariable=self.modify_source_username).grid(sticky='w'+'e',row=r,column=2,columnspan=4)
+			Tkinter.Button(self.modify_source_window,text='?',command=lambda: tkMessageBox.showinfo('Edit Sources','Username for the host that bears the images, if applicable.\nLeave empty if protocol is LOCAL.')).grid(sticky='w'+'e',row=r,column=6)
+			r += 1
+			Tkinter.Label(self.modify_source_window,anchor='w',text='Password for host:').grid(sticky='w'+'e',row=r,column=1)
+			Tkinter.Entry(self.modify_source_window,textvariable=self.modify_source_password).grid(sticky='w'+'e',row=r,column=2,columnspan=4)
+			Tkinter.Button(self.modify_source_window,text='?',command=lambda: tkMessageBox.showinfo('Edit Sources','Password for the username for the host that bears the images, if applicable.\nIf \'*\' is used, the program will ask for the password each time it is trying to connect to the host. For security, prefer \'*\', because that information is saved in a file in your local disk.\nLeave empty if protocol is LOCAL.')).grid(sticky='w'+'e',row=r,column=6)
+			r += 1
+			Tkinter.Label(self.modify_source_window,anchor='w',text='Path to images:').grid(sticky='w'+'e',row=r,column=1)
+			Tkinter.Entry(self.modify_source_window,textvariable=self.modify_source_path).grid(sticky='w'+'e',row=r,column=2,columnspan=3)
+			Tkinter.Button(self.modify_source_window,text='Browse...',command=self.Networks_BrowseImages).grid(sticky='w'+'e',row=r,column=5)
+			Tkinter.Button(self.modify_source_window,text='?',command=lambda: tkMessageBox.showinfo('Edit Sources','The path of the image directory. For example, \'mycameranetwork/mycnif.ini\'. If the protocol is LOCAL (i.e. CNIF is in this computer) use browse to find the file.')).grid(sticky='w'+'e',row=r,column=6)
+			r += 1
+			Tkinter.Label(self.modify_source_window,anchor='w',text='File name convention of images:').grid(sticky='w'+'e',row=r,column=1)
+			Tkinter.Entry(self.modify_source_window,textvariable=self.modify_source_filenameformat).grid(sticky='w'+'e',row=r,column=2,columnspan=4)
+			Tkinter.Button(self.modify_source_window,text='?',command=lambda: tkMessageBox.showinfo('Edit Sources','File name convention is how the files are named according to the time of the image. For example, if the file name convention is \'researchsite_1_north_%Y_%m_%d_%H:%M:%S.jpg\' and an image is named as \'researchsite_1_north_2016_09_24_18:27:05.jpg\', then the time that the image taken is 24 September 2016 18:27:05. Do not forget to include the extension (e.g. \'.jpg\', \'.png\'). For the meanings of time directives, refer to the user manual or visit  https://docs.python.org/2/library/datetime.html#strftime-strptime-behavior')).grid(sticky='w'+'e',row=r,column=6)
+			r += 1
+			Tkinter.Label(self.modify_source_window,anchor='w',text='').grid(sticky='w'+'e',row=r,column=1)
+			Tkinter.Button(self.modify_source_window,bg="darkgreen",fg='white',text='Save and continue',command=self.modify_source_window.destroy).grid(sticky='w'+'e'+'s'+'n',row=r,column=2,columnspan=2,rowspan=2)
+			Tkinter.Button(self.modify_source_window,bg="brown",fg='white',text='Discard changes',command=self.modifySourcesInSetup_loadSource).grid(sticky='w'+'e'+'s'+'n',row=r,column=4,columnspan=2,rowspan=2)
+			self.centerWindow(self.modify_source_window)
+			self.modify_source_window.wait_window()
+
+			source = deepcopy(self.modify_source_source)
+			source['name'] = self.modify_source_name.get()
+			source['protocol'] = self.modify_source_protocol.get()
+			source['host'] = self.modify_source_host.get()
+			source['username'] = self.modify_source_username.get()
+			source['password'] = self.modify_source_password.get()
+			source['path'] = self.modify_source_path.get()
+			source['filenameformat'] = self.modify_source_filenameformat.get()
+			setup[s]['source'] = deepcopy(source)
+
+		return setup
+
+	def modifySourcesInSetup_loadSource(self):
+		self.modify_source_name.set(self.modify_source_source['name'])
+		self.modify_source_protocol.set(self.modify_source_source['protocol'])
+		self.modify_source_host.set(self.modify_source_source['host'])
+		self.modify_source_username.set(self.modify_source_source['username'])
+		self.modify_source_password.set(self.modify_source_source['password'])
+		self.modify_source_path.set(self.modify_source_source['path'])
+		self.modify_source_filenameformat.set(self.modify_source_source['filenameformat'])
 
 	def Networks_SourceManager(self):
 		#self.manager_network_window.grab_release()
@@ -3896,8 +3979,9 @@ class monimet_gui(Tkinter.Tk):
 			options['defaultextension'] = '.cfg'
 			options['filetypes'] = [ ('FMIPROT setup files', '.cfg'),('FMIPROT configuration files', '.cfg'),('all files', '.*')]
 			options['title'] = 'Choose setup file to load...'
-			ans = os.path.normpath(tkFileDialog.askopenfilename(**self.file_opt))
-		if ans != '' and ans != '.':
+			ans = tkFileDialog.askopenfilename(**self.file_opt)
+		if ans != '' and ans != '.' and ans != ():
+			ans = os.path.normpath(ans)
 			setup = self.setupFileRead(ans)
 			if sysargv['gui']:
 				self.Menu_Main()
@@ -3992,11 +4076,28 @@ class monimet_gui(Tkinter.Tk):
 		options['defaultextension'] = '.cfg'
 		options['filetypes'] = [ ('FMIPROT setup files', '.cfg'),('FMIPROT configuration files', '.cfg'),('all files', '.*')]
 		options['title'] = 'Set setup file to save...'
-		ans = os.path.normpath(tkFileDialog.asksaveasfilename(**self.file_opt))
-		if ans != '' and ans != '.':
+		ans = tkFileDialog.asksaveasfilename(**self.file_opt)
+		if ans != '' and ans != '.' and ans != ():
+			ans = os.path.normpath(ans)
 			self.setupFileVariable.set(ans)
 			parsers.writeINI(self.setupFileVariable.get(),self.setupToWrite(self.setup))
 			self.Message.set("Setup file saved as " + os.path.split(self.setupFileVariable.get())[1])
+		else:
+			self.Message.set("Saving cancelled.")
+
+	def setupFileSaveasModified(self):
+		self.UpdateSetup()
+		self.file_opt = options = {}
+		options['defaultextension'] = '.cfg'
+		options['filetypes'] = [ ('FMIPROT setup files', '.cfg'),('FMIPROT configuration files', '.cfg'),('all files', '.*')]
+		options['title'] = 'Set setup file to save...'
+		ans = tkFileDialog.asksaveasfilename(**self.file_opt)
+		if ans != '' and ans != '.' and ans != ():
+			ans = os.path.normpath(ans)
+			setup = deepcopy(self.setup)
+			setup = self.modifySourcesInSetup(setup)
+			parsers.writeINI(ans,self.setupToWrite(setup))
+			self.Message.set("Modified copy of setup file saved as " + os.path.split(ans)[1])
 		else:
 			self.Message.set("Saving cancelled.")
 
@@ -4026,8 +4127,12 @@ class monimet_gui(Tkinter.Tk):
 		options['defaultextension'] = '.html'
 		options['filetypes'] = [ ('HTML', '.html'),('all files', '.*')]
 		options['title'] = 'Set file to save the report...'
-		ans = os.path.normpath(tkFileDialog.asksaveasfilename(**self.file_opt))
-		self.setupFileReportFunc(ans)
+		ans = tkFileDialog.asksaveasfilename(**self.file_opt)
+		if ans != '' and ans != '.' and ans != ():
+			ans = os.path.normpath(ans)
+			self.setupFileReportFunc(ans)
+		else:
+			self.Message.set('Report generation cancelled.')
 
 	def setupFileReportFunc(self,ans,s=False):
 		res_data = False
