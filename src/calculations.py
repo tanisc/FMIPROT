@@ -229,6 +229,7 @@ def filterThresholds(imglist, datetimelist, mask, logger):
 					datetimelistv.append(datetimelist[i])
 			except:
 				pass
+			logger.set('Image: |progress:4|queue:'+str(i+1)+'|total:'+str(len(imglist)))
 		logger.set('Number of images:'+str(len(imglistv)))
 		return (imglistv,datetimelistv)
 	else:

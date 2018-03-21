@@ -554,7 +554,6 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 				pathlist = pathlist[:count]
 				datetimelist = datetimelist[:count]
 			logger.set(str(len(imglist)) + ' images found.')
-			print imglist,datetimelist,pathlist
 
 		if online and download:
 			fail = []

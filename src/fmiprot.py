@@ -4178,14 +4178,10 @@ class monimet_gui(Tkinter.Tk):
 					source = sources.getSource(self.Message,sources.getSources(self.Message,self.sourcelist,scenario['source']['network'],prop='network'),scenario['source']['name'])
 					self.Message.set('Analyzing ' + source['name'].replace('_',' ') + ' Camera images:')
 					(imglist_uf,datetimelist_uf,pathlist_uf) = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), scenario['temporal'], online=self.imagesdownload.get(),download=False)
-					(imglist_uf,datetimelist_uf,pathlist_uf) = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), scenario['temporal'][:4]+['List',imglist_uf,datetimelist_uf,pathlist_uf], online=self.imagesdownload.get(),download=True)
 					if imglist_uf == []:
 						self.Message.set("No pictures found. Scenario is skipped.")
 						self.Message.set('Scenario: |progress:1|queue:'+str(s+1)+'|total:'+str(len(self.setup)))
 						continue
-					mask = maskers.polymask(imglist_uf[0],scenario['polygonicmask'],self.Message)
-					mask = (mask,scenario['polygonicmask'],scenario['thresholds'])
-					(imglist_ur,datetimelist_ur) = calculations.filterThresholds(imglist_uf,datetimelist_uf, mask,logger)
 					self.Message.set('Analysis: |progress:2|queue:'+str(0)+'|total:'+str(len(scenario['analyses'])))
 				for a,analysis in enumerate(scenario['analyses']):
 					csvlist[s].append([])
@@ -4211,7 +4207,7 @@ class monimet_gui(Tkinter.Tk):
 								exec("commandstring = commandstring.replace('p"+str(i)+"','"+str(analysis[param])+"')")
 						if scenario['multiplerois'] and isinstance(scenario['polygonicmask'][0],list):
 								self.Message.set('ROI: |progress:3|queue:'+str(0)+'|total:'+str(len(scenario['polygonicmask'])+1))
-						(imglist,datetimelist) = (deepcopy(imglist_ur),deepcopy(datetimelist_ur))
+						(imglist,datetimelist,pathlist) = (deepcopy(imglist_uf),deepcopy(datetimelist_uf),deepcopy(pathlist_uf))
 						if self.outputmodevariable.get() == output_modes[2]:
 							self.Message.set('Reading results of image that are already processed...')
 							(analysis_captionsv, outputtv) = readResultsData(filelabel,logger)
@@ -4219,14 +4215,28 @@ class monimet_gui(Tkinter.Tk):
 								datetimelistp = []
 							else:
 								datetimelistp = parsers.oTime2sTime(outputtv[0][1][1])
-							(imglista,datetimelista) = (deepcopy(imglist),deepcopy(datetimelist)) #all
+							(imglista,datetimelista,pathlista) = (deepcopy(imglist),deepcopy(datetimelist),deepcopy(pathlist)) #all
 							imglist = [] #missing
 							datetimelist = []
+							pathlist = []
 							for i,v in enumerate(datetimelista):
 								if v not in datetimelistp:
 									imglist.append(imglista[i])
 									datetimelist.append(v)
+									pathlist.append(pathlista[i])
 							self.Message.set(str(len(datetimelistp))+' images are already processed. '+ str(len(imglist))+' images will be processed.')
+						(imglist,datetimelist,pathlist) = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), scenario['temporal'][:4]+['List',imglist,datetimelist,pathlist], online=self.imagesdownload.get(),download=True)
+						mask = maskers.polymask(imglist[0],scenario['polygonicmask'],self.Message)
+						mask = (mask,scenario['polygonicmask'],scenario['thresholds'])
+						(imglist,datetimelist) = calculations.filterThresholds(imglist,datetimelist, mask,logger)
+						if imglist == []:
+							if scenario['multiplerois'] and isinstance(scenario['polygonicmask'][0],list):
+								self.Message.set("No pictures are valid after filtering with thresholds. ROI is skipped.")
+								self.Message.set('ROI: |progress:3|queue:'+str(0)+'|total:'+str(len(scenario['polygonicmask'])+1))
+							else:
+								self.Message.set("No pictures are valid after filtering with thresholds. Scenario is skipped.")
+								self.Message.set('Scenario: |progress:1|queue:'+str(s+1)+'|total:'+str(len(self.setup)))
+								continue
 						exec(commandstring)
 						if self.outputmodevariable.get() == output_modes[2]:
 							self.Message.set('Merging results...')
@@ -4254,23 +4264,31 @@ class monimet_gui(Tkinter.Tk):
 						if scenario['multiplerois'] and isinstance(scenario['polygonicmask'][0],list):
 							for r, roi in enumerate(scenario['polygonicmask']):
 								self.Message.set("Running for ROI"+str(r+1).zfill(3))
-								mask = maskers.polymask(imglist_uf[0],[roi],self.Message)
-								mask = (mask,[roi],scenario['thresholds'])
-								(imglist,datetimelist) = calculations.filterThresholds(imglist_uf,datetimelist_uf, mask,logger)
+								(imglist,datetimelist,pathlist) = (deepcopy(imglist_uf),deepcopy(datetimelist_uf),deepcopy(pathlist_uf))
 								if self.outputmodevariable.get() == output_modes[2]:
 									self.Message.set('Reading results of image that are already processed...')
 									if outputtv == []:
 										datetimelistp = []
 									else:
 										datetimelistp = parsers.oTime2sTime(outputtv[r+1][1][1])
-									(imglista,datetimelista) = (deepcopy(imglist),deepcopy(datetimelist)) #all
+									(imglista,datetimelista,pathlista) = (deepcopy(imglist),deepcopy(datetimelist),deepcopy(pathlist)) #all
 									imglist = [] #missing
 									datetimelist = []
+									pathlist = []
 									for i,v in enumerate(datetimelista):
 										if v not in datetimelistp:
 											imglist.append(imglista[i])
 											datetimelist.append(v)
+											pathlist.append(pathlista[i])
 									self.Message.set(str(len(datetimelistp))+' images are already processed. '+ str(len(imglist))+' images will be processed.')
+								(imglist,datetimelist,pathlist) = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), scenario['temporal'][:4]+['List',imglist,datetimelist,pathlist], online=self.imagesdownload.get(),download=True)
+								mask = maskers.polymask(imglist[0],[roi],self.Message)
+								mask = (mask,[roi],scenario['thresholds'])
+								(imglist,datetimelist) = calculations.filterThresholds(imglist,datetimelist, mask,logger)
+								if imglist == []:
+									self.Message.set("No pictures are valid after filtering with thresholds. ROI is skipped.")
+									self.Message.set('ROI: |progress:3|queue:'+str(r+2)+'|total:'+str(len(scenario['polygonicmask'])+1))
+									continue
 								exec(commandstring)
 								if self.outputmodevariable.get() == output_modes[2]:
 									self.Message.set('Merging results...')
