@@ -231,12 +231,15 @@ class monimet_gui(Tkinter.Tk):
 		else:
 			self.outputmodevariable.set(output_modes[0])
 
-		if sysargv['online']:
-			self.imagesdownload.set(True)
-		else:
+		if sysargv['offline']:
 			self.imagesdownload.set(False)
+		else:
+			self.imagesdownload.set(True)
 
 		if not sysargv['gui']:
+			if sysargv['config']:
+				self.configSettings()
+				os._exit(1)
 			if sysargv['setupfile'] is None:
 				tkMessageBox.showerror('Usage error','Setup file must be provided if GUI is off.')
 				os._exit(1)
@@ -303,6 +306,34 @@ class monimet_gui(Tkinter.Tk):
 		self.updateProcessing()
 
 		parsers.writeSettings(parsers.dictSettings(settingv),settingsFile,self.Message)
+
+	def configSettings(self):
+		ans = ''
+		while True:
+			if ans == '0':
+				break
+			print 'ID','\t', 'Parameter',' : ', 'Value'
+			settingv = parsers.readSettings(settingsFile,self.Message)
+			for s,setting in enumerate(settings):
+				print str(s+1),'\t', settingsn[settings.index(setting)],' : ', settingv[settings.index(setting)]
+			ans = raw_input('Enter ID to modify the parameter or 0 to exit\n')
+			try:
+				if int(ans) <= 0 or int(ans) > len(settingv):
+					fail
+			except:
+				if ans != '0':
+					print 'Incorrect input.'
+				continue
+			s = int(ans)-1
+			val = raw_input('Enter new value for ' + settingsn[s] + ' '+settingso[s]+'\n')
+			conf = ''
+			while conf not in ['y','n','Y','N']:
+				conf = raw_input('Are you sure? (y/n)')
+				if conf not in ['y','n','Y','N']:
+					print 'Incorrect answer. ',
+			if conf in ['y','Y']:
+				settingv[s] = val
+				parsers.writeSettings(parsers.dictSettings(settingv),settingsFile,self.Message)
 
 	def centerWindow(self,toplevel=None,ontheside=False):
 		if toplevel != None:

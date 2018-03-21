@@ -3,23 +3,20 @@ version = '0.15.4 (Beta)'
 import argparse
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('-s','--setupfile', help="Path to setup file to be loaded.")
-parser.add_argument('-g','--gui', default='on', help="GUI 'on' or 'off'")
+parser.add_argument('-g','--gui', action='store_false', help="Switch GUI off.")
 parser.add_argument('-r','--resultdir', help="Path to directory that results will be stored. Directory should be empty or nonexisting for new results to be stored. If the directory is not empty, the results will be merged with the old results only if the setup is identical. Otherwise setup will not be run.")
-parser.add_argument('-p','--prompt', default='on', help="If prompts are allowed, for example asking yes no questions or prompting credentials. 'on' or 'off'. Only valid when GUI is off." )
-parser.add_argument('-o','--online', default='on', help="If the program is online, so that it checks and downloads images with online protocols, for example FTP or HTTP. If it is off, it will only consider images on the local directories. 'on' or 'off'")
-parser.add_argument('-c','--cleantemp',action='store_true', help="Clean temporary files. DO NOT USE THAT OPTION IF ANY INSTANCE OF THE PROGRAM IS RUNNING. These files also include images downloaded for temporarily added cameras and camera networks. Exits after cleaning.")
+parser.add_argument('-p','--prompt', action='store_false', help="Turn the prompts off, for example asking yes no questions or prompting credentials. Only valid when GUI is swiched off." )
+parser.add_argument('-o','--offline', action='store_true', help="Switch the program to offline mode, so that it does not check and download images with online protocols, for example FTP or HTTP. It will only consider images on the local directories.")
+parser.add_argument('-c','--config',action='store_true', help="Configure settings without GUI.")
+parser.add_argument('--cleantemp',action='store_true', help="Clean temporary files. DO NOT USE THAT OPTION IF ANY INSTANCE OF THE PROGRAM IS RUNNING. These files also include images downloaded for temporarily added cameras and camera networks. Exits after cleaning.")
 parser.add_argument('--version', action='version', version='Version: ' + version)
 # parser.add_argument('-d','--dev', default='off', help="Devmode 'on' or 'off'")
-parser.print_help()
+#parser.print_help()
 global sysargv
 sysargv = vars(parser.parse_args())
 sysargv.update({'version': version})
-for arg in sysargv:
-    if sysargv[arg] == 'on':
-        sysargv[arg] = True
-    if sysargv[arg] == 'off':
-        sysargv[arg] = False
-    sysargv[arg]
+if sysargv['config']:
+    sysargv['gui'] = False
 if 'dev' not in sysargv:
     sysargv.update({'dev':False})
 
@@ -122,6 +119,8 @@ if sysargv['cleantemp']:
     os._exit(1)
 #definitions, labels, keys for sources
 settings = ['http_proxy','https_proxy','ftp_proxy','ftp_passive','ftp_numberofconnections','results_path','images_path','images_download','timezone','convert_timezone']
+settingsn = ['Proxy address for HTTP connections','Proxy address for HTTPS connections','Proxy address for FTP connections','Use passive connection for FTP','Maximum number of simultaneous FTP connections','Default results directory','Local image directory','Check and download new images from the camera network servers','Timezone offset','Convert time zone of timestamps of the images']
+settingso = ['(host:port)','(host:port)','(host:port)','(0/1)','(0-10)','(Path to directory)','(Path to directory)','(0/1)','(+HHMM/-HHMM or +0000 for UTC)','(0/1)']
 source_metadata_hidden = ['host','username','password','path','filenameformat','networkid']
 source_metadata_names = {'network':'Source network','protocol':'Communication protocol','host':'Host address','username':'Username','password':'Password','device':'Device type','channels':'List of channels in the images','name':'Source Name','path':'Path on the server','filenameformat':'Filename convention of the images'}
 source_metadata_names.update({'sharedsources':'Other image sources that produces image including any shared location'})
