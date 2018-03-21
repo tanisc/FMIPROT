@@ -3801,7 +3801,7 @@ class monimet_gui(Tkinter.Tk):
 					timec[2] = scenario['previewimagetime'][9:11]+':'+scenario['previewimagetime'][11:13]
 					timec[1] = scenario['previewimagetime'][6:8]+'.'+scenario['previewimagetime'][4:6]+'.'+scenario['previewimagetime'][0:4]
 					timec[3] = scenario['previewimagetime'][9:11]+':'+scenario['previewimagetime'][11:13]
-					img, ts = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), timec + ['Date and time intervals'], count=1, online=True)
+					img, ts = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), timec + ['Date and time intervals'], count=1, online=True)[:2]
 					if len(img) == 0:
 						del scenario['previewimagetime']
 						self.Message.set('Can not find the image for the ' + source_metadata_names['previewimagetime'] + ' provided by the setup file. It is removed from the setup.' )
@@ -3813,16 +3813,16 @@ class monimet_gui(Tkinter.Tk):
 						timec[2] = source['previewimagetime'][9:11]+':'+source['previewimagetime'][11:13]
 						timec[1] = source['previewimagetime'][6:8]+'.'+source['previewimagetime'][4:6]+'.'+source['previewimagetime'][0:4]
 						timec[3] = source['previewimagetime'][9:11]+':'+source['previewimagetime'][11:13]
-						img, ts = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), timec + ['Date and time intervals'], count=1, online=True)
+						img, ts = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), timec + ['Date and time intervals'], count=1, online=True)[:2]
 						if len(img) == 0:
 							self.Message.set('Can not find the image for the ' + source_metadata_names['previewimagetime'] + ' provided by CNIF.' )
 					else:
 						self.Message.set(source_metadata_names['previewimagetime'] + ' is not supplied in CNIF file or the scenario.')
 				if len(img) == 0:
 					self.Message.set('Looking for a suitable image...')
-					img, ts = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), [0,0,'11:30','12:30','Date and time intervals'], count=1, online=True)
+					img, ts = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), [0,0,'11:30','12:30','Date and time intervals'], count=1, online=True)[:2]
 				if len(img) == 0:
-					img, ts = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), [0,0,'00:00','23:59'], count=1, online=True)
+					img, ts = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), [0,0,'00:00','23:59'], count=1, online=True)[:2]
 				if len(img) == 0:
 					self.Message.set('No suitable file for preview image found for camera: '+source['network'] + ' - ' + source['name'])
 					return (source,scenario)
@@ -4177,7 +4177,8 @@ class monimet_gui(Tkinter.Tk):
 				if scn == None or scn == s:
 					source = sources.getSource(self.Message,sources.getSources(self.Message,self.sourcelist,scenario['source']['network'],prop='network'),scenario['source']['name'])
 					self.Message.set('Analyzing ' + source['name'].replace('_',' ') + ' Camera images:')
-					(imglist_uf,datetimelist_uf) = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), scenario['temporal'], online=self.imagesdownload.get())
+					(imglist_uf,datetimelist_uf,pathlist_uf) = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), scenario['temporal'], online=self.imagesdownload.get(),download=False)
+					(imglist_uf,datetimelist_uf,pathlist_uf) = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), scenario['temporal'][:4]+['List',imglist_uf,datetimelist_uf,pathlist_uf], online=self.imagesdownload.get(),download=True)
 					if imglist_uf == []:
 						self.Message.set("No pictures found. Scenario is skipped.")
 						self.Message.set('Scenario: |progress:1|queue:'+str(s+1)+'|total:'+str(len(self.setup)))

@@ -465,87 +465,96 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 		timelimc[3] = timelimc[3][11:13]+'.'+timelimc[3][14:16]
 
 	if protocol == 'FTP':
-		if online:
-			logger.set('Establishing FTP connection...')
-			try:
-				if 'ftp_proxy' in proxy:
-					ftp = ftplib.FTP()
-					ftp.set_pasv(bool(int(connection['ftp_passive'])))
-					ftp.connect(proxy['ftp_proxy'])
-					for i in [3,2,1,0]:
-						try:
-							ftp.login( '%s@%s' % (username,host), password )
-							break
-						except ftplib.error_perm as e:
-							if e[0] == '530 Login incorrect.' and i>0:
-								logger.set("Login incorrect. Trying again ("+str(i)+")")
-								getPassword(tkobj,logger,protocol,host,renew=True)
-								exec('username = tkobj.'+validateName(protocol+host).lower()+'username.get()')
-								exec('password = tkobj.'+validateName(protocol+host).lower()+'password.get()')
-							else:
-								logger.set('Fetching failed.')
-								try:
-									ftp.quit()
-								except:
-									pass
-								return False
-				else:
-					ftp = ftplib.FTP(host)
-					ftp.set_pasv(bool(int(connection['ftp_passive'])))
-					for i in [3,2,1,0]:
-						try:
-							ftp.login(username, password)
-							break
-						except ftplib.error_perm as e:
-							if e[0] == '530 Login incorrect.' and i>0:
-								logger.set("Login incorrect. Trying again ("+str(i)+")")
-								getPassword(tkobj,logger,protocol,host,renew=True)
-								exec('username = tkobj.'+validateName(protocol+host).lower()+'username.get()')
-								exec('password = tkobj.'+validateName(protocol+host).lower()+'password.get()')
-							else:
-								logger.set('Fetching failed.')
-								try:
-									ftp.quit()
-								except:
-									pass
-								return False
-				logger.set('Connection established.')
-				logger.set('Looking for images...')
-				paths_to_crawl = listPathCrawl(remote_path,timec,timelimc)
-				if len(paths_to_crawl) > 1:
-					logger.set('Crawling through '+str(len(paths_to_crawl))+ ' paths...')
-				for p in paths_to_crawl:
-					try:
-						for img in ftp.nlst(p):
-							imglistv.append(img.split('/')[-1])
-							pathlistv.append(p)
-						logger.set(str(len(ftp.nlst(p)))+' possible files found.')
-					except:
-						continue
-
-					if count != 0:
-						if len(filterImageListTemporal(logger,imglistv,pathlistv,filenameformat,timec,count)[0]) >= count:
-							break
-				ftp.quit()
-				logger.set('Disconnected from FTP.')
-			except:
-				logger.set('Connection failed.')
-				logger.set('Checking local directory for images...')
-				online = False
-
+		if timec[4] == 'List':
+			datetimelist = deepcopy(timec[6])
+			pathlist = deepcopy(timec[7])
+			imglist = []
+			for i,img in enumerate(timec[5]):
+				imglist.append(os.path.split(img)[1])
 
 		else:
-			imglistv = os.listdir(local_path)
-			for i,v in enumerate(imglistv):
-				pathlistv.append(local_path)
+			if online:
+				logger.set('Establishing FTP connection...')
+				try:
+					if 'ftp_proxy' in proxy:
+						ftp = ftplib.FTP()
+						ftp.set_pasv(bool(int(connection['ftp_passive'])))
+						ftp.connect(proxy['ftp_proxy'])
+						for i in [3,2,1,0]:
+							try:
+								ftp.login( '%s@%s' % (username,host), password )
+								break
+							except ftplib.error_perm as e:
+								if e[0] == '530 Login incorrect.' and i>0:
+									logger.set("Login incorrect. Trying again ("+str(i)+")")
+									getPassword(tkobj,logger,protocol,host,renew=True)
+									exec('username = tkobj.'+validateName(protocol+host).lower()+'username.get()')
+									exec('password = tkobj.'+validateName(protocol+host).lower()+'password.get()')
+								else:
+									logger.set('Fetching failed.')
+									try:
+										ftp.quit()
+									except:
+										pass
+									return False
+					else:
+						ftp = ftplib.FTP(host)
+						ftp.set_pasv(bool(int(connection['ftp_passive'])))
+						for i in [3,2,1,0]:
+							try:
+								ftp.login(username, password)
+								break
+							except ftplib.error_perm as e:
+								if e[0] == '530 Login incorrect.' and i>0:
+									logger.set("Login incorrect. Trying again ("+str(i)+")")
+									getPassword(tkobj,logger,protocol,host,renew=True)
+									exec('username = tkobj.'+validateName(protocol+host).lower()+'username.get()')
+									exec('password = tkobj.'+validateName(protocol+host).lower()+'password.get()')
+								else:
+									logger.set('Fetching failed.')
+									try:
+										ftp.quit()
+									except:
+										pass
+									return False
+					logger.set('Connection established.')
+					logger.set('Looking for images...')
+					paths_to_crawl = listPathCrawl(remote_path,timec,timelimc)
+					if len(paths_to_crawl) > 1:
+						logger.set('Crawling through '+str(len(paths_to_crawl))+ ' paths...')
+					for p in paths_to_crawl:
+						try:
+							for img in ftp.nlst(p):
+								imglistv.append(img.split('/')[-1])
+								pathlistv.append(p)
+							logger.set(str(len(ftp.nlst(p)))+' possible files found.')
+						except:
+							continue
 
-		(imglist, datetimelist, pathlist) = filterImageListTemporal(logger,imglistv,pathlistv,filenameformat,timec,count)
+						if count != 0:
+							if len(filterImageListTemporal(logger,imglistv,pathlistv,filenameformat,timec,count)[0]) >= count:
+								break
+					ftp.quit()
+					logger.set('Disconnected from FTP.')
+				except:
+					logger.set('Connection failed.')
+					logger.set('Checking local directory for images...')
+					online = False
 
-		if count != 0:
-			imglist = imglist[:count]
-			pathlist = pathlist[:count]
-			datetimelist = datetimelist[:count]
-		logger.set(str(len(imglist)) + ' images found.')
+
+			else:
+				imglistv = os.listdir(local_path)
+				for i,v in enumerate(imglistv):
+					pathlistv.append(local_path)
+
+			(imglist, datetimelist, pathlist) = filterImageListTemporal(logger,imglistv,pathlistv,filenameformat,timec,count)
+
+			if count != 0:
+				imglist = imglist[:count]
+				pathlist = pathlist[:count]
+				datetimelist = datetimelist[:count]
+			logger.set(str(len(imglist)) + ' images found.')
+			print imglist,datetimelist,pathlist
 
 		if online and download:
 			fail = []
@@ -605,70 +614,78 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 
 
 	if protocol == 'HTTP' or protocol == 'HTTPS':
-		if online:
-			import urllib2
-			import re
-			urllib2 = reload(urllib2)
-			if 'http_proxy' in proxy:
-				proxy.update({'http':proxy['http_proxy']})
-				del proxy['http_proxy']
-			if 'https_proxy' in proxy:
-				proxy.update({'https':proxy['https_proxy']})
-				del proxy['https_proxy']
-			if 'ftp_proxy' in proxy:
-				proxy.update({'ftp':proxy['ftp_proxy']})
-				del proxy['ftp_proxy']
-			proxyhl = urllib2.ProxyHandler(proxy)
-			opener = urllib2.build_opener(proxyhl)
-			if (protocol == 'HTTP'  and 'http' in proxy) or (protocol == 'HTTPS'  and 'https' in proxy):
-				urllib2.install_opener(opener)
-
-			if username != '':
-				if password == '':
-					password = None
-				passman = urllib2.HTTPPasswordMgrWithDefaultRealm()
-				passman.add_password(None, inifile, username, password)
-				authhandler = urllib2.HTTPBasicAuthHandler(passman)
-				opener = urllib2.build_opener(authhandler)
-				urllib2.install_opener(opener)
-			logger.set('Establishing connection(s)...')
-			pattern = re.compile('href=[\'"]?([^\'" >]+)')
-			paths_to_crawl = listPathCrawl(remote_path,timec,timelimc)
-			logger.set('Looking for images...')
-			if len(paths_to_crawl) > 1:
-				logger.set('Crawling through '+str(len(paths_to_crawl))+ ' paths...')
-			for p in paths_to_crawl:
-
-				if protocol == 'HTTP':
-					url = 'http://'+host+'/'+p
-				if protocol == 'HTTPS':
-					url = 'https://'+host+'/'+p
-
-				try:
-					response = urllib2.urlopen(url).read()
-				except:
-					#logger.set('Connection failed.')
-					continue
-
-				for img in pattern.findall(response):	#already includes full path to img
-					imglistv.append(img.split('/')[-1])
-					pathlistv.append([img,p])
-				logger.set(str(len(pattern.findall(response)))+' possible files found.')
-
-				if count != 0:
-					if len(filterImageListTemporal(logger,imglistv,pathlistv,filenameformat,timec,count)[0]) >= count:
-						break
+		if timec[4] == 'List':
+			datetimelist = deepcopy(timec[6])
+			pathlist = deepcopy(timec[7])
+			imglist = []
+			for i,img in enumerate(timec[5]):
+				imglist.append(os.path.split(img)[1])
 
 		else:
-			imglistv = os.listdir(local_path)
-			for i,v in enumerate(imglistv):
-				pathlistv.append(local_path)
-		(imglist, datetimelist, pathlist) = filterImageListTemporal(logger,imglistv,pathlistv,filenameformat,timec,count)
-		if count != 0:
-			imglist = imglist[:count]
-			datetimelist = datetimelist[:count]
-			pathlist = pathlist[:count]
-		logger.set(str(len(imglist)) + ' images found.')
+			if online:
+				import urllib2
+				import re
+				urllib2 = reload(urllib2)
+				if 'http_proxy' in proxy:
+					proxy.update({'http':proxy['http_proxy']})
+					del proxy['http_proxy']
+				if 'https_proxy' in proxy:
+					proxy.update({'https':proxy['https_proxy']})
+					del proxy['https_proxy']
+				if 'ftp_proxy' in proxy:
+					proxy.update({'ftp':proxy['ftp_proxy']})
+					del proxy['ftp_proxy']
+				proxyhl = urllib2.ProxyHandler(proxy)
+				opener = urllib2.build_opener(proxyhl)
+				if (protocol == 'HTTP'  and 'http' in proxy) or (protocol == 'HTTPS'  and 'https' in proxy):
+					urllib2.install_opener(opener)
+
+				if username != '':
+					if password == '':
+						password = None
+					passman = urllib2.HTTPPasswordMgrWithDefaultRealm()
+					passman.add_password(None, inifile, username, password)
+					authhandler = urllib2.HTTPBasicAuthHandler(passman)
+					opener = urllib2.build_opener(authhandler)
+					urllib2.install_opener(opener)
+				logger.set('Establishing connection(s)...')
+				pattern = re.compile('href=[\'"]?([^\'" >]+)')
+				paths_to_crawl = listPathCrawl(remote_path,timec,timelimc)
+				logger.set('Looking for images...')
+				if len(paths_to_crawl) > 1:
+					logger.set('Crawling through '+str(len(paths_to_crawl))+ ' paths...')
+				for p in paths_to_crawl:
+
+					if protocol == 'HTTP':
+						url = 'http://'+host+'/'+p
+					if protocol == 'HTTPS':
+						url = 'https://'+host+'/'+p
+
+					try:
+						response = urllib2.urlopen(url).read()
+					except:
+						#logger.set('Connection failed.')
+						continue
+
+					for img in pattern.findall(response):	#already includes full path to img
+						imglistv.append(img.split('/')[-1])
+						pathlistv.append([img,p])
+					logger.set(str(len(pattern.findall(response)))+' possible files found.')
+
+					if count != 0:
+						if len(filterImageListTemporal(logger,imglistv,pathlistv,filenameformat,timec,count)[0]) >= count:
+							break
+
+			else:
+				imglistv = os.listdir(local_path)
+				for i,v in enumerate(imglistv):
+					pathlistv.append(local_path)
+			(imglist, datetimelist, pathlist) = filterImageListTemporal(logger,imglistv,pathlistv,filenameformat,timec,count)
+			if count != 0:
+				imglist = imglist[:count]
+				datetimelist = datetimelist[:count]
+				pathlist = pathlist[:count]
+			logger.set(str(len(imglist)) + ' images found.')
 
 		if online and download:
 			fail = []
@@ -727,35 +744,44 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 
 
 	if protocol == 'LOCAL':
+		if timec[4] == 'List':
+			datetimelist = deepcopy(timec[6])
+			pathlist = deepcopy(timec[7])
+			imglist = []
+			for i,img in enumerate(timec[5]):
+				imglist.append(os.path.split(img)[1])
 
-		paths_to_crawl = listPathCrawl(remote_path,timec,timelimc)
-		if len(paths_to_crawl) > 1:
-			logger.set('Crawling through '+str(len(paths_to_crawl))+ ' paths...')
-		for p in paths_to_crawl:
-			try:
-				for img in os.listdir(p):
-					imglistv.append(img)
-					pathlistv.append(p)
-				logger.set(str(len(os.listdir(p)))+' possible files found.')
-			except:
-				pass
+		else:
+			paths_to_crawl = listPathCrawl(remote_path,timec,timelimc)
+			if len(paths_to_crawl) > 1:
+				logger.set('Crawling through '+str(len(paths_to_crawl))+ ' paths...')
+			for p in paths_to_crawl:
+				try:
+					for img in os.listdir(p):
+						imglistv.append(img)
+						pathlistv.append(p)
+					logger.set(str(len(os.listdir(p)))+' possible files found.')
+				except:
+					pass
 
-		(imglist, datetimelist, pathlist) = filterImageListTemporal(logger,imglistv,pathlistv,filenameformat,timec,count)
+			(imglist, datetimelist, pathlist) = filterImageListTemporal(logger,imglistv,pathlistv,filenameformat,timec,count)
 
-		if count != 0:
-			imglist = imglist[:count]
-			datetimelist = datetimelist[:count]
-		logger.set(str(len(imglist)) + ' images found.')
+			if count != 0:
+				imglist = imglist[:count]
+				datetimelist = datetimelist[:count]
+			logger.set(str(len(imglist)) + ' images found.')
 
 		#merge paths with filenames
 		for i in range(len(imglist)):
 			imglist[i] = os.path.join(pathlist[i],imglist[i])
 
 	#sort according to time
-	imglistv = [ilist for dlist, ilist in sorted(zip(datetimelist, imglist))]
-	datetimelistv = [dlist for dlist, ilist in sorted(zip(datetimelist, imglist))]
+	imglistv = [ilist for dlist, ilist, plist in sorted(zip(datetimelist, imglist, pathlist))]
+	datetimelistv = [dlist for dlist, ilist, plist in sorted(zip(datetimelist, imglist, pathlist))]
+	pathlistv = [plist for dlist, ilist, plist in sorted(zip(datetimelist, imglist, pathlist))]
 	imglist = imglistv
 	datetimelist = datetimelistv
+	pathlist = pathlistv
 
 	if len(datetimelist) > 0 and care_tz: #false used for checkQuantity
 		if 'timezone' in source:
@@ -771,7 +797,7 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 			for i_dt,dt in enumerate(datetimelist):#localize utc
 				datetimelist[i_dt]=dt.astimezone(timezone('UTC'))
 				#all time in utc now
-	return (imglist,datetimelist)
+	return (imglist,datetimelist,pathlist)
 
 def checkQuantity(tkobj,logger,source, proxy, connection, remote_path, timec, interval=30, epoch=15):
 
