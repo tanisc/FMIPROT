@@ -407,18 +407,18 @@ def writeSetupReport(filename,setup,logger):
 		report_f.write("<table class='hdr2'><tbody><tr><td>")
 		report_f.write("<table class='hdr2'><tbody><tr><td>")
 		if  "Scenario_"+str(i+1)+"_Mask_Preview_2.jpg" in listdir(path.join(path.split(filename)[0],path.split(filename)[1].split('.')[0]+'_files')): #split for . creates exception if there is more than one . in the path
-			report_f.write("<img src='"+path.join(path.split(filename)[1].split('.')[0]+'_files',"Scenario_"+str(i+1)+"_Mask_Preview_2.jpg")+"' height=612 style='border: 1px solid;'>")
+			report_f.write("<img src='"+path.join(path.split(filename)[1].split('.')[0]+'_files',"Scenario_"+str(i+1)+"_Mask_Preview_2.jpg")+"' style='border: 1px solid;width:151%'>")
 		report_f.write("</td></tr></tbody></table>")
 		report_f.write("</td><td>")
-		report_f.write("<table class='hdr2'><tbody><tr><td>")
+		report_f.write("<table class='hdr2' style='text-align:right;'><tbody><tr><td>")
 		if  "Scenario_"+str(i+1)+"_Mask_Preview_1.jpg" in listdir(path.join(path.split(filename)[0],path.split(filename)[1].split('.')[0]+'_files')): #split for . creates exception if there is more than one . in the path
-			report_f.write("<img src='"+path.join(path.split(filename)[1].split('.')[0]+'_files',"Scenario_"+str(i+1)+"_Mask_Preview_1.jpg")+"' height=200 style='border: 1px solid;'>")
+			report_f.write("<img src='"+path.join(path.split(filename)[1].split('.')[0]+'_files',"Scenario_"+str(i+1)+"_Mask_Preview_1.jpg")+"'  style='border: 1px solid;width:49%'>")
 		report_f.write("</td></tr><tr><td>")
 		if  "Scenario_"+str(i+1)+"_Mask_Preview_3.jpg" in listdir(path.join(path.split(filename)[0],path.split(filename)[1].split('.')[0]+'_files')): #split for . creates exception if there is more than one . in the path
-			report_f.write("<img src='"+path.join(path.split(filename)[1].split('.')[0]+'_files',"Scenario_"+str(i+1)+"_Mask_Preview_3.jpg")+"' height=200 style='border: 1px solid;'>")
+			report_f.write("<img src='"+path.join(path.split(filename)[1].split('.')[0]+'_files',"Scenario_"+str(i+1)+"_Mask_Preview_3.jpg")+"'  style='border: 1px solid;width:49%'>")
 		report_f.write("</td></tr><tr><td>")
 		if  "Scenario_"+str(i+1)+"_Mask_Preview_4.jpg" in listdir(path.join(path.split(filename)[0],path.split(filename)[1].split('.')[0]+'_files')): #split for . creates exception if there is more than one . in the path
-			report_f.write("<img src='"+path.join(path.split(filename)[1].split('.')[0]+'_files',"Scenario_"+str(i+1)+"_Mask_Preview_4.jpg")+"' height=200 style='border: 1px solid;'>")
+			report_f.write("<img src='"+path.join(path.split(filename)[1].split('.')[0]+'_files',"Scenario_"+str(i+1)+"_Mask_Preview_4.jpg")+"'  style='border: 1px solid;width:49%'>")
 		report_f.write("</td></tr></tbody></table>")
 		report_f.write("</td></tr></tbody></table>")
 		report_f.write("<table class='hdr1'><tbody><tr><td>")
