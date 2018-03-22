@@ -3882,9 +3882,6 @@ class monimet_gui(Tkinter.Tk):
 		self.Message.set("Preview picture is changed.")
 		try:
 			shutil.copyfile(self.PictureFileName.get(),os.path.join(PreviewsDir,pfn))
-			for f in os.listdir(PreviewsDir):
-					if f != pfn and os.path.isfile(os.path.join(PreviewsDir,f)) and f.startswith(pfn_prev[0]) and f.endswith(pfn_prev[1]) and f.replace(pfn_prev[0],'').replace(pfn_prev[1],'') != '':
-						os.remove(os.path.join(PreviewsDir,f))
 			self.Message.set('Preview image file is updated camera: '+source['network'] + ' - ' + source['name'])
 		except:
 			self.Message.set('Preview image file could not be updated for camera: '+source['network'] + ' - ' + source['name'] + '.')
