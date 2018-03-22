@@ -298,7 +298,7 @@ def writeSetupReport(filename,setup,logger):
 	report_f.write("<tr><td>")
 	report_f.write("FMIPROT Setup Report | Last processed: ")
 	report_f.write(writetime)
-	report_f.write(" | <a href='http://fmiprot.fmi.fi' target='_blank'>FMIPROT Webpage</a>")
+	report_f.write(" UTC | <a href='http://fmiprot.fmi.fi' target='_blank'>FMIPROT Webpage</a>")
 	report_f.write("</td></tr>")
 	report_f.write("<tr><td>")
 	report_f.write("<table class='hdr0'><tbody><tr><td>Go to:</td>")

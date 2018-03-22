@@ -10,7 +10,7 @@ parser.add_argument('-o','--offline', action='store_true', help="Switch the prog
 parser.add_argument('-c','--config',action='store_true', help="Configure settings without GUI.")
 parser.add_argument('--cleantemp',action='store_true', help="Clean temporary files. DO NOT USE THAT OPTION IF ANY INSTANCE OF THE PROGRAM IS RUNNING. These files also include images downloaded for temporarily added cameras and camera networks. Exits after cleaning.")
 parser.add_argument('--version', action='version', version='Version: ' + version)
-# parser.add_argument('-d','--dev', default='off', help="Devmode 'on' or 'off'")
+parser.add_argument('-d','--dev', action='store_true', help="Devmode")
 #parser.print_help()
 global sysargv
 sysargv = vars(parser.parse_args())

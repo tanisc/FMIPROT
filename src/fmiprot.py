@@ -98,6 +98,7 @@ class monimet_gui(Tkinter.Tk):
 		self.Message.trace('w',self.LogMessage)
 		self.Log = Tkinter.StringVar()
 		self.LogLL = Tkinter.StringVar()
+		self.LogFileName = ['','']
 		self.LogNew(self)
 		self.Message.set("Initializing...|busy:True")
 		self.Message.set("Initializing GUI...")
@@ -3891,10 +3892,10 @@ class monimet_gui(Tkinter.Tk):
 
 	def UpdatePreviewPictureFiles(self,source,scenario):
 		self.Message.set('Checking preview pictures...')
-		if 'temporary' in source and source['temporary'] and source['protocol'] == 'LOCAL':
-			tkMessageBox.showwarning('No directory','Directory does not exist. This camera was temporarily added and the images of the camera refer to local directories and they do not exist. It probably means that the setup file loaded is saved in another computer with a camera network or camera which is not defined identically in this computer. To fix it, load the setup file again, confirm the permanent save of the camera/network and the open camera network manager and set up directories accordingly.')
-			self.Message.set('Checking preview picture skipped due to temporarily added camera with protocol: LOCAL.')
-			return (source,scenario)
+		# if 'temporary' in source and source['temporary'] and source['protocol'] == 'LOCAL':
+		# 	tkMessageBox.showwarning('No directory','Directory does not exist. This camera was temporarily added and the images of the camera refer to local directories and they do not exist. It probably means that the setup file loaded is saved in another computer with a camera network or camera which is not defined identically in this computer. To fix it, load the setup file again, confirm the permanent save of the camera/network and the open camera network manager and set up directories accordingly.')
+		# 	self.Message.set('Checking preview picture skipped due to temporarily added camera with protocol: LOCAL.')
+		# 	return (source,scenario)
 		pfn_ts = ''
 		if 'previewimagetime' in scenario and scenario['previewimagetime'] != '' and scenario['previewimagetime'] is not None:
 			pfn_ts = '-' + scenario['previewimagetime']
@@ -4297,13 +4298,18 @@ class monimet_gui(Tkinter.Tk):
 			if self.outputmodevariable.get() == output_modes[2]:
 				outputsetup = self.checkoutputsetup(out=True)
 				if outputsetup is False:
-					if not sysargv['prompt'] or tkMessageBox.askyesno('Results can not be merged','Results can not be merged. Do you want to continue the analysis and store results in a new directory under results directory?'):
-						if not sysargv['prompt']:
-							tkMessageBox.showwarning('Results can not be merged','Results can not be merged. Results will be stored in a new directory under results directory.')
-						self.outputmodevariable.set(output_modes[0])
+					if self.checkemptyoutput(out=True):
+						self.outputmodevariable.set(output_modes[1])
+						tkMessageBox.showwarning('Results can not be merged','No results in the directory, new  results will be stored under it.')
 					else:
-						return False
+						if not sysargv['prompt'] or tkMessageBox.askyesno('Results can not be merged','Results can not be merged. Do you want to continue the analysis and store results in a new directory under results directory?'):
+							if not sysargv['prompt']:
+								tkMessageBox.showwarning('Results can not be merged','Results can not be merged. Results will be stored in a new directory under results directory.')
+							self.outputmodevariable.set(output_modes[0])
+						else:
+							return False
 			resultspath = self.outputpath.get()
+			self.LogFileName[1] = os.path.join(resultspath,'log.txt')
 			self.Message.set('Running all scenarios...|busy:True')
 			if not os.path.exists(resultspath):
 				os.makedirs(resultspath)
@@ -4366,18 +4372,31 @@ class monimet_gui(Tkinter.Tk):
 									pathlist.append(pathlista[i])
 							self.Message.set(str(len(datetimelistp))+' images are already processed. '+ str(len(imglist))+' images will be processed.')
 						(imglist,datetimelist,pathlist) = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), scenario['temporal'][:4]+['List',imglist,datetimelist,pathlist], online=self.imagesdownload.get(),download=True)
-						mask = maskers.polymask(imglist[0],scenario['polygonicmask'],self.Message)
-						mask = (mask,scenario['polygonicmask'],scenario['thresholds'])
-						(imglist,datetimelist) = calculations.filterThresholds(imglist,datetimelist, mask,logger)
+						outputValid = True
 						if imglist == []:
+							outputValid = False
 							if scenario['multiplerois'] and isinstance(scenario['polygonicmask'][0],list):
 								self.Message.set("No pictures are valid after filtering with thresholds. ROI is skipped.")
 								self.Message.set('ROI: |progress:3|queue:'+str(0)+'|total:'+str(len(scenario['polygonicmask'])+1))
 							else:
 								self.Message.set("No pictures are valid after filtering with thresholds. Scenario is skipped.")
 								self.Message.set('Scenario: |progress:1|queue:'+str(s+1)+'|total:'+str(len(self.setup)))
-								continue
-						exec(commandstring)
+						if outputValid:
+							mask = maskers.polymask(imglist[0],scenario['polygonicmask'],self.Message)
+							mask = (mask,scenario['polygonicmask'],scenario['thresholds'])
+							(imglist,datetimelist) = calculations.filterThresholds(imglist,datetimelist, mask,logger)
+						if imglist == []:
+							outputValid = False
+							if scenario['multiplerois'] and isinstance(scenario['polygonicmask'][0],list):
+								self.Message.set("No pictures are valid after filtering with thresholds. ROI is skipped.")
+								self.Message.set('ROI: |progress:3|queue:'+str(0)+'|total:'+str(len(scenario['polygonicmask'])+1))
+							else:
+								self.Message.set("No pictures are valid after filtering with thresholds. Scenario is skipped.")
+								self.Message.set('Scenario: |progress:1|queue:'+str(s+1)+'|total:'+str(len(self.setup)))
+						if outputValid:
+							exec(commandstring)
+						else:
+							output = False
 						if self.outputmodevariable.get() == output_modes[2]:
 							self.Message.set('Merging results...')
 							if output is not False:
@@ -4422,14 +4441,23 @@ class monimet_gui(Tkinter.Tk):
 											pathlist.append(pathlista[i])
 									self.Message.set(str(len(datetimelistp))+' images are already processed. '+ str(len(imglist))+' images will be processed.')
 								(imglist,datetimelist,pathlist) = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), scenario['temporal'][:4]+['List',imglist,datetimelist,pathlist], online=self.imagesdownload.get(),download=True)
-								mask = maskers.polymask(imglist[0],[roi],self.Message)
-								mask = (mask,[roi],scenario['thresholds'])
-								(imglist,datetimelist) = calculations.filterThresholds(imglist,datetimelist, mask,logger)
+								outputValid = True
 								if imglist == []:
+									outputValid = False
 									self.Message.set("No pictures are valid after filtering with thresholds. ROI is skipped.")
 									self.Message.set('ROI: |progress:3|queue:'+str(r+2)+'|total:'+str(len(scenario['polygonicmask'])+1))
-									continue
-								exec(commandstring)
+								if outputValid:
+									mask = maskers.polymask(imglist[0],[roi],self.Message)
+									mask = (mask,[roi],scenario['thresholds'])
+									(imglist,datetimelist) = calculations.filterThresholds(imglist,datetimelist, mask,logger)
+								if imglist == []:
+									outputValid = False
+									self.Message.set("No pictures are valid after filtering with thresholds. ROI is skipped.")
+									self.Message.set('ROI: |progress:3|queue:'+str(r+2)+'|total:'+str(len(scenario['polygonicmask'])+1))
+								if outputValid:
+									exec(commandstring)
+								else:
+									output = False
 								if self.outputmodevariable.get() == output_modes[2]:
 									self.Message.set('Merging results...')
 									if  output is not False:
@@ -4481,6 +4509,7 @@ class monimet_gui(Tkinter.Tk):
 				return False
 			self.ResultFolderNameVariable.set(resultspath)#xxx result dir default problematic
 			self.Message.set("Running scenarios completed.|busy:False")
+			self.LogFileName[1] = ''
 			if self.outputmodevariable.get() == output_modes[0]:
 				self.callbackoutputmode()
 			self.Menu_Main_Results()
@@ -5009,18 +5038,24 @@ class monimet_gui(Tkinter.Tk):
 					tkMessageBox.showinfo('Information',message)
 
 		if not 'logtextonly' in meta:
-			lf = open(os.path.join(LogDir,self.LogFileName),'a')
-			lf.write(time)
-			lf.write(" ")
-			lf.write(message)
-			lf.write("\n")
-			lf.close()
+			for l,lfname in enumerate(self.LogFileName):
+				if lfname == '':
+					continue
+				if l == 0:
+					lf = open(os.path.join(LogDir,lfname),'a')
+				else:
+					lf = open(lfname,'a')
+				lf.write(time)
+				lf.write(" ")
+				lf.write(message)
+				lf.write("\n")
+				lf.close()
 
 	def LogOpen(self):
 		self.LogWindowOff()
 		self.Message.set('Log window opened.')
 		self.LogWindowOn()
-		lf = open(os.path.join(LogDir,self.LogFileName),'r')
+		lf = open(os.path.join(LogDir,self.LogFileName[0]),'r')
 		for line in lf:
 			self.Message.set(line.replace('\n','')+'|logtextonly:True')
 		lf.close()
@@ -5045,7 +5080,7 @@ class monimet_gui(Tkinter.Tk):
 		self.grab_set()
 
 	def LogFileOpen(self):
-		webbrowser.open(os.path.join(LogDir,self.LogFileName),new=2)
+		webbrowser.open(os.path.join(LogDir,self.LogFileName[0]),new=2)
 
 	def ManualFileOpen(self):
 		webbrowser.open(os.path.join(BinDir,'doc','usermanual.pdf'),new=2)
@@ -5060,7 +5095,7 @@ class monimet_gui(Tkinter.Tk):
 		webbrowser.open("http://monimet.fmi.fi?page=FMIPROT",new=2)
 
 	def LogNew(self,*args):
-		self.LogFileName = str(datetime.datetime.now()).replace(":",".").replace(" ",".").replace("-",".") + ".log"
+		self.LogFileName[0] = str(datetime.datetime.now()).replace(":",".").replace(" ",".").replace("-",".") + ".log"
 
 	def FinishUp(self):
 		if os.path.exists(TmpDir):
