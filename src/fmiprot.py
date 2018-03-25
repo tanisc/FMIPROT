@@ -4238,7 +4238,6 @@ class monimet_gui(Tkinter.Tk):
 					os.remove(maskfiles4)
 			shutil.copyfile(os.path.join(ResourcesDir,'style.css'),os.path.join(maskdir,'style.css'))
 			shutil.copyfile(os.path.join(ResourcesDir,'dygraph.js'),os.path.join(maskdir,'dygraph.js'))
-			shutil.copyfile(os.path.join(ResourcesDir,'dygraph.js'),os.path.join(maskdir,'dygraph.min.js'))
 			shutil.copyfile(os.path.join(ResourcesDir,'dygraph.css'),os.path.join(maskdir,'dygraph.css'))
 			shutil.copyfile(os.path.join(ResourcesDir,'interaction-api.js'),os.path.join(maskdir,'interaction-api.js'))
 			if res_data:

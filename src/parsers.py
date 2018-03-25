@@ -295,6 +295,7 @@ def writeSetupReport(filename,setup,logger):
 
 		to_write = to_write.replace('<replace:processing_time>',writetime)
 		to_write = to_write.replace('<replace:html_folder>',path.join(path.splitext(path.split(filename)[1])[0]+'_files'))
+		to_write = to_write.replace('<replace:scenario_id>',str(i+1))
 
 		to_write = to_write.replace('<replace:network>',scenario['source']['network'])
 		to_write = to_write.replace('<replace:name>',scenario['source']['name'])
@@ -453,21 +454,29 @@ def writeSetupReport(filename,setup,logger):
 								$(document).ready(function () {var lastClickedGraph;\n\
 								document.addEventListener(\"mousewheel\", function() { lastClickedGraph = null; });\n\
 								document.addEventListener(\"click\", function() { lastClickedGraph = null; });\n\
-								g"+str(i)+str(j)+str(k)+str(l)+" = new Dygraph(\n\
-								  document.getElementById(\"graphdiv"+str(i)+str(j)+str(k)+str(l)+"\"),\n\
+								if(window.location.href.indexOf(\"file:///\") > -1) {\n\
+									g"+str(i)+str(j)+str(k)+str(l)+" = new Dygraph(\n\
+								  	document.getElementById(\"graphdiv"+str(i)+str(j)+str(k)+str(l)+"\"),\n\
 								  \"")
 								csv_f = open(csvf,'r')
 								plt_f.write(csv_f.read().replace('\n','\\n'))
 								csv_f.close()
-								plt_f.write(csvf)
-								#if(window.location.href.indexOf("file:") > -1) {
-						     	#} else {
-								#}
 								plt_f.write("\",\n\
-									{\n\
-										title: '"+csvt+"',legend: 'onmouseover',legendFormatter: legendFormatter, labelsUTC:true, digitsAfterDecimal:3, showRangeSelector: true,rollPeriod: 1,showRoller: true,highlightCircleSize: 2,strokeWidth: 1,strokeBorderWidth:1,highlightSeriesOpts: {strokeWidth: 3,strokeBorderWidth: 1,highlightCircleSize: 5},\n\
-										interactionModel : {'mousedown' : downV3,'mousemove' : moveV3,'mouseup' : upV3,'click' : clickV3,'dblclick' : dblClickV3,'mousewheel' : scrollV3}\n\
-									});\n\
+										{\n\
+											title: '"+csvt+"',legend: 'onmouseover',legendFormatter: legendFormatter, labelsUTC:true, digitsAfterDecimal:3, showRangeSelector: true,rollPeriod: 1,showRoller: true,highlightCircleSize: 2,strokeWidth: 1,strokeBorderWidth:1,highlightSeriesOpts: {strokeWidth: 3,strokeBorderWidth: 1,highlightCircleSize: 5},\n\
+											interactionModel : {'mousedown' : downV3,'mousemove' : moveV3,'mouseup' : upV3,'click' : clickV3,'dblclick' : dblClickV3,'mousewheel' : scrollV3}\n\
+										});\n\
+									} else {\n\
+									g"+str(i)+str(j)+str(k)+str(l)+" = new Dygraph(\n\
+									document.getElementById(\"graphdiv"+str(i)+str(j)+str(k)+str(l)+"\"),\n\
+  								  \"")
+  								plt_f.write(path.split(csvf)[1])
+  								plt_f.write("\",\n\
+	  									{\n\
+	  										title: '"+csvt+"',legend: 'onmouseover',legendFormatter: legendFormatter, labelsUTC:true, digitsAfterDecimal:3, showRangeSelector: true,rollPeriod: 1,showRoller: true,highlightCircleSize: 2,strokeWidth: 1,strokeBorderWidth:1,highlightSeriesOpts: {strokeWidth: 3,strokeBorderWidth: 1,highlightCircleSize: 5},\n\
+	  										interactionModel : {'mousedown' : downV3,'mousemove' : moveV3,'mouseup' : upV3,'click' : clickV3,'dblclick' : dblClickV3,'mousewheel' : scrollV3}\n\
+	  									});\n\
+									}\n\
 									document.getElementById(\"restore"+str(i)+str(j)+str(k)+str(l)+"\").onclick = function() {restorePositioning(g"+str(i)+str(j)+str(k)+str(l)+");};\n\
 								});\n\
 								</script>\

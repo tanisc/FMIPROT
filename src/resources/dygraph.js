@@ -5575,7 +5575,6 @@ function binarySearch(_x, _x2, _x3, _x4, _x5) {
 function dateParser(dateStr) {
   var dateStrSlashed;
   var d;
-  var i;	////edited for FMIPROT
 
   // Let the system try the format first, with one caveat:
   // YYYY-MM-DD[ HH:MM:SS] is interpreted as UTC by a variety of browsers.
@@ -5590,11 +5589,12 @@ function dateParser(dateStr) {
 
   if (dateStr.search("-") != -1) {
     // e.g. '2009-7-12' or '2009-07-12'
-    dateStrSlashed = dateStr.replace("-", "/", "g");
-    //while (dateStrSlashed.search("-") != -1) {
-    for (i = 0; i < 2; i++) { //edited for FMIPROT
-      dateStrSlashed = dateStrSlashed.replace("-", "/");
-    }
+    // dateStrSlashed = dateStr.replace("-", "/", "g");
+    // while (dateStrSlashed.search("-") != -1) {
+    //   dateStrSlashed = dateStrSlashed.replace("-", "/");
+    // }
+    //edited for FMIPROT, timestamp like 2018-01-27-18:38:56+0000
+    dateStrSlashed = dateStr.substr(0,10)+' '+ dateStr.substr(11,25);
     d = dateStrToMillis(dateStrSlashed);
   } else if (dateStr.length == 8) {
     // e.g. '20090712'
@@ -5625,9 +5625,7 @@ function dateParser(dateStr) {
  */
 
 function dateStrToMillis(str) {
-  //return new Date(str).getTime();
-  //edited for FMIPROT
-  return new Date(str).getTime() + new Date('1971/01/01 00:00:00+00:00').getTime() - new Date('1971/01/01 00:00:00'+str.substr(19,25)).getTime();
+  return new Date(str).getTime();
 }
 
 ;
