@@ -202,12 +202,12 @@ def filterImageListTemporal(logger,imglistv,pathlistv,fnameconv,timec,count):
 		time2 = strptime2(timec[3],'%H:%M')[2]
 	time2 = time2.replace(second=59)
 
-	today = datetime.date.today()
-	yesterday = today - datetime.timedelta(days=1)
 	lastimagetime = deepcopy(datetimelist)
 	lastimagetime.sort()
 	lastimagetime = lastimagetime[-1]
-	lastimagehour = lastimagetime - datetime.timedelta(hours=1)
+	now = datetime.datetime.now()
+	today = datetime.date.today()
+	yesterday = today - datetime.timedelta(days=1)
 
 	if timec[4] == 'Yesterday only':
 		date1 =	yesterday
@@ -223,11 +223,17 @@ def filterImageListTemporal(logger,imglistv,pathlistv,fnameconv,timec,count):
 		time2 = strptime2('23:59','%H:%M')[2]
 		time2 = time2.replace(second=59)
 
-	if timec[4] == 'Latest 1 hour only':
-		date1 = datetime.date(lastimagetime.year, lastimagetime.month, lastimagetime.day)
-		date2 = datetime.date(lastimagetime.year, lastimagetime.month, lastimagetime.day)
-		time1 = datetime.time(lastimagehour.hour,lastimagehour.minute,lastimagehour.second,lastimagehour.microsecond)
-		time2 = datetime.time(lastimagetime.hour,lastimagetime.minute,lastimagetime.second,lastimagetime.microsecond)
+	if timec[4] == 'Last one year':
+		date1 = today - (datetime.date(2011,12,31)-datetime.date(2010,1,1))
+		date2 = today
+		time1 = strptime2(timec[2],'%H:%M')[2]
+		time2 = strptime2(timec[3],'%H:%M')[2]
+
+	if timec[4] == 'Last one week':
+		date1 = today - (datetime.date(2010,1,7)-datetime.date(2010,1,1))
+		date2 = today
+		time1 = strptime2(timec[2],'%H:%M')[2]
+		time2 = strptime2(timec[3],'%H:%M')[2]
 
 	if timec[4] == 'Latest date and time intervals':
 		datestr = ' older than ' + str(date2)
@@ -261,11 +267,41 @@ def filterImageListTemporal(logger,imglistv,pathlistv,fnameconv,timec,count):
 				pathlistv.append(pathlist[i])
 		return (imglistv, datetimelistv, pathlistv)
 
+	if timec[4] in ['Date and time intervals','Today only','Yesterday only','Last one week','Last one year']:
+		for i,img in enumerate(imglist):
+			if timelist[i] <= time2 and timelist[i] >= time1 and datelist[i] >= date1 and datelist[i] <= date2:
+				imglistv.append(img)
+				datetimelistv.append(datetimelist[i])
+				pathlistv.append(pathlist[i])
+		return (imglistv, datetimelistv, pathlistv)
+
+	#now, today, lastimagetime
+	if timec[4] == ['Latest 1 hour only']:
+		datetime1 = lastimagetime - datetime.timedelta(hours=1)
+		datetime2 = lastimagetime
+
+	if timec[4] == 'Last 48 hours':
+		datetime1 = now - datetime.timedelta(hours=48)
+		datetime2 = now
+
+	if timec[4] == 'Last 24 hours':
+		datetime1 = now - datetime.timedelta(hours=24)
+		datetime2 = now
+
+	if count == 0:
+		logger.set('Listing images between ' + str(datetime1)[:19] + ' and ' + str(datetime2)[:19] + '...')
+	else:
+		logger.set('Listing maximum ' + str(count) + ' images between ' + str(datetime1)[:19] + ' and ' + str(datetime2)[:19] + '...')
+
+	imglistv = []
+	datetimelistv = []
+	pathlistv = []
 	for i,img in enumerate(imglist):
-		if timelist[i] <= time2 and timelist[i] >= time1 and datelist[i] >= date1 and datelist[i] <= date2:
+		if datetimelist[i] <= datetime2 and datetimelist[i] >= datetime1:
 			imglistv.append(img)
 			datetimelistv.append(datetimelist[i])
 			pathlistv.append(pathlist[i])
+
 	return (imglistv, datetimelistv, pathlistv)
 
 
