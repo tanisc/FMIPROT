@@ -270,280 +270,133 @@ def writeSetupReport(filename,setup,logger):
 		res_data = filename[1:]
 		filename = filename[0]
 	report_f = open(filename,'w')
-	report_f.write("<html><head><style>")
-	report_f.write("BODY, TD, TH {	font-size:		18px;	}H1 {	font-size:		24px;	color:			rgb(9,146,71);	font-weight:		bold;}H2 {	font-size:		22px;	color:			rgb(9,146,71);	font-weight:		bold;}H3 {	font-size:		20px;	color:			rgb(101,190,97);}H4 {	font-size:		18px;	color:			rgb(0,0,0);	font-weight:		bold;}A{color:white;}")
-	report_f.write("tr.hdr0{color:white;background-color:rgb(51,85,51);}")
-	report_f.write("td.hdr0{color:white;background-color:rgb(51,85,51);}")
-	report_f.write("tr.hdr1{color:white;background-color:rgb(39,64,139);}")
-	report_f.write("td.hdr1{color:white;background-color:rgb(39,64,139);}")
-	report_f.write("tr.hdr2{color:black;background-color:rgb(217,217,217);}")
-	report_f.write("td.hdr2{color:black;background-color:rgb(217,217,217);}")
-	report_f.write("tr.hdr3{color:white;background-color:rgb(51,85,51);}")
-	report_f.write("td.hdr3{color:white;background-color:rgb(51,85,51);}")
-	report_f.write("table.bg{text-align:center;margin:auto;color:white;background-color:rgb(133,65,31);}")
-	report_f.write("table.hdr0{text-align:center;width:100%;color:white;background-color:rgb(51,85,51);}")
-	report_f.write("table.nrm0{width:100%;}")
-	report_f.write("table.hdr1{text-align:center;width:100%;color:white;background-color:rgb(39,64,139);}")
-	report_f.write("table.nrm1{width:100%;}")
-	report_f.write("table.hdr2{text-align:center;width:100%;color:black;background-color:rgb(255,255,255);}")
-	report_f.write("table.nrm2{width:100%;}")
-	report_f.write("table.hdr3{text-align:center;width:100%;color:black;background-color:rgb(255, 255, 255);}")
-	report_f.write("table.nrm3{width:100%;}")
-	report_f.write("</style>")
-	report_f.write("<title>FMIPROT Setup Report</title>")
-	if res_data is not False:
-		report_f.write("<script type='text/javascript' src='"+path.join(path.split(filename)[1].split('.')[0]+'_files','dygraph.js')+"'></script><script type='text/javascript' src='"+path.join(path.split(filename)[1].split('.')[0]+'_files','interaction-api.js')+"'></script><link rel='stylesheet' href='"+path.join(path.split(filename)[1].split('.')[0]+'_files','dygraph.css')+"' />")
-	report_f.write("</head><body>")
-	report_f.write("<table class='bg' style='margin: 0 auto;'><tbody>")
-	report_f.write("<tr><td>")
-	report_f.write("FMIPROT Setup Report | Last processed: ")
-	report_f.write(writetime)
-	report_f.write(" UTC | <a href='http://fmiprot.fmi.fi' target='_blank'>FMIPROT Webpage</a>")
-	report_f.write("</td></tr>")
-	report_f.write("<tr><td>")
-	report_f.write("<table class='hdr0'><tbody><tr><td>Go to:</td>")
+
+	report_f.write("<html>\n")
+	#head
+	to_write = open(path.join(ResourcesDir,'html_head.html')).read()
+	to_write = to_write.replace('<replace:html_folder>',path.join(path.splitext(path.split(filename)[1])[0]+'_files'))
+	to_write = to_write.replace('<replace:processing_time>',writetime)
+	report_f.write(to_write)
+	report_f.write("<body>\n")
+
+	#top
+	to_write = open(path.join(ResourcesDir,'html_top.html')).read()
+	to_write = to_write.replace('<replace:processing_time>',writetime)
+	to_write = to_write.replace('<replace:html_folder>',path.join(path.splitext(path.split(filename)[1])[0]+'_files'))
+	to_write_substr = ''
 	for i,scenario in enumerate(setup):
-		report_f.write("<td>")
-		report_f.write("<a href='#"+str(i+1)+"'>"+scenario['name']+"</a>")
-		report_f.write("</td>")
-	report_f.write("</tbody></table>")
-	report_f.write("</td></tr>")
+		to_write_substr += "<td><a href=\"#"+str(i+1)+"\" class=\"light\">"+scenario['name']+"</a></td>"
+	to_write = to_write.replace('<replace:scenario_links>',to_write_substr)
+	report_f.write(to_write)
+
+	#scenarios
 	for i,scenario in enumerate(setup):
-		report_f.write("<tr><td>")
-		report_f.write("<table class='hdr0'><tbody><tr><td>")
-		report_f.write("<a name='"+str(i+1)+"'></a>")
-		report_f.write(scenario['name'])
-		report_f.write("</td></tr></tbody></table>")
-		report_f.write("<table class='hdr1'><tbody><tr><td>")
-		report_f.write("Camera Selection")
-		report_f.write("</td></tr></tbody></table>")
-		report_f.write("<table class='hdr2'><tbody><tr class='hdr2'><td>")
-		report_f.write("Camera Network")
-		report_f.write("</td><td>")
-		report_f.write("Camera Name")
-		report_f.write("</td></tr><tr><td>")
-		report_f.write(scenario['source']['network'])
-		report_f.write("</td><td>")
-		report_f.write(scenario['source']['name'])
-		report_f.write("</td></tr></tbody></table>")
-		report_f.write("<table class='hdr1'><tbody><tr><td>")
-		report_f.write("Temporal Selection")
-		report_f.write("</td></tr></tbody></table>")
-		report_f.write("<table class='hdr2'><tbody><tr><td>")
-		report_f.write(scenario['temporal'][4])
-		report_f.write("</td></tr></tbody></table>")
+		to_write = open(path.join(ResourcesDir,'html_scenario.html')).read()
+
+		to_write = to_write.replace('<replace:processing_time>',writetime)
+		to_write = to_write.replace('<replace:html_folder>',path.join(path.splitext(path.split(filename)[1])[0]+'_files'))
+
+		to_write = to_write.replace('<replace:network>',scenario['source']['network'])
+		to_write = to_write.replace('<replace:name>',scenario['source']['name'])
+
+		to_write = to_write.replace('<replace:temporal4>',scenario['temporal'][4])
 		if scenario['temporal'][4] == 'Date and time intervals' or scenario['temporal'][4] == 'Earliest date and time intervals' or scenario['temporal'][4] == 'Latest date and time intervals':
-			report_f.write("<table class='hdr2'><tbody><tr class='hdr2'><td>")
-			report_f.write("</td><td>")
-			report_f.write("Start")
-			report_f.write("</td><td>")
-			report_f.write("End")
-			report_f.write("</td></tr><tr><td>")
-			report_f.write("Date")
-			report_f.write("</td><td>")
-			start = strptime2(scenario['temporal'][0],'%d.%m.%Y')[1]
-			end = strptime2(scenario['temporal'][1],'%d.%m.%Y')[1]
+			start = str(strptime2(scenario['temporal'][0],'%d.%m.%Y')[1])
+			end = str(strptime2(scenario['temporal'][1],'%d.%m.%Y')[1])
 			if scenario['temporal'][4] == 'Latest date and time intervals':
-				report_f.write("None")
+				to_write = to_write.replace('<replace:temporal0>','None')
 			else:
-				report_f.write(str(start))
-			report_f.write("</td><td>")
+				to_write = to_write.replace('<replace:temporal0>',start)
 			if scenario['temporal'][4] == 'Earliest date and time intervals':
-				report_f.write("None")
+				to_write = to_write.replace('<replace:temporal1>','None')
 			else:
-				report_f.write(str(end))
-			report_f.write("</td></tr><tr><td>")
-			report_f.write("Time")
-			start = strptime2(scenario['temporal'][2],'%H:%M')[2]
-			end = strptime2(scenario['temporal'][3],'%H:%M')[2]
-			report_f.write("</td><td>")
-			report_f.write(str(start))
-			report_f.write("</td><td>")
-			report_f.write(str(end))
-			report_f.write("</td></tr><tr><td>")
-			report_f.write("</td></tr></tbody></table>")
-		report_f.write("<table class='hdr1'><tbody><tr><td>")
-		report_f.write("Masking/ROIs")
-		report_f.write("</td></tr></tbody></table>")
-		report_f.write("<table class='hdr2'><tbody><tr><td>")
-		report_f.write("Run analyses also for each polygon (ROI) separately: ")
-		report_f.write(str(bool(float(scenario['multiplerois']))))
-		report_f.write("</td></tr></tbody></table>")
-		report_f.write("<table class='hdr2'><tbody><tr class='hdr2'><td>")
+				to_write = to_write.replace('<replace:temporal1>',end)
+			start = str(strptime2(scenario['temporal'][2],'%H:%M')[2])
+			end = str(strptime2(scenario['temporal'][3],'%H:%M')[2])
+			to_write = to_write.replace('<replace:temporal2>',start)
+			to_write = to_write.replace('<replace:temporal3>',end)
+		else:
+			to_write = to_write.replace('<replace:temporal0>','N/A')
+			to_write = to_write.replace('<replace:temporal1>','N/A')
+			to_write = to_write.replace('<replace:temporal2>','N/A')
+			to_write = to_write.replace('<replace:temporal3>','N/A')
+
+		to_write = to_write.replace('<replace:multiplerois>',str(bool(float(scenario['multiplerois']))))
+		to_write_substr = ''
 		if isinstance(scenario['polygonicmask'], dict):
 			aoi = []
-			for k in scenario['polygonicmask']:
-				aoi.append(scenario['polygonicmask'][k])
+			for j in scenario['polygonicmask']:
+				aoi.append(scenario['polygonicmask'][j])
 			scenario['polygonicmask'] = aoi
 		if isinstance(scenario['polygonicmask'][0],list):
-			report_f.write("Polygon</td><td>Coordinates</td></tr>")
-			for k,polygon in enumerate(scenario['polygonicmask']):
-				report_f.write("<tr><td>")
-				report_f.write(str(k+1))
-				report_f.write("</td><td>")
-				for c in polygon:
-					report_f.write(str((c)))
-					if c != polygon[-1]:
-						report_f.write(",")
+			to_write_substr += "<tr class='hdr2'><td>Polygon</td><td>Coordinates</td></tr>"
+			for j,polygon in enumerate(scenario['polygonicmask']):
+				to_write_substr += "<tr><td>"
+				to_write_substr += str(j+1)
+				to_write_substr += "</td><td>"
+				for k in polygon:
+					to_write_substr += str(k)
+					if k != polygon[-1]:
+						to_write_substr += ","
 					else:
-						report_f.write("</td></tr>")
+						to_write_substr += "</td></tr>"
 		else:
 			if scenario['polygonicmask'] == [0,0,0,0,0,0,0,0]:
-				report_f.write("None.<br>")
+				to_write_substr += "<tr><td>No polygons selected.</td></tr>"
 			else:
+				to_write_substr += "<tr class='hdr2'><td>Polygon</td><td>Coordinates</td></tr>"
 				polygon = scenario['polygonicmask']
-				report_f.write("Polygon</td><td>Coordinates</td></tr>")
-				report_f.write("<tr><td>")
-				report_f.write("1")
-				report_f.write("</td><td>")
-				for c in polygon:
-					report_f.write(str((c)))
-					if c != polygon[-1]:
-						report_f.write(",")
+				to_write_substr += "<tr><td>"
+				to_write_substr += "1"
+				to_write_substr += "</td><td>"
+				for j in polygon:
+					to_write_substr += str(c)
+					if j != polygon[-1]:
+						to_write_substr += ","
 					else:
-						report_f.write("</td></tr>")
+						to_write_substr += "</td></tr>"
+		to_write = to_write.replace('<replace:polygonicmask>',to_write_substr)
 
-		report_f.write("</td></tr></tbody></table>")
-		report_f.write("<table class='hdr2'><tbody><tr><td>")
-		report_f.write("<table class='hdr2'><tbody><tr><td>")
-		if  "Scenario_"+str(i+1)+"_Mask_Preview_2.jpg" in listdir(path.join(path.split(filename)[0],path.split(filename)[1].split('.')[0]+'_files')): #split for . creates exception if there is more than one . in the path
-			report_f.write("<img src='"+path.join(path.split(filename)[1].split('.')[0]+'_files',"Scenario_"+str(i+1)+"_Mask_Preview_2.jpg")+"' style='border: 1px solid;width:151%'>")
-		report_f.write("</td></tr></tbody></table>")
-		report_f.write("</td><td>")
-		report_f.write("<table class='hdr2' style='text-align:right;'><tbody><tr><td>")
-		if  "Scenario_"+str(i+1)+"_Mask_Preview_1.jpg" in listdir(path.join(path.split(filename)[0],path.split(filename)[1].split('.')[0]+'_files')): #split for . creates exception if there is more than one . in the path
-			report_f.write("<img src='"+path.join(path.split(filename)[1].split('.')[0]+'_files',"Scenario_"+str(i+1)+"_Mask_Preview_1.jpg")+"'  style='border: 1px solid;width:49%'>")
-		report_f.write("</td></tr><tr><td>")
-		if  "Scenario_"+str(i+1)+"_Mask_Preview_3.jpg" in listdir(path.join(path.split(filename)[0],path.split(filename)[1].split('.')[0]+'_files')): #split for . creates exception if there is more than one . in the path
-			report_f.write("<img src='"+path.join(path.split(filename)[1].split('.')[0]+'_files',"Scenario_"+str(i+1)+"_Mask_Preview_3.jpg")+"'  style='border: 1px solid;width:49%'>")
-		report_f.write("</td></tr><tr><td>")
-		if  "Scenario_"+str(i+1)+"_Mask_Preview_4.jpg" in listdir(path.join(path.split(filename)[0],path.split(filename)[1].split('.')[0]+'_files')): #split for . creates exception if there is more than one . in the path
-			report_f.write("<img src='"+path.join(path.split(filename)[1].split('.')[0]+'_files',"Scenario_"+str(i+1)+"_Mask_Preview_4.jpg")+"'  style='border: 1px solid;width:49%'>")
-		report_f.write("</td></tr></tbody></table>")
-		report_f.write("</td></tr></tbody></table>")
-		report_f.write("<table class='hdr1'><tbody><tr><td>")
-		report_f.write("Thresholds")
-		report_f.write("</td></tr></tbody></table>")
-		report_f.write("<table class='hdr2'><tbody><tr class='hdr2'><td>")
-		report_f.write("Type")
-		report_f.write("</td><td>")
-		report_f.write("Value")
-		report_f.write("</td><td>")
-		report_f.write("Minimum")
-		report_f.write("</td><td>")
-		report_f.write("Maximum")
-		report_f.write("</td></tr><tr><td>")
-		report_f.write("Image Threshold")
-		report_f.write("</td><td>")
-		report_f.write("Brightness")
-		report_f.write("</td><td>")
-		report_f.write(str(scenario['thresholds'][6]))
-		report_f.write("</td><td>")
-		report_f.write(str(scenario['thresholds'][7]))
-		report_f.write("</td></tr><tr><td>")
-		report_f.write("Image Threshold")
-		report_f.write("</td><td>")
-		report_f.write("Luminance")
-		report_f.write("</td><td>")
-		report_f.write(str(scenario['thresholds'][14]))
-		report_f.write("</td><td>")
-		report_f.write(str(scenario['thresholds'][15]))
-		report_f.write("</td></tr><tr><td>")
-		report_f.write("ROI Threshold")
-		report_f.write("</td><td>")
-		report_f.write("Red Fraction")
-		report_f.write("</td><td>")
-		report_f.write(str(scenario['thresholds'][0]))
-		report_f.write("</td><td>")
-		report_f.write(str(scenario['thresholds'][1]))
-		report_f.write("</td></tr><tr><td>")
-		report_f.write("ROI Threshold")
-		report_f.write("</td><td>")
-		report_f.write("Green Fraction")
-		report_f.write("</td><td>")
-		report_f.write(str(scenario['thresholds'][2]))
-		report_f.write("</td><td>")
-		report_f.write(str(scenario['thresholds'][3]))
-		report_f.write("</td></tr><tr><td>")
-		report_f.write("ROI Threshold")
-		report_f.write("</td><td>")
-		report_f.write("Blue Fraction")
-		report_f.write("</td><td>")
-		report_f.write(str(scenario['thresholds'][4]))
-		report_f.write("</td><td>")
-		report_f.write(str(scenario['thresholds'][5]))
-		report_f.write("</td></tr><tr><td>")
-		report_f.write("Pixel Threshold")
-		report_f.write("</td><td>")
-		report_f.write("Red Channel")
-		report_f.write("</td><td>")
-		report_f.write(str(int(scenario['thresholds'][8])))
-		report_f.write("</td><td>")
-		report_f.write(str(int(scenario['thresholds'][9])))
-		report_f.write("</td></tr><tr><td>")
-		report_f.write("Pixel Threshold")
-		report_f.write("</td><td>")
-		report_f.write("Green Channel")
-		report_f.write("</td><td>")
-		report_f.write(str(int(scenario['thresholds'][10])))
-		report_f.write("</td><td>")
-		report_f.write(str(int(scenario['thresholds'][11])))
-		report_f.write("</td></tr><tr><td>")
-		report_f.write("Pixel Threshold")
-		report_f.write("</td><td>")
-		report_f.write("Blue Channel")
-		report_f.write("</td><td>")
-		report_f.write(str(int(scenario['thresholds'][12])))
-		report_f.write("</td><td>")
-		report_f.write(str(int(scenario['thresholds'][13])))
-		report_f.write("</td></tr><tr><td>")
-		report_f.write("</td></tr></tbody></table>")
+		for j,threshold in enumerate(scenario['thresholds']):
+			to_write = to_write.replace('<replace:thresholds'+str(j)+'>',str(scenario['thresholds'][j]))
 
-		report_f.write("<table class='hdr1'><tbody><tr><td>")
-		report_f.write("Analyses")
-		report_f.write("</td></tr></tbody></table>")
-		report_f.write("<table class='hdr2'><tbody>")
-		report_f.write("<tr class='hdr2'><td>")
-		report_f.write("Analysis No")
-		report_f.write("</td><td>")
-		report_f.write("Analysis Name")
-		report_f.write("</td><td>")
-		report_f.write("Analysis Parameters")
-		report_f.write("</td></tr>")
+		to_write_substr = ''
 		for j,analysis in enumerate(scenario['analyses']):
 			analysis = scenario[analysis]
-			report_f.write("<tr><td>")
-			report_f.write(str(j+1))
-			report_f.write("</td><td>")
-			report_f.write(calcnames[calcids.index(analysis['id'])])
-			report_f.write("</td><td>")
+			to_write_substr += "<tr>\n<td>"
+			to_write_substr += str(j+1)
+			to_write_substr += "</td>\n<td>"
+			to_write_substr += calcnames[calcids.index(analysis['id'])]
+			to_write_substr += "</td>\n<td>"
 			if paramnames[calcids.index(analysis['id'])] == []:
-				report_f.write("There is no parameters for the analysis.<br>")
-			report_f.write("<table class='hdr3'><tbody>")
-			report_f.write("<tr class='hdr3'><td>")
-			report_f.write("Parameter")
-			report_f.write("</td><td>")
-			report_f.write("Value")
-			report_f.write("</td></tr>")
-			for m,param in enumerate(paramnames[calcids.index(analysis['id'])]):
-				report_f.write("<tr><td>")
-				report_f.write(param)
-				report_f.write("</td><td>")
-				paramopt = paramopts[calcids.index(analysis['id'])][m]
-				if paramopt == "Checkbox":
-					if analysis[param] == 0 or analysis[param] == 0.0 or bool(int(analysis[param])) == False:
-						report_f.write("Not Selected")
-					else:
-						report_f.write("Selected")
-				if isinstance(paramopt,list):
-					report_f.write(paramopt[int(analysis[param])])
-				if paramopt == "":
-					report_f.write(str(analysis[param]))
-				report_f.write("</td></tr>")
-			report_f.write("</tbody></table>")
-			report_f.write("</td></tr>")
-		report_f.write("</tbody></table>")
+				to_write_substr += "There is no parameters for the analysis.<br>"
+			else:
+				to_write_substr += "<table class='hdr3'><tbody>\n"
+				to_write_substr += "<tr class='hdr3'>\n<td>"
+				to_write_substr += "Parameter"
+				to_write_substr += "</td>\n<td>"
+				to_write_substr += "Value"
+				to_write_substr += "</td>\n</tr>\n"
+				for m,param in enumerate(paramnames[calcids.index(analysis['id'])]):
+					to_write_substr += "<tr>\n<td>"
+					to_write_substr += param
+					to_write_substr += "</td>\n<td>"
+					paramopt = paramopts[calcids.index(analysis['id'])][m]
+					if paramopt == "Checkbox":
+						if analysis[param] == 0 or analysis[param] == 0.0 or bool(int(analysis[param])) == False:
+							to_write_substr += "Not Selected"
+						else:
+							to_write_substr += "Selected"
+					if isinstance(paramopt,list):
+						to_write_substr += paramopt[int(analysis[param])]
+					if paramopt == "":
+						to_write_substr += str(analysis[param])
+					to_write_substr += "</td>\n</tr>\n"
+				to_write_substr += "</tbody></table>"
+			to_write_substr += "</td>\n</tr>\n"
+		to_write = to_write.replace('<replace:analyses>',to_write_substr)
 
+		to_write_substr = ''
 		if res_data is not False:
 			csvres = False
 			for j,csva in enumerate(res_data[i]):
@@ -551,76 +404,94 @@ def writeSetupReport(filename,setup,logger):
 					if csvf is not False:
 						csvres = True
 			if csvres:
-				report_f.write("<table class='hdr1'><tbody><tr><td>")
-				report_f.write("Results")
-				report_f.write("</td></tr></tbody></table>")
-			for j,csva in enumerate(res_data[i]):
-				for k,csvr in enumerate(csva):
-					for l,csvf in enumerate(csvr):
-						if csvf is not False:
-							report_f.write("<table class='hdr2'><tbody>")
-							report_f.write("<tr class='hdr2'><td>")
-							csvt = "Analysis "+str(j+1)
-							csvt += ": " + calcnames[calcids.index(scenario[scenario['analyses'][j]]['id'])]
-							if l > 0:
-								csvt += ' - ROI'+str(l).zfill(3)
-							report_f.write("</td></tr>")
-							report_f.write("<tr><td>")
-							report_f.write("\
-	<div id=\"graphdiv"+str(i)+str(j)+str(k)+str(l)+"\"></div>\n\
-	<script type=\"text/javascript\" src=\"http://code.jquery.com/jquery-1.10.0.min.js\"></script>\n\
-	<script type=\"text/javascript\">\n\
-	function vischange"+str(i)+str(j)+str(k)+str(l)+" (el) {g"+str(i)+str(j)+str(k)+str(l)+".setVisibility(el.id.substr((\""+str(i)+str(j)+str(k)+str(l)+"\".length),el.id.length-1), el.checked);}\n\
-	function legendFormatter(data) {\n\
-	  if (data.x == null) {\n\
-	    // This happens when there's no selection and {legend: 'always'} is set.\n\
-	    return '<br>' + data.series.map(function(series) { return series.dashHTML + ' ' + series.labelHTML }).join('<br>');\n\
-	  }\n\
-	  var html = this.getLabels()[0] + ': ' + data.xHTML;\n\
-	  data.series.forEach(function(series) {\n\
-	    if (!series.isVisible) return;\n\
-	    var labeledData = series.labelHTML + ': ' + series.yHTML;\n\
-	    if (series.isHighlighted) {\n\
-	      labeledData = '<b>' + labeledData + '</b>';\n\
-	    }\n\
-	    html += '<br>' + series.dashHTML + ' ' + labeledData;\n\
-	  });\n\
-	  return html;\n\
-	}\n\
-	$(document).ready(function () {var lastClickedGraph;\ndocument.addEventListener(\"mousewheel\", function() { lastClickedGraph = null; });\ndocument.addEventListener(\"click\", function() { lastClickedGraph = null; });\n\
-	  g"+str(i)+str(j)+str(k)+str(l)+" = new Dygraph(\n\
-	    document.getElementById(\"graphdiv"+str(i)+str(j)+str(k)+str(l)+"\"),\n\
-	    \"")
-							csv_f = open(csvf,'r')
-							report_f.write(csv_f.read().replace('\n','\\n'))
-							csv_f.close()
-							report_f.write("\",\n\
-		{\n\
-			width: 1000,height: 400,\n\
-			title: '"+csvt+"',legend: 'onmouseover',legendFormatter: legendFormatter, labelsUTC:true, digitsAfterDecimal:3, showRangeSelector: true,rollPeriod: 1,showRoller: true,highlightCircleSize: 2,strokeWidth: 1,strokeBorderWidth:1,highlightSeriesOpts: {strokeWidth: 3,strokeBorderWidth: 1,highlightCircleSize: 5},\n\
-			interactionModel : {'mousedown' : downV3,'mousemove' : moveV3,'mouseup' : upV3,'click' : clickV3,'dblclick' : dblClickV3,'mousewheel' : scrollV3}\n\
-		});\n\
-		document.getElementById(\"restore"+str(i)+str(j)+str(k)+str(l)+"\").onclick = function() {restorePositioning(g"+str(i)+str(j)+str(k)+str(l)+");};\n\
-	});\n\
-	</script>\
-	")
-							report_f.write("</td>")
-							report_f.write("<td style='text-align:left;vertical-align:top;'>")
-							report_f.write("<b><a href=\""+path.split(csvf)[1]+"\" target=\"_blank\" style=\"color:black;\">Download/Open data file</a></b><br>")
-							report_f.write("<b>Plot:</b><br>")
-							csv_f = open(csvf,'rb')
-							csv_header = csv_f.readline().replace('\n','').split(',')
-							csv_f.close()
-							csv_header = csv_header[1:]	#exclude time
-							for i_h,h in enumerate(csv_header):
-								report_f.write("<input type=\"checkbox\" id=\""+str(i)+str(j)+str(k)+str(l)+str(i_h)+"\" onclick=\"vischange"+str(i)+str(j)+str(k)+str(l)+"(this)\" checked=\"\"><label for=\""+str(i)+str(j)+str(k)+str(l)+str(i_h)+"\">"+h+"</label><br>")
-							report_f.write("<b>Zoom in:</b> double-click, scroll wheel<br><b>Zoom out:</b> ctrl-double-click, scroll wheel<br><b>Standard Zoom:</b> shift-click-drag<br><b>Standard Pan:</b> click-drag<br><b>Restore zoom level:</b> <button id=\"restore"+str(i)+str(j)+str(k)+str(l)+"\">Restore position</button><br>")
-							report_f.write("</td></tr>")
-							report_f.write("</tbody></table>")
-			report_f.write("</td></tr>")
+				to_write_substr += "<table class='hdr1'><tbody>\n<tr>\n<td>"
+				to_write_substr += "Results"
+				to_write_substr += "</td>\n</tr>\n</tbody></table>\n"
+				for j,csva in enumerate(res_data[i]):
+					for k,csvr in enumerate(csva):
+						for l,csvf in enumerate(csvr):
+							if csvf is not False:
+								to_write_substr += "<table class='hdr2'><tbody>\n"
+								to_write_substr += "<tr>\n<td>"
 
-	report_f.write("</tbody></table>")
-	report_f.write("</body></html>")
+								pltf = path.splitext(csvf)[0]+'.html'
+								to_write_substr += "<iframe src=\""+ path.split(pltf)[1] +"\" style=\"width:100%;height:500px;\"></iframe>\n\t\t\t"
+								to_write_substr += "</td>\n</tr>\n</tbody></table>\n"
+								plt_f = open(pltf,'w')
+								plt_f.write("<html>\n")
+								plt_to_write = open(path.join(ResourcesDir,'html_head.html')).read()
+								plt_to_write = plt_to_write.replace('<replace:html_folder>',path.join(path.splitext(path.split(filename)[1])[0]+'_files'))
+								plt_to_write = plt_to_write.replace('<replace:processing_time>',writetime)
+								plt_f.write(plt_to_write)
+								plt_f.write("<body>\n")
+
+								csvt = "Analysis "+str(j+1)
+								csvt += ": " + calcnames[calcids.index(scenario[scenario['analyses'][j]]['id'])]
+								if l > 0:
+									csvt += ' - ROI'+str(l).zfill(3)
+								plt_f.write("\n\
+								<div id=\"graphdiv"+str(i)+str(j)+str(k)+str(l)+"\" style=\"position: absolute; left: 0px;  right: 20%; top: 20px; bottom: 8px;\"></div>\n\
+								<script type=\"text/javascript\" src=\"http://code.jquery.com/jquery-1.10.0.min.js\"></script>\n\
+								<script type=\"text/javascript\">\n\
+								function vischange"+str(i)+str(j)+str(k)+str(l)+" (el) {g"+str(i)+str(j)+str(k)+str(l)+".setVisibility(el.id.substr((\""+str(i)+str(j)+str(k)+str(l)+"\".length),el.id.length-1), el.checked);}\n\
+								function legendFormatter(data) {\n\
+								  if (data.x == null) {\n\
+								    // This happens when there's no selection and {legend: 'always'} is set.\n\
+								    return '<br>' + data.series.map(function(series) { return series.dashHTML + ' ' + series.labelHTML }).join('<br>');\n\
+								  }\n\
+								  var html = this.getLabels()[0] + ': ' + data.xHTML;\n\
+								  data.series.forEach(function(series) {\n\
+								    if (!series.isVisible) return;\n\
+								    var labeledData = series.labelHTML + ': ' + series.yHTML;\n\
+								    if (series.isHighlighted) {\n\
+								      labeledData = '<b>' + labeledData + '</b>';\n\
+								    }\n\
+								    html += '<br>' + series.dashHTML + ' ' + labeledData;\n\
+								  });\n\
+								  return html;\n\
+								}\n\
+								$(document).ready(function () {var lastClickedGraph;\n\
+								document.addEventListener(\"mousewheel\", function() { lastClickedGraph = null; });\n\
+								document.addEventListener(\"click\", function() { lastClickedGraph = null; });\n\
+								g"+str(i)+str(j)+str(k)+str(l)+" = new Dygraph(\n\
+								  document.getElementById(\"graphdiv"+str(i)+str(j)+str(k)+str(l)+"\"),\n\
+								  \"")
+								csv_f = open(csvf,'r')
+								plt_f.write(csv_f.read().replace('\n','\\n'))
+								csv_f.close()
+								plt_f.write(csvf)
+								#if(window.location.href.indexOf("file:") > -1) {
+						     	#} else {
+								#}
+								plt_f.write("\",\n\
+									{\n\
+										title: '"+csvt+"',legend: 'onmouseover',legendFormatter: legendFormatter, labelsUTC:true, digitsAfterDecimal:3, showRangeSelector: true,rollPeriod: 1,showRoller: true,highlightCircleSize: 2,strokeWidth: 1,strokeBorderWidth:1,highlightSeriesOpts: {strokeWidth: 3,strokeBorderWidth: 1,highlightCircleSize: 5},\n\
+										interactionModel : {'mousedown' : downV3,'mousemove' : moveV3,'mouseup' : upV3,'click' : clickV3,'dblclick' : dblClickV3,'mousewheel' : scrollV3}\n\
+									});\n\
+									document.getElementById(\"restore"+str(i)+str(j)+str(k)+str(l)+"\").onclick = function() {restorePositioning(g"+str(i)+str(j)+str(k)+str(l)+");};\n\
+								});\n\
+								</script>\
+								")
+
+								plt_f.write("\n<p style=\"position: absolute; left: 80%;\"><b><a href=\""+path.split(csvf)[1]+"\" target=\"_blank\" style=\"color:black;\">Download/Open data file</a></b><br>")
+								plt_f.write("<b>Plot:</b><br>")
+								csv_f = open(csvf,'rb')
+								csv_header = csv_f.readline().replace('\n','').split(',')
+								csv_f.close()
+								csv_header = csv_header[1:]	#exclude time
+								for i_h,h in enumerate(csv_header):
+									plt_f.write("<input type=\"checkbox\" id=\""+str(i)+str(j)+str(k)+str(l)+str(i_h)+"\" onclick=\"vischange"+str(i)+str(j)+str(k)+str(l)+"(this)\" checked=\"\"><label for=\""+str(i)+str(j)+str(k)+str(l)+str(i_h)+"\">"+h+"</label><br>")
+								plt_f.write("<b>Zoom in:</b> double-click, scroll wheel<br><b>Zoom out:</b> ctrl-double-click, scroll wheel<br><b>Standard Zoom:</b> shift-click-drag<br><b>Standard Pan:</b> click-drag<br><b>Restore zoom level:</b> <button id=\"restore"+str(i)+str(j)+str(k)+str(l)+"\">Restore position</button><br></p>\n")
+								plt_f.write("</body>\n\n")
+								plt_f.write("</html>\n\n")
+								plt_f.close()
+
+		to_write = to_write.replace('<replace:results>',to_write_substr)
+		report_f.write(to_write)
+
+	report_f.write("</body>\n")
+	report_f.write("</html>\n")
+
 	report_f.close()
 	logger.set("Report is saved as " + filename)
 

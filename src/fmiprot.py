@@ -3889,10 +3889,6 @@ class monimet_gui(Tkinter.Tk):
 
 	def UpdatePreviewPictureFiles(self,source,scenario):
 		self.Message.set('Checking preview pictures...')
-		# if 'temporary' in source and source['temporary'] and source['protocol'] == 'LOCAL':
-		# 	tkMessageBox.showwarning('No directory','Directory does not exist. This camera was temporarily added and the images of the camera refer to local directories and they do not exist. It probably means that the setup file loaded is saved in another computer with a camera network or camera which is not defined identically in this computer. To fix it, load the setup file again, confirm the permanent save of the camera/network and the open camera network manager and set up directories accordingly.')
-		# 	self.Message.set('Checking preview picture skipped due to temporarily added camera with protocol: LOCAL.')
-		# 	return (source,scenario)
 		pfn_ts = ''
 		if 'previewimagetime' in scenario and scenario['previewimagetime'] != '' and scenario['previewimagetime'] is not None:
 			pfn_ts = '-' + scenario['previewimagetime']
@@ -4240,11 +4236,12 @@ class monimet_gui(Tkinter.Tk):
 					shutil.copyfile(maskfiles4,maskfilet4)
 				if os.path.isfile(maskfiles4):
 					os.remove(maskfiles4)
+			shutil.copyfile(os.path.join(ResourcesDir,'style.css'),os.path.join(maskdir,'style.css'))
+			shutil.copyfile(os.path.join(ResourcesDir,'dygraph.js'),os.path.join(maskdir,'dygraph.js'))
+			shutil.copyfile(os.path.join(ResourcesDir,'dygraph.js'),os.path.join(maskdir,'dygraph.min.js'))
+			shutil.copyfile(os.path.join(ResourcesDir,'dygraph.css'),os.path.join(maskdir,'dygraph.css'))
+			shutil.copyfile(os.path.join(ResourcesDir,'interaction-api.js'),os.path.join(maskdir,'interaction-api.js'))
 			if res_data:
-				shutil.copyfile(os.path.join(ResourcesDir,'dygraph.js'),os.path.join(maskdir,'dygraph.js'))
-				shutil.copyfile(os.path.join(ResourcesDir,'dygraph.js'),os.path.join(maskdir,'dygraph.min.js'))
-				shutil.copyfile(os.path.join(ResourcesDir,'dygraph.css'),os.path.join(maskdir,'dygraph.css'))
-				shutil.copyfile(os.path.join(ResourcesDir,'interaction-api.js'),os.path.join(maskdir,'interaction-api.js'))
 				parsers.writeSetupReport([ans]+res_data,setup,self.Message)
 			else:
 				parsers.writeSetupReport(ans,setup,self.Message)
@@ -4307,9 +4304,9 @@ class monimet_gui(Tkinter.Tk):
 							return False
 			resultspath = self.outputpath.get()
 			self.LogFileName[1] = os.path.join(resultspath,'log.txt')
-			self.Message.set('Running all scenarios...|busy:True')
 			if not os.path.exists(resultspath):
 				os.makedirs(resultspath)
+			self.Message.set('Running all scenarios...|busy:True')
 			parsers.writeINI(os.path.join(resultspath,'setup.cfg'),self.setupToWrite(self.setup))
 			self.Message.set("Setup file saved as " + os.path.split(self.setupFileVariable.get())[1] + " in results directory. ")
 			csvlist = []
@@ -5041,7 +5038,10 @@ class monimet_gui(Tkinter.Tk):
 				if l == 0:
 					lf = open(os.path.join(LogDir,lfname),'a')
 				else:
-					lf = open(lfname,'a')
+					if os.path.isfile(lfname):
+						lf = open(lfname,'a')
+					else:
+						lf = open(lfname,'w')
 				lf.write(time)
 				lf.write(" ")
 				lf.write(message)

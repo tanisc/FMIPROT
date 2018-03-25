@@ -1,0 +1,173 @@
+<div>
+  <table class='bg'><tbody>
+    <tr>
+      <td>
+        <table class='hdr0'><tbody>
+          <tr>
+            <td><a name='1'></a>Scenario-1</td>
+          </tr>
+        </tbody></table>
+        <table class='hdr1'><tbody>
+          <tr>
+            <td>Camera Selection</td>
+          </tr>
+        </tbody></table>
+        <table class='hdr2'><tbody>
+          <tr class='hdr2'>
+            <td>Camera Network</td>
+            <td>Camera Name</td>
+          </tr>
+          <tr>
+            <td><replace:network></td>
+            <td><replace:name></td>
+          </tr>
+        </tbody></table>
+        <table class='hdr1'><tbody>
+          <tr>
+            <td>Temporal Selection</td>
+          </tr>
+        </tbody></table>
+        <table class='hdr2'><tbody>
+          <tr>
+            <td><replace:temporal4></td>
+          </tr>
+        </tbody></table>
+        <table class='hdr2'><tbody>
+          <tr class='hdr2'>
+            <td></td>
+            <td>Start</td>
+            <td>End</td>
+          </tr>
+          <tr>
+            <td>Date</td>
+            <td><replace:temporal0></td>
+            <td><replace:temporal1></td>
+          </tr>
+          <tr>
+            <td>Time</td>
+            <td><replace:temporal2></td>
+            <td><replace:temporal3></td>
+          </tr>
+          <tr>
+            <td></td>
+          </tr>
+        </tbody></table>
+        <table class='hdr1'><tbody>
+          <tr>
+            <td>Masking/ROIs</td>
+          </tr>
+        </tbody></table>
+        <table class='hdr2'><tbody>
+          <tr>
+            <td>Run analyses also for each polygon (ROI) separately: <replace:multiplerois></td>
+          </tr>
+        </tbody></table>
+        <table class='hdr2'><tbody>
+          <replace:polygonicmask>
+        </tbody></table>
+        <table class='hdr2'><tbody>
+          <tr>
+            <td class='previmg1'>
+              <table class='hdr2'><tbody>
+                <tr>
+                  <td><img src='<replace:html_folder>/Scenario_1_Mask_Preview_2.jpg' class='previmg1'></td>
+                </tr>
+              </tbody></table>
+            </td>
+            <td class='previmg2'>
+              <table class='hdr2'><tbody>
+                <tr>
+                  <td><img src='<replace:html_folder>/Scenario_1_Mask_Preview_1.jpg'  class='previmg2'></td>
+                </tr>
+                <tr>
+                  <td><img src='<replace:html_folder>/Scenario_1_Mask_Preview_3.jpg'  class='previmg2'></td>
+                </tr>
+                <tr>
+                  <td><img src='<replace:html_folder>/Scenario_1_Mask_Preview_4.jpg'  class='previmg2'></td>
+                </tr>
+              </tbody></table>
+            </td>
+          </tr>
+        </tbody></table>
+        <table class='hdr1'><tbody>
+          <tr>
+            <td>Thresholds</td>
+          </tr>
+        </tbody></table>
+        <table class='hdr2'><tbody>
+          <tr class='hdr2'>
+            <td>Type</td>
+            <td>Value</td>
+            <td>Minimum</td>
+            <td>Maximum</td>
+          </tr>
+          <tr>
+            <td>Image Threshold</td>
+            <td>Brightness</td>
+            <td><replace:thresholds6></td>
+            <td><replace:thresholds7></td>
+          </tr>
+          <tr>
+            <td>Image Threshold</td>
+            <td>Luminance</td>
+              <td><replace:thresholds14></td>
+              <td><replace:thresholds15></td>
+            </tr>
+            <tr>
+              <td>ROI Threshold</td>
+              <td>Red Fraction</td>
+              <td><replace:thresholds0></td>
+              <td><replace:thresholds1></td>
+            </tr>
+            <tr>
+              <td>ROI Threshold</td>
+              <td>Green Fraction</td>
+              <td><replace:thresholds2></td>
+              <td><replace:thresholds3></td>
+            </tr>
+            <tr>
+              <td>ROI Threshold</td>
+              <td>Blue Fraction</td>
+              <td><replace:thresholds4></td>
+              <td><replace:thresholds5></td>
+            </tr>
+            <tr>
+              <td>Pixel Threshold</td>
+              <td>Red Channel</td>
+              <td><replace:thresholds8></td>
+              <td><replace:thresholds9></td>
+            </tr>
+            <tr>
+              <td>Pixel Threshold</td>
+              <td>Green Channel</td>
+              <td><replace:thresholds10></td>
+              <td><replace:thresholds11></td>
+            </tr>
+            <tr>
+              <td>Pixel Threshold</td>
+              <td>Blue Channel</td>
+              <td><replace:thresholds12></td>
+              <td><replace:thresholds13></td>
+            </tr>
+            <tr>
+              <td></td>
+            </tr>
+          </tbody></table>
+          <table class='hdr1'><tbody>
+            <tr>
+              <td>Analyses</td>
+            </tr>
+          </tbody></table>
+          <table class='hdr2'><tbody>
+            <tr class='hdr2'>
+              <td>Analysis No</td>
+              <td>Analysis Name</td>
+              <td>Analysis Parameters</td>
+            </tr>
+            <replace:analyses>
+          </tbody></table>
+          <replace:results>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
