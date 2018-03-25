@@ -5030,7 +5030,7 @@ class monimet_gui(Tkinter.Tk):
 				if meta['dialog'] == 'info':
 					tkMessageBox.showinfo('Information',message)
 
-		if not 'logtextonly' in meta:
+		if not 'logtextonly' in meta and ("progress" not in meta or ( "progress" in meta and meta['total'] == 1)):
 			for l,lfname in enumerate(self.LogFileName):
 				if lfname == '':
 					continue
