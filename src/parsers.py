@@ -426,7 +426,7 @@ def writeSetupReport(filename,setup,logger):
 								plt_f.write(plt_to_write)
 								plt_f.write("<body>\n")
 
-								csvt = "Analysis "+str(j+1)
+								csvt = scenario['name'] + " - Analysis "+str(j+1)
 								csvt += ": " + calcnames[calcids.index(scenario[scenario['analyses'][j]]['id'])]
 								if l > 0:
 									csvt += ' - ROI'+str(l).zfill(3)
@@ -461,9 +461,17 @@ def writeSetupReport(filename,setup,logger):
 								csv_f = open(csvf,'r')
 								plt_f.write(csv_f.read().replace('\n','\\n'))
 								csv_f.close()
+								csv_f = open(csvf,'r')
+								csv_f.readline()
+								tzoffset = csv_f.readline().replace('\n','').split(',')[0]
+								if len(tzoffset) == 21:
+									tzoffset = ' ('+tzoffset[19:]+')'
+								else:
+									tzoffset = ''
+								csv_f.close()
 								plt_f.write("\",\n\
 										{\n\
-											title: '"+csvt+"',legend: 'onmouseover',legendFormatter: legendFormatter, labelsUTC:true, digitsAfterDecimal:3, showRangeSelector: true,rollPeriod: 1,showRoller: true,highlightCircleSize: 2,strokeWidth: 1,strokeBorderWidth:1,highlightSeriesOpts: {strokeWidth: 3,strokeBorderWidth: 1,highlightCircleSize: 5},\n\
+											title: '"+csvt+"', xlabel:'Time"+tzoffset+"',legend: 'always',legendFormatter: legendFormatter, labelsUTC:false, digitsAfterDecimal:3, showRangeSelector: true,rollPeriod: 5,showRoller: true,highlightCircleSize: 3,drawPoints:true,drawPointCallback : Dygraph.Circles.TRIANGLE,pointSize: 3,strokeWidth: 1,strokeBorderWidth:1,highlightSeriesOpts: {drawPoints:true,drawPointCallback : Dygraph.Circles.TRIANGLE,pointSize:5,strokeWidth: 3,strokeBorderWidth: 1,highlightCircleSize: 5},\n\
 											interactionModel : {'mousedown' : downV3,'mousemove' : moveV3,'mouseup' : upV3,'click' : clickV3,'dblclick' : dblClickV3,'mousewheel' : scrollV3}\n\
 										});\n\
 									} else {\n\
@@ -473,7 +481,7 @@ def writeSetupReport(filename,setup,logger):
   								plt_f.write(path.split(csvf)[1])
   								plt_f.write("\",\n\
 	  									{\n\
-	  										title: '"+csvt+"',legend: 'onmouseover',legendFormatter: legendFormatter, labelsUTC:true, digitsAfterDecimal:3, showRangeSelector: true,rollPeriod: 1,showRoller: true,highlightCircleSize: 2,strokeWidth: 1,strokeBorderWidth:1,highlightSeriesOpts: {strokeWidth: 3,strokeBorderWidth: 1,highlightCircleSize: 5},\n\
+	  										title: '"+csvt+"', xlabel:'Time"+tzoffset+"',legend: 'always',legendFormatter: legendFormatter, labelsUTC:false, digitsAfterDecimal:3, showRangeSelector: true,rollPeriod: 5,showRoller: true,highlightCircleSize: 3,drawPoints:true,drawPointCallback : Dygraph.Circles.TRIANGLE,pointSize: 3,strokeWidth: 1,strokeBorderWidth:1,highlightSeriesOpts: {drawPoints:true,drawPointCallback : Dygraph.Circles.TRIANGLE,pointSize:5,strokeWidth: 3,strokeBorderWidth: 1,highlightCircleSize: 5},\n\
 	  										interactionModel : {'mousedown' : downV3,'mousemove' : moveV3,'mouseup' : upV3,'click' : clickV3,'dblclick' : dblClickV3,'mousewheel' : scrollV3}\n\
 	  									});\n\
 									}\n\

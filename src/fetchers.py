@@ -243,10 +243,11 @@ def filterImageListTemporal(logger,imglistv,pathlistv,fnameconv,timec,count):
 		datestr = ' between dates ' + str(date1) + ' - ' + str(date2)
 	timestr = ' between times of the day ' + str(time1) + ' - ' + str(time2)
 
-	if count == 0:
-		logger.set('Listing images' + datestr +  timestr + '...')
-	else:
-		logger.set('Listing maximum ' + str(count) + ' images' + datestr +  timestr + '...')
+	if timec[4] in ['Date and time intervals','Today only','Yesterday only','Last one week','Last one year','Latest date and time intervals','Earliest date and time intervals']:
+		if count == 0:
+			logger.set('Listing images' + datestr +  timestr + '...')
+		else:
+			logger.set('Listing maximum ' + str(count) + ' images' + datestr +  timestr + '...')
 
 	imglistv = []
 	datetimelistv = []

@@ -4244,6 +4244,7 @@ class monimet_gui(Tkinter.Tk):
 					os.remove(maskfiles4)
 			shutil.copyfile(os.path.join(ResourcesDir,'style.css'),os.path.join(maskdir,'style.css'))
 			shutil.copyfile(os.path.join(ResourcesDir,'dygraph.js'),os.path.join(maskdir,'dygraph.js'))
+			shutil.copyfile(os.path.join(ResourcesDir,'dygraph.js'),os.path.join(maskdir,'dygraph-shapes.js'))
 			shutil.copyfile(os.path.join(ResourcesDir,'dygraph.css'),os.path.join(maskdir,'dygraph.css'))
 			shutil.copyfile(os.path.join(ResourcesDir,'interaction-api.js'),os.path.join(maskdir,'interaction-api.js'))
 			if res_data:
@@ -4361,6 +4362,17 @@ class monimet_gui(Tkinter.Tk):
 							else:
 								datetimelistp = parsers.oTime2sTime(outputtv[0][1][1])
 							(imglista,datetimelista,pathlista) = (deepcopy(imglist),deepcopy(datetimelist),deepcopy(pathlist)) #all
+							if outputtv != []:
+								outputtvd = []	#out of temporal selection
+								for i,v in enumerate(outputtv[0][1][1]):
+									if parsers.oTime2sTime(v) not in datetimelista:
+										outputtvd.append(i)
+								for i in range(len(outputtv[0][1])/2)[::-1]:
+									if isinstance(outputtv[0][1][2*i+1],list):
+										for j in outputtvd[::-1]:
+											del outputtv[0][1][2*i+1][j]
+									else:
+										np.delete(outputtv[0][1][2*i+1],outputtvd)
 							imglist = [] #missing
 							datetimelist = []
 							pathlist = []
@@ -4369,7 +4381,7 @@ class monimet_gui(Tkinter.Tk):
 									imglist.append(imglista[i])
 									datetimelist.append(v)
 									pathlist.append(pathlista[i])
-							self.Message.set(str(len(datetimelistp))+' images are already processed. '+ str(len(imglist))+' images will be processed.')
+							self.Message.set(str(len(datetimelistp))+' images are already processed. '+ str(len(imglist))+' images will be processed. Results of '+ str(len(outputtvd))+' images which do not fit the temporal selection will be deleted.')
 						(imglist,datetimelist,pathlist) = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), scenario['temporal'][:4]+['List',imglist,datetimelist,pathlist], online=self.imagesdownload.get(),download=True)
 						outputValid = True
 						if imglist == []:
@@ -4430,6 +4442,17 @@ class monimet_gui(Tkinter.Tk):
 									else:
 										datetimelistp = parsers.oTime2sTime(outputtv[r+1][1][1])
 									(imglista,datetimelista,pathlista) = (deepcopy(imglist),deepcopy(datetimelist),deepcopy(pathlist)) #all
+									if outputtv != []:
+										outputtvd = []	#out of temporal selection
+										for i,v in enumerate(outputtv[r+1][1][1]):
+											if parsers.oTime2sTime(v) not in datetimelista:
+												outputtvd.append(i)
+										for i in range(len(outputtv[r+1][1])/2)[::-1]:
+											if isinstance(outputtv[r+1][1][2*i+1],list):
+												for j in outputtvd[::-1]:
+													del outputtv[r+1][1][2*i+1][j]
+											else:
+												np.delete(outputtv[r+1][1][2*i+1],outputtvd)
 									imglist = [] #missing
 									datetimelist = []
 									pathlist = []
@@ -4438,7 +4461,7 @@ class monimet_gui(Tkinter.Tk):
 											imglist.append(imglista[i])
 											datetimelist.append(v)
 											pathlist.append(pathlista[i])
-									self.Message.set(str(len(datetimelistp))+' images are already processed. '+ str(len(imglist))+' images will be processed.')
+									self.Message.set(str(len(datetimelistp))+' images are already processed. '+ str(len(imglist))+' images will be processed. Results of '+ str(len(outputtvd))+' images which do not fit the temporal selection will be deleted.')
 								(imglist,datetimelist,pathlist) = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), scenario['temporal'][:4]+['List',imglist,datetimelist,pathlist], online=self.imagesdownload.get(),download=True)
 								outputValid = True
 								if imglist == []:
