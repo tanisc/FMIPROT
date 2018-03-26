@@ -351,7 +351,7 @@ def writeSetupReport(filename,setup,logger):
 				to_write_substr += "1"
 				to_write_substr += "</td><td>"
 				for j in polygon:
-					to_write_substr += str(c)
+					to_write_substr += str(j)
 					if j != polygon[-1]:
 						to_write_substr += ","
 					else:

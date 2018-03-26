@@ -100,6 +100,7 @@ class monimet_gui(Tkinter.Tk):
 		self.LogLL = Tkinter.StringVar()
 		self.LogFileName = ['','']
 		self.LogNew(self)
+		self.MessagePrev= {}
 		self.Message.set("Initializing...|busy:True")
 		self.Message.set("Initializing GUI...")
 		self.ActiveMenu = Tkinter.StringVar()
@@ -227,8 +228,9 @@ class monimet_gui(Tkinter.Tk):
 		temporal_modes = ['All','Date and time intervals','Earliest date and time intervals','Latest date and time intervals','Yesterday only','Today only','Latest 1 hour only','Latest image only','Last one year','Last one week','Last 48 hours','Last 24 hours']
 		output_modes = ['New directory in results directory','Existing empty directory','Merge with existing results']
 		if sysargv['resultdir'] is not None:
-			if not os.path.exists(sysargv['resultdir']) or len(os.listdir(sysargv['resultdir'])) == 0:
+			if not os.path.exists(sysargv['resultdir']):
 				os.makedirs(sysargv['resultdir'])
+			if not os.path.exists(sysargv['resultdir']) or len(os.listdir(sysargv['resultdir'])) == 0:
 				self.outputmodevariable.set(output_modes[1])
 			else:
 				self.outputmodevariable.set(output_modes[2])
@@ -3940,7 +3942,7 @@ class monimet_gui(Tkinter.Tk):
 					self.Message.set('Looking for a suitable image...')
 					img, ts = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), [0,0,'11:30','12:30','Date and time intervals'], count=1, online=True)[:2]
 				if len(img) == 0:
-					img, ts = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), [0,0,'00:00','23:59'], count=1, online=True)[:2]
+					img, ts = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), [0,0,'00:00','23:59','All'], count=1, online=True)[:2]
 				if len(img) == 0:
 					self.Message.set('No suitable file for preview image found for camera: '+source['network'] + ' - ' + source['name'])
 					return (source,scenario)
@@ -4317,7 +4319,7 @@ class monimet_gui(Tkinter.Tk):
 			self.Message.set("Setup file saved as " + os.path.split(self.setupFileVariable.get())[1] + " in results directory. ")
 			csvlist = []
 			if scn == None:
-				self.Message.set('Scenario: |progress:1|queue:0|total:'+str(len(self.setup)))
+				self.Message.set('Scenario: |progress:10|queue:0|total:'+str(len(self.setup)))
 			for s,scenario in enumerate(self.setup):
 				csvlist.append([])
 				if scn == None or scn == s:
@@ -4326,9 +4328,9 @@ class monimet_gui(Tkinter.Tk):
 					(imglist_uf,datetimelist_uf,pathlist_uf) = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), scenario['temporal'], online=self.imagesdownload.get(),download=False)
 					if imglist_uf == []:
 						self.Message.set("No pictures found. Scenario is skipped.")
-						self.Message.set('Scenario: |progress:1|queue:'+str(s+1)+'|total:'+str(len(self.setup)))
+						self.Message.set('Scenario: |progress:10|queue:'+str(s+1)+'|total:'+str(len(self.setup)))
 						continue
-					self.Message.set('Analysis: |progress:2|queue:'+str(0)+'|total:'+str(len(scenario['analyses'])))
+					self.Message.set('Analysis: |progress:8|queue:'+str(0)+'|total:'+str(len(scenario['analyses'])))
 				for a,analysis in enumerate(scenario['analyses']):
 					csvlist[s].append([])
 					analysis = scenario[analysis]
@@ -4352,7 +4354,7 @@ class monimet_gui(Tkinter.Tk):
 							for i,param in enumerate(paramnames[calcids.index(analysis['id'])]):
 								exec("commandstring = commandstring.replace('p"+str(i)+"','"+str(analysis[param])+"')")
 						if scenario['multiplerois'] and isinstance(scenario['polygonicmask'][0],list):
-								self.Message.set('ROI: |progress:3|queue:'+str(0)+'|total:'+str(len(scenario['polygonicmask'])+1))
+								self.Message.set('ROI: |progress:6|queue:'+str(0)+'|total:'+str(len(scenario['polygonicmask'])+1))
 						(imglist,datetimelist,pathlist) = (deepcopy(imglist_uf),deepcopy(datetimelist_uf),deepcopy(pathlist_uf))
 						if self.outputmodevariable.get() == output_modes[2]:
 							self.Message.set('Reading results of image that are already processed...')
@@ -4388,10 +4390,10 @@ class monimet_gui(Tkinter.Tk):
 							outputValid = False
 							if scenario['multiplerois'] and isinstance(scenario['polygonicmask'][0],list):
 								self.Message.set("No pictures are valid after filtering with thresholds. ROI is skipped.")
-								self.Message.set('ROI: |progress:3|queue:'+str(0)+'|total:'+str(len(scenario['polygonicmask'])+1))
+								self.Message.set('ROI: |progress:6|queue:'+str(0)+'|total:'+str(len(scenario['polygonicmask'])+1))
 							else:
 								self.Message.set("No pictures are valid after filtering with thresholds. Scenario is skipped.")
-								self.Message.set('Scenario: |progress:1|queue:'+str(s+1)+'|total:'+str(len(self.setup)))
+								self.Message.set('Scenario: |progress:10|queue:'+str(s+1)+'|total:'+str(len(self.setup)))
 						if outputValid:
 							mask = maskers.polymask(imglist[0],scenario['polygonicmask'],self.Message)
 							mask = (mask,scenario['polygonicmask'],scenario['thresholds'])
@@ -4400,10 +4402,10 @@ class monimet_gui(Tkinter.Tk):
 							outputValid = False
 							if scenario['multiplerois'] and isinstance(scenario['polygonicmask'][0],list):
 								self.Message.set("No pictures are valid after filtering with thresholds. ROI is skipped.")
-								self.Message.set('ROI: |progress:3|queue:'+str(0)+'|total:'+str(len(scenario['polygonicmask'])+1))
+								self.Message.set('ROI: |progress:6|queue:'+str(0)+'|total:'+str(len(scenario['polygonicmask'])+1))
 							else:
 								self.Message.set("No pictures are valid after filtering with thresholds. Scenario is skipped.")
-								self.Message.set('Scenario: |progress:1|queue:'+str(s+1)+'|total:'+str(len(self.setup)))
+								self.Message.set('Scenario: |progress:10|queue:'+str(s+1)+'|total:'+str(len(self.setup)))
 						if outputValid:
 							exec(commandstring)
 						else:
@@ -4416,10 +4418,10 @@ class monimet_gui(Tkinter.Tk):
 										if output[0][1][2*i] == outputtv[0][1][2*i]:
 											output[0][1][2*i+1] = np.hstack((output[0][1][2*i+1] , outputtv[0][1][2*i+1]))
 										else:
-											output[0] = outputtv
+											output[0] = [outputtv[0]]
 											break
 							else:
-								output = outputtv
+								output = [outputtv[0]]
 							if output[0] != []:
 								isorted = np.argsort(output[0][1][1])
 								for i in range(len(output[0][1])/2)[::-1]:
@@ -4427,7 +4429,7 @@ class monimet_gui(Tkinter.Tk):
 										output[0][1][2*i+1] = np.array(output[0][1][2*i+1])
 									output[0][1][2*i+1] = output[0][1][2*i+1][isorted]
 						if scenario['multiplerois'] and isinstance(scenario['polygonicmask'][0],list):
-								self.Message.set('ROI: |progress:3|queue:'+str(1)+'|total:'+str(len(scenario['polygonicmask'])+1))
+								self.Message.set('ROI: |progress:6|queue:'+str(1)+'|total:'+str(len(scenario['polygonicmask'])+1))
 						outputt = []
 						if output:
 							outputt.append(output[0])
@@ -4467,7 +4469,7 @@ class monimet_gui(Tkinter.Tk):
 								if imglist == []:
 									outputValid = False
 									self.Message.set("No pictures are valid after filtering with thresholds. ROI is skipped.")
-									self.Message.set('ROI: |progress:3|queue:'+str(r+2)+'|total:'+str(len(scenario['polygonicmask'])+1))
+									self.Message.set('ROI: |progress:6|queue:'+str(r+2)+'|total:'+str(len(scenario['polygonicmask'])+1))
 								if outputValid:
 									mask = maskers.polymask(imglist[0],[roi],self.Message)
 									mask = (mask,[roi],scenario['thresholds'])
@@ -4475,7 +4477,7 @@ class monimet_gui(Tkinter.Tk):
 								if imglist == []:
 									outputValid = False
 									self.Message.set("No pictures are valid after filtering with thresholds. ROI is skipped.")
-									self.Message.set('ROI: |progress:3|queue:'+str(r+2)+'|total:'+str(len(scenario['polygonicmask'])+1))
+									self.Message.set('ROI: |progress:6|queue:'+str(r+2)+'|total:'+str(len(scenario['polygonicmask'])+1))
 								if outputValid:
 									exec(commandstring)
 								else:
@@ -4488,10 +4490,10 @@ class monimet_gui(Tkinter.Tk):
 												if output[0][1][2*i] == outputtv[r+1][1][2*i]:
 													output[0][1][2*i+1] = np.hstack((output[0][1][2*i+1] , outputtv[r+1][1][2*i+1]))
 												else:
-													output[0] = outputtv
+													output[0] = outputtv[r+1]
 													break
 									else:
-										output = outputtv
+										output = [outputtv[r+1]]
 									if output[0] != []:
 										isorted = np.argsort(output[0][1][1])
 										for i in range(len(output[0][1])/2)[::-1]:
@@ -4501,7 +4503,7 @@ class monimet_gui(Tkinter.Tk):
 								if output and output[0]:
 									output[0][0] += ' - ROI' + str(r+1).zfill(3)
 									outputt.append(output[0])
-								self.Message.set('ROI: |progress:3|queue:'+str(r+2)+'|total:'+str(len(scenario['polygonicmask'])+1))
+								self.Message.set('ROI: |progress:6|queue:'+str(r+2)+'|total:'+str(len(scenario['polygonicmask'])+1))
 						if len(outputt)>0:
 							if self.TimeZoneConversion.get() and self.TimeZone.get() != '+0000':
 								outputt = convertTZoutput(outputt,self.TimeZone.get())
@@ -4509,7 +4511,7 @@ class monimet_gui(Tkinter.Tk):
 							csvlist[s][a].append(csvf)
 						else:
 							csvlist[s][a].append([False])
-						self.Message.set('Analysis: |progress:2|queue:'+str(a+1)+'|total:'+str(len(scenario['analyses'])))
+						self.Message.set('Analysis: |progress:8|queue:'+str(a+1)+'|total:'+str(len(scenario['analyses'])))
 					if scn != None and scn != s:
 						csvf = filelabel + 'R' + str(0).zfill(3) + '.csv'
 						if os.path.isfile(csvf):
@@ -4524,7 +4526,7 @@ class monimet_gui(Tkinter.Tk):
 						else:
 							csvlist[s][a].append([False])
 				if scn == None:
-					self.Message.set('Scenario: |progress:1|queue:'+str(s+1)+'|total:'+str(len(self.setup)))
+					self.Message.set('Scenario: |progress:10|queue:'+str(s+1)+'|total:'+str(len(self.setup)))
 			if self.outputreportvariable.get():
 				self.setupFileReportFunc([os.path.join(resultspath,'report.html')]+csvlist)
 			if not sysargv['gui']:
@@ -4958,7 +4960,8 @@ class monimet_gui(Tkinter.Tk):
 					return True
 
 	def LogMessage(self,*args):
-		time = str(datetime.datetime.now())[:19]
+		now = datetime.datetime.now()
+		time = str(now)[:19]
 		meta = {}
 		if '|' in self.Message.get():
 			for m in self.Message.get().split('|')[1:]:
@@ -4990,16 +4993,23 @@ class monimet_gui(Tkinter.Tk):
 		if "progress" in meta and meta['total'] != 1:
 			p_level = meta['progress']
 			p_fraction = float(10000*meta['queue']/meta['total'])/100
-			p_string = message + str(meta['queue'])+' of '+str(meta['total'])+' ('+(str(p_fraction))+'%)'
+			if meta['total'] != 0 and meta['queue'] != 0 and p_level in self.MessagePrev and 'now' in self.MessagePrev[p_level]:
+				try:
+					p_remaining = datetime.timedelta(seconds=(100-p_fraction)*((now-self.MessagePrev[p_level]['now']).total_seconds()/float(p_fraction-self.MessagePrev[p_level]['p_fraction'])))
+				except:
+					p_remaining = '~'
+			else:
+				p_remaining = '~'
+			self.MessagePrev.update({p_level:{"now":now,"p_fraction":p_fraction}})
+			if meta['queue']==meta['total'] and p_level in self.MessagePrev:
+				del self.MessagePrev[p_level]
+			p_string = message + str(meta['queue'])+' of '+str(meta['total'])+' ('+(str(p_fraction))+'%) (' + str(p_remaining)[:7] + ')'
 			print '\r',p_string,
 			sys.stdout.flush()
 			if meta['queue']==meta['total']:
 				print ''
 		if self.LogText.winfo_exists():
 			if "progress" in meta and meta['total'] != 1:
-				p_level = meta['progress']
-				p_fraction = float(10000*meta['queue']/meta['total'])/100
-				p_string = message + str(meta['queue'])+' of '+str(meta['total'])+' ('+(str(p_fraction))+'%)'
 				try:
 					exec("self.LogProgressLabelLevel"+str(p_level)+".config(text=p_string)")
 					exec("self.LogProgressBarLevel"+str(p_level)+"['value']=p_fraction")
