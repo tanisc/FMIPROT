@@ -4993,14 +4993,15 @@ class monimet_gui(Tkinter.Tk):
 		if "progress" in meta and meta['total'] != 1:
 			p_level = meta['progress']
 			p_fraction = float(10000*meta['queue']/meta['total'])/100
-			if meta['total'] != 0 and meta['queue'] != 0 and p_level in self.MessagePrev and 'now' in self.MessagePrev[p_level]:
+			if meta['total'] != 0 and meta['queue'] != 0 and p_level in self.MessagePrev:
 				try:
-					p_remaining = datetime.timedelta(seconds=(100-p_fraction)*((now-self.MessagePrev[p_level]['now']).total_seconds()/float(p_fraction-self.MessagePrev[p_level]['p_fraction'])))
+					p_remaining = datetime.timedelta(seconds=(100-p_fraction)*((now-self.MessagePrev[p_level]).total_seconds()/float(p_fraction)))
 				except:
 					p_remaining = '~'
 			else:
 				p_remaining = '~'
-			self.MessagePrev.update({p_level:{"now":now,"p_fraction":p_fraction}})
+			if meta['total'] != 0 and meta['queue'] == 1:
+				self.MessagePrev.update({p_level:now})
 			if meta['queue']==meta['total'] and p_level in self.MessagePrev:
 				del self.MessagePrev[p_level]
 			p_string = message + str(meta['queue'])+' of '+str(meta['total'])+' ('+(str(p_fraction))+'%) (' + str(p_remaining)[:7] + ')'
