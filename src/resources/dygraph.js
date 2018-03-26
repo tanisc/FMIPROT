@@ -5589,12 +5589,11 @@ function dateParser(dateStr) {
 
   if (dateStr.search("-") != -1) {
     // e.g. '2009-7-12' or '2009-07-12'
-    // dateStrSlashed = dateStr.replace("-", "/", "g");
-    // while (dateStrSlashed.search("-") != -1) {
-    //   dateStrSlashed = dateStrSlashed.replace("-", "/");
-    // }
-    //edited for FMIPROT, timestamp like 2018-01-27-18:38:56+0000
-    dateStrSlashed = dateStr.substr(0,10)+' '+ dateStr.substr(11,25);
+    dateStrSlashed = dateStr.replace("-", "/", "g");
+    while (dateStrSlashed.search("-") != -1) {
+      dateStrSlashed = dateStrSlashed.replace("-", "/");
+    }
+    dateStrSlashed = dateStr.substr(0,10)+' '+ dateStr.substr(11,25); //modified for FMIPROT, timestamp like 2018-01-27-18:38:56+0000
     d = dateStrToMillis(dateStrSlashed);
   } else if (dateStr.length == 8) {
     // e.g. '20090712'
@@ -5625,6 +5624,7 @@ function dateParser(dateStr) {
  */
 
 function dateStrToMillis(str) {
+  return new Date(str.substr(0,19)).getTime();    //modified for FMIPROT not to convert timezone to local time. time zone info will be given in x axis label.
   return new Date(str).getTime();
 }
 
