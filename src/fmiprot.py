@@ -3896,7 +3896,7 @@ class monimet_gui(Tkinter.Tk):
 		self.UpdatePictures()
 
 	def UpdatePreviewPictureFiles(self,source,scenario):
-		self.Message.set('Checking preview pictures...')
+		self.Message.set('Checking preview picture for '+source['name']+'...')
 		pfn_ts = ''
 		if 'previewimagetime' in scenario and scenario['previewimagetime'] != '' and scenario['previewimagetime'] is not None:
 			pfn_ts = '-' + scenario['previewimagetime']

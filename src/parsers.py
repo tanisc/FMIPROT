@@ -474,8 +474,8 @@ def writeSetupReport(filename,setup,logger):
 								csv_f = open(csvf,'r')
 								csv_f.readline()
 								tzoffset = csv_f.readline().replace('\n','').split(',')[0]
-								if len(tzoffset) == 21:
-									tzoffset = ' ('+tzoffset[19:]+')'
+								if len(tzoffset) == 25:
+									tzoffset = ' (UTC'+tzoffset[19:]+')'
 								else:
 									tzoffset = ''
 								csv_f.close()
