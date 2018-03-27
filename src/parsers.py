@@ -787,13 +787,18 @@ def dwriteINI(inifile, dictlist,commonheader=True):
 	f.close()
 
 def debugDict(dic):
-	for key in dic:
-		if isinstance(dic[key],dict):
-			for key1 in dic[key]:
-				if isinstance(dic[key][key1],dict):
-					for key2 in dic[key][key1]:
-						print key,' : ', key1,' : ', key2,' : ', dic[key][key1][key2]
-				else:
-					print key,' : ', key1,' : ', dic[key][key1]
-		else:
-			print key,' : ', dic[key]
+	if not isinstance(dic,list):
+		diclist = [dic]
+	else:
+		diclist = dic
+	for dic in diclist:
+		for key in dic:
+			if isinstance(dic[key],dict):
+				for key1 in dic[key]:
+					if isinstance(dic[key][key1],dict):
+						for key2 in dic[key][key1]:
+							print key,' : ', key1,' : ', key2,' : ', dic[key][key1][key2]
+					else:
+						print key,' : ', key1,' : ', dic[key][key1]
+			else:
+				print key,' : ', dic[key]

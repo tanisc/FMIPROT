@@ -5593,7 +5593,6 @@ function dateParser(dateStr) {
     while (dateStrSlashed.search("-") != -1) {
       dateStrSlashed = dateStrSlashed.replace("-", "/");
     }
-    dateStrSlashed = dateStr.substr(0,10)+' '+ dateStr.substr(11,25); //modified for FMIPROT, timestamp like 2018-01-27-18:38:56+0000
     d = dateStrToMillis(dateStrSlashed);
   } else if (dateStr.length == 8) {
     // e.g. '20090712'

@@ -131,7 +131,7 @@ def storeData(fname, analysis_captions, data_captions,logger,csvout=False):
 				for d in zip(*data):
 					g.write('\n')
 					for v in d:
-						g.write(str(v).replace(' ','-'))
+						g.write(str(v).replace(' ','T'))
 						if v != d[-1]:
 							g.write(',')
 				g.close()

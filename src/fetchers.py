@@ -821,8 +821,8 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 	datetimelist = datetimelistv
 	pathlist = pathlistv
 
-	if len(datetimelist) > 0 and care_tz: #false used for checkQuantity
-		if 'timezone' in source:
+	if len(datetimelist) > 0 and care_tz and timec[4] != 'List': #false used for checkQuantity
+		if 'timezone' in source and source['timezone'] is not None:
 			if '%z' in filenameformat:
 				logger.set("Timezone information exists both in filename format and metadata for the source. Timezone information from filename format will be used.")
 			else:
