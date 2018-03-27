@@ -279,6 +279,14 @@ def writeSetupReport(filename,setup,logger):
 	report_f.write(to_write)
 	report_f.write("<body>\n")
 
+	#results
+	if res_data is not False:
+		pltsf = path.join(path.split(filename)[0],'results.html')
+		plts_f = open(pltsf,'w')
+		plts_f.write("<html>\n")
+		plts_f.write(to_write)
+		plts_f.write("<body>\n")
+
 	#top
 	to_write = open(path.join(ResourcesDir,'html_top.html')).read()
 	to_write = to_write.replace('<replace:processing_time>',writetime)
@@ -408,14 +416,6 @@ def writeSetupReport(filename,setup,logger):
 				to_write_substr += "<table class='hdr1'><tbody>\n<tr>\n<td>"
 				to_write_substr += "Results"
 				to_write_substr += "</td>\n</tr>\n</tbody></table>\n"
-				pltsf = path.join(path.split(filename)[0],'results.html')
-				plts_f = open(pltsf,'w')
-				plts_f.write("<html>\n")
-				plts_to_write = open(path.join(ResourcesDir,'html_head.html')).read()
-				plts_to_write = plts_to_write.replace('<replace:html_folder>',path.join(path.splitext(path.split(filename)[1])[0]+'_files'))
-				plts_to_write = plts_to_write.replace('<replace:processing_time>',writetime)
-				plts_f.write(plts_to_write)
-				plts_f.write("<body>\n")
 				for j,csva in enumerate(res_data[i]):
 					for k,csvr in enumerate(csva):
 						for l,csvf in enumerate(csvr):
@@ -512,15 +512,16 @@ def writeSetupReport(filename,setup,logger):
 								plt_f.write("</body>\n\n")
 								plt_f.write("</html>\n\n")
 								plt_f.close()
-				plts_f.write("</body>\n")
-				plts_f.write("</html>\n")
-				plts_f.close()
 		to_write = to_write.replace('<replace:results>',to_write_substr)
 		report_f.write(to_write)
 
+	plts_f.write("</body>\n")
+	plts_f.write("</html>\n")
+	plts_f.close()
+	logger.set("Result plots are saved as " + pltsf)
+
 	report_f.write("</body>\n")
 	report_f.write("</html>\n")
-
 	report_f.close()
 	logger.set("Report is saved as " + filename)
 
