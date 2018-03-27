@@ -500,7 +500,7 @@ def writeSetupReport(filename,setup,logger):
 								</script>\
 								")
 
-								plt_f.write("\n<p style=\"position: absolute; left: 80%;\"><b><a href=\""+path.split(csvf)[1]+"\" target=\"_blank\" style=\"color:black;\">Download/Open data file</a></b><br>")
+								plt_f.write("\n<p style=\"position: absolute; left: 80%;\"><b><a href=\""+path.split(filename)[1]+"\" style=\"color:black;\">Setup report page</a><br><a href=\""+path.split(csvf)[1]+"\" target=\"_blank\" style=\"color:black;\">Download/Open data file</a></b><br>")
 								plt_f.write("<b>Plot:</b><br>")
 								csv_f = open(csvf,'rb')
 								csv_header = csv_f.readline().replace('\n','').split(',')
