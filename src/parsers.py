@@ -481,7 +481,7 @@ def writeSetupReport(filename,setup,logger):
 								csv_f.close()
 								plt_f.write("\",\n\
 										{\n\
-											title: '"+csvt+"', xlabel:'Time"+tzoffset+"',legend: 'always',legendFormatter: legendFormatter, labelsUTC:false, digitsAfterDecimal:3, showRangeSelector: true,rollPeriod: 5,showRoller: true,highlightCircleSize: 3,drawPoints:true,drawPointCallback : Dygraph.Circles.TRIANGLE,pointSize: 3,strokeWidth: 1,strokeBorderWidth:1,highlightSeriesOpts: {drawPoints:true,drawPointCallback : Dygraph.Circles.TRIANGLE,pointSize:5,strokeWidth: 3,strokeBorderWidth: 1,highlightCircleSize: 8},\n\
+											title: '"+csvt+"', xlabel:'Time"+tzoffset+"',legend: 'onmouseover',legendFormatter: legendFormatter, labelsUTC:false, digitsAfterDecimal:3, showRangeSelector: true,rollPeriod: 24,showRoller: true,highlightCircleSize: 3,drawPoints:false,pointSize: 1,strokeWidth: 1,strokeBorderWidth:1,highlightSeriesOpts: {drawPoints:true,pointSize:2,strokeWidth: 2,strokeBorderWidth: 1,highlightCircleSize: 5},\n\
 											interactionModel : {'mousedown' : downV3,'mousemove' : moveV3,'mouseup' : upV3,'click' : clickV3,'dblclick' : dblClickV3,'mousewheel' : scrollV3}\n\
 										});\n\
 									} else {\n\
@@ -491,7 +491,7 @@ def writeSetupReport(filename,setup,logger):
   								plt_f.write(path.split(csvf)[1])
   								plt_f.write("\",\n\
 	  									{\n\
-	  										title: '"+csvt+"', xlabel:'Time"+tzoffset+"',legend: 'always',legendFormatter: legendFormatter, labelsUTC:false, digitsAfterDecimal:3, showRangeSelector: true,rollPeriod: 5,showRoller: true,highlightCircleSize: 3,drawPoints:true,drawPointCallback : Dygraph.Circles.TRIANGLE,pointSize: 3,strokeWidth: 1,strokeBorderWidth:1,highlightSeriesOpts: {drawPoints:true,drawPointCallback : Dygraph.Circles.TRIANGLE,pointSize:5,strokeWidth: 3,strokeBorderWidth: 1,highlightCircleSize: 8},\n\
+	  										title: '"+csvt+"', xlabel:'Time"+tzoffset+"',legend: 'onmouseover',legendFormatter: legendFormatter, labelsUTC:false, digitsAfterDecimal:3, showRangeSelector: true,rollPeriod: 24,showRoller: true,highlightCircleSize: 3,drawPoints:false,pointSize: 1,strokeWidth: 1,strokeBorderWidth:1,highlightSeriesOpts: {drawPoints:true,pointSize:2,strokeWidth: 2,strokeBorderWidth: 1,highlightCircleSize: 5},\n\
 	  										interactionModel : {'mousedown' : downV3,'mousemove' : moveV3,'mouseup' : upV3,'click' : clickV3,'dblclick' : dblClickV3,'mousewheel' : scrollV3}\n\
 	  									});\n\
 									}\n\
