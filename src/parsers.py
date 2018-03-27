@@ -424,7 +424,7 @@ def writeSetupReport(filename,setup,logger):
 								to_write_substr += "<tr>\n<td>"
 
 								pltf = path.splitext(csvf)[0]+'.html'
-								plts_to_write = "<iframe src=\""+ path.split(pltf)[1] +"\" style=\"width:100%;height:480px;\" frameborder=\"0\"></iframe>\n\t\t\t"
+								plts_to_write = "<iframe src=\""+ path.split(pltf)[1] +"\" style=\"width:100%;height:500px;\" frameborder=\"0\"></iframe>\n\t\t\t"
 								plts_f.write(plts_to_write)
 								to_write_substr += plts_to_write
 								to_write_substr += "</td>\n</tr>\n</tbody></table>\n"
@@ -441,7 +441,7 @@ def writeSetupReport(filename,setup,logger):
 								if l > 0:
 									csvt += ' - ROI'+str(l).zfill(3)
 								plt_f.write("\n\
-								<div id=\"graphdiv"+str(i)+str(j)+str(k)+str(l)+"\" style=\"position: absolute; left: 0px;  right: 20%; top: 20px; bottom: 8px;\"></div>\n\
+								<div id=\"graphdiv"+str(i)+str(j)+str(k)+str(l)+"\" style=\"position: absolute; left: 0px;  right: 21%; top: 20px; bottom: 8px;\"></div>\n\
 								<script type=\"text/javascript\" src=\"http://code.jquery.com/jquery-1.10.0.min.js\"></script>\n\
 								<script type=\"text/javascript\">\n\
 								function vischange"+str(i)+str(j)+str(k)+str(l)+" (el) {g"+str(i)+str(j)+str(k)+str(l)+".setVisibility(el.id.substr((\""+str(i)+str(j)+str(k)+str(l)+"\".length),el.id.length-1), el.checked);}\n\
@@ -499,8 +499,8 @@ def writeSetupReport(filename,setup,logger):
 								});\n\
 								</script>\
 								")
-
-								plt_f.write("\n<p style=\"position: absolute; left: 80%;\"><b><a href=\""+path.split(filename)[1]+"\" style=\"color:black;\">Setup report page</a><br><a href=\""+path.split(csvf)[1]+"\" target=\"_blank\" style=\"color:black;\">Download/Open data file</a></b><br>")
+								plt_f.write("\n<img style=\"position: relative; left: 80%;width:20%;\" src=\""+path.join(path.splitext(path.split(filename)[1])[0]+'_files',"Scenario_"+str(i+1)+"_Mask_Preview_"+("ROI"+str(l).zfill(3))*(l!=0)+"0"*(l==0)+".jpg")+"\"><br>")
+								plt_f.write("\n<p style=\"position: absolute; left: 80%;\"><b><a href=\""+path.split(filename)[1]+"\" target=\"_blank\" style=\"color:black;\">>Setup report page</a><br><a href=\""+path.split(csvf)[1]+"\" target=\"_blank\" style=\"color:black;\">>Download/Open data file</a></b><br>")
 								plt_f.write("<b>Plot:</b><br>")
 								csv_f = open(csvf,'rb')
 								csv_header = csv_f.readline().replace('\n','').split(',')

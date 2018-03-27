@@ -4165,38 +4165,17 @@ class monimet_gui(Tkinter.Tk):
 					pfn = source['networkid']+'-'+validateName(source['network'])+'-'+validateName(source['name']) + pfn_ts + os.path.splitext(source['filenameformat'])[1]
 				if not os.path.exists(maskdir):
 					os.makedirs(maskdir)
-				maskfilet1 = os.path.join(maskdir,"Scenario_"+str(i+1)+"_Mask_Preview_1.jpg")
-				maskfilet2 = os.path.join(maskdir,"Scenario_"+str(i+1)+"_Mask_Preview_2.jpg")
-				maskfilet3 = os.path.join(maskdir,"Scenario_"+str(i+1)+"_Mask_Preview_3.jpg")
-				maskfilet4 = os.path.join(maskdir,"Scenario_"+str(i+1)+"_Mask_Preview_4.jpg")
-				maskfiles1 = os.path.join(TmpDir,"Scenario_"+str(i+1)+"_Mask_Preview_1.jpg")
-				maskfiles2 = os.path.join(TmpDir,"Scenario_"+str(i+1)+"_Mask_Preview_2.jpg")
-				maskfiles3 = os.path.join(TmpDir,"Scenario_"+str(i+1)+"_Mask_Preview_3.jpg")
-				maskfiles4 = os.path.join(TmpDir,"Scenario_"+str(i+1)+"_Mask_Preview_4.jpg")
-				if os.path.isfile(maskfilet1):
-					os.remove(maskfilet1)
-				if os.path.isfile(maskfilet2):
-					os.remove(maskfilet2)
-				if os.path.isfile(maskfilet3):
-					os.remove(maskfilet3)
-				if os.path.isfile(maskfilet4):
-					os.remove(maskfilet4)
-				if pfn not in os.listdir(PreviewsDir):
-					continue
-				img = mahotas.imread(os.path.join(PreviewsDir,pfn))
-				rat = 160.0/img.shape[1]
-				tshape = (int(img.shape[1]*rat),int(img.shape[0]*rat))
-				mask = Image.new("RGB", tshape[0:2], "white")
-				mask2 = Image.new("RGB", (img.shape[1], img.shape[0]), "white")
-				mask3 = Image.new("RGB", (img.shape[1], img.shape[0]), "white")
-				draw = ImageDraw.Draw(mask)
-				draw2 = ImageDraw.Draw(mask2)
-				draw3 = ImageDraw.Draw(mask3)
+				maskfiles = []
+				maskfilet = []
+				maskfilet.append(os.path.join(maskdir,"Scenario_"+str(i+1)+"_Mask_Preview_0.jpg"))
+				maskfilet.append(os.path.join(maskdir,"Scenario_"+str(i+1)+"_Mask_Preview_1.jpg"))
+				maskfilet.append(os.path.join(maskdir,"Scenario_"+str(i+1)+"_Mask_Preview_2.jpg"))
+				maskfilet.append(os.path.join(maskdir,"Scenario_"+str(i+1)+"_Mask_Preview_3.jpg"))
+				maskfiles.append(os.path.join(TmpDir,"Scenario_"+str(i+1)+"_Mask_Preview_0.jpg"))
+				maskfiles.append(os.path.join(TmpDir,"Scenario_"+str(i+1)+"_Mask_Preview_1.jpg"))
+				maskfiles.append(os.path.join(TmpDir,"Scenario_"+str(i+1)+"_Mask_Preview_2.jpg"))
+				maskfiles.append(os.path.join(TmpDir,"Scenario_"+str(i+1)+"_Mask_Preview_3.jpg"))
 				aoic = deepcopy(scenario['polygonicmask'])
-				if img.shape[0]>480:
-					linewidth=int(self.PolygonWidth.get()*img.shape[0]/float(480))
-				else:
-					linewidth=self.PolygonWidth.get()
 				if isinstance(aoic, dict):
 					aoi = []
 					for k in aoic:
@@ -4206,6 +4185,32 @@ class monimet_gui(Tkinter.Tk):
 					aoic = [aoic]
 				if aoic != [[0,0,0,0,0,0,0,0]]:
 					for p_i,p in enumerate(aoic):
+						maskfilet.append(os.path.join(maskdir,"Scenario_"+str(i+1)+"_Mask_Preview_ROI"+str(p_i+1).zfill(3)+".jpg"))
+						maskfiles.append(os.path.join(TmpDir,"Scenario_"+str(i+1)+"_Mask_Preview_ROI"+str(p_i+1).zfill(3)+".jpg"))
+				for j in range(len(maskfiles)):
+					if os.path.isfile(maskfilet[j]):
+						os.remove(maskfilet[j])
+				if pfn not in os.listdir(PreviewsDir):
+					continue
+				img = mahotas.imread(os.path.join(PreviewsDir,pfn))
+				rat = 160.0/img.shape[1]
+				tshape = (int(img.shape[1]*rat),int(img.shape[0]*rat))
+				maskt = Image.new("RGB", tshape[0:2], "white")
+				mask0b = Image.new("RGB", (img.shape[1], img.shape[0]), "white")
+				mask0 = Image.new("RGB", (img.shape[1], img.shape[0]), "white")
+				drawt = ImageDraw.Draw(maskt)
+				draw0b = ImageDraw.Draw(mask0b)
+				draw0 = ImageDraw.Draw(mask0)
+				if img.shape[0]>480:
+					linewidth=int(self.PolygonWidth.get()*img.shape[0]/float(480))
+				else:
+					linewidth=self.PolygonWidth.get()
+				if aoic != [[0,0,0,0,0,0,0,0]]:
+					for p_i,p in enumerate(aoic):
+						exec("mask"+str(p_i+1)+" = Image.new('RGB', (img.shape[1], img.shape[0]), 'white')")
+						exec("draw"+str(p_i+1)+" = ImageDraw.Draw(mask"+str(p_i+1)+")")
+						exec("maskb"+str(p_i+1)+" = Image.new('RGB', (img.shape[1], img.shape[0]), 'white')")
+						exec("drawb"+str(p_i+1)+" = ImageDraw.Draw(maskb"+str(p_i+1)+")")
 						textx = []
 						texty = []
 						for i_c,c in enumerate(p):
@@ -4217,33 +4222,29 @@ class monimet_gui(Tkinter.Tk):
 								p[i_c]*=img.shape[0]
 						p.append(p[0])
 						p.append(p[1])
-						draw2.line(tuple(map(int,p)), fill='black', width=linewidth)
-						draw3.line(tuple(map(int,p)), fill=self.PolygonColor1.get(), width=linewidth)
-						draw.text(((np.array(textx).mean()).astype(int),(np.array(texty).mean()).astype(int)),str(p_i+1),'black',font=ImageFont.load_default())
-				mask = mask.resize(img.shape[0:2][::-1])
-				mask = np.array(list(mask.getdata())).reshape(img.shape)	#black text
-				mask2 = np.array(list(mask2.getdata())).reshape(img.shape)	#black polygons
-				mask3 = np.array(list(mask3.getdata())).reshape(img.shape)	#polycolor polygons
-				mahotas.imsave(maskfiles1,(255-((255)*((mask2<100)+(mask<100)))).astype('uint8'))
-				mahotas.imsave(maskfiles2,(mask3*(mask2<100)+img*(mask2>=100)).astype('uint8'))
-				mahotas.imsave(maskfiles3,img.astype('uint8'))
-				mahotas.imsave(maskfiles4,mask2.astype('uint8'))
-				if os.path.isfile(maskfiles1):
-					shutil.copyfile(maskfiles1,maskfilet1)
-				if os.path.isfile(maskfiles1):
-					os.remove(maskfiles1)
-				if os.path.isfile(maskfiles2):
-					shutil.copyfile(maskfiles2,maskfilet2)
-				if os.path.isfile(maskfiles2):
-					os.remove(maskfiles2)
-				if os.path.isfile(maskfiles3):
-					shutil.copyfile(maskfiles3,maskfilet3)
-				if os.path.isfile(maskfiles3):
-					os.remove(maskfiles3)
-				if os.path.isfile(maskfiles4):
-					shutil.copyfile(maskfiles4,maskfilet4)
-				if os.path.isfile(maskfiles4):
-					os.remove(maskfiles4)
+						draw0b.line(tuple(map(int,p)), fill='black', width=linewidth)
+						draw0.line(tuple(map(int,p)), fill=self.PolygonColor1.get(), width=linewidth)
+
+						eval("drawb"+str(p_i+1)).line(tuple(map(int,p)), fill='black', width=linewidth)
+						eval("draw"+str(p_i+1)).line(tuple(map(int,p)), fill=self.PolygonColor1.get(), width=linewidth)
+						exec("maskb"+str(p_i+1)+" = np.array(list(maskb"+str(p_i+1)+".getdata())).reshape(img.shape)")	#black polygon
+						exec("mask"+str(p_i+1)+" = np.array(list(mask"+str(p_i+1)+".getdata())).reshape(img.shape)")	#polycolor polygon
+						mahotas.imsave(maskfiles[4+p_i],(eval("mask"+str(p_i+1))*(eval("maskb"+str(p_i+1))<100)+img*(eval("maskb"+str(p_i+1))>=100)).astype('uint8'))
+
+						drawt.text(((np.array(textx).mean()).astype(int),(np.array(texty).mean()).astype(int)),str(p_i+1),'black',font=ImageFont.load_default())
+				maskt = maskt.resize(img.shape[0:2][::-1])
+				maskt = np.array(list(maskt.getdata())).reshape(img.shape)	#black text
+				mask0b = np.array(list(mask0b.getdata())).reshape(img.shape)	#black polygons
+				mask0 = np.array(list(mask0.getdata())).reshape(img.shape)	#polycolor polygons
+				mahotas.imsave(maskfiles[0],(mask0*(mask0b<100)+img*(mask0b>=100)).astype('uint8'))
+				mahotas.imsave(maskfiles[1],(255-((255)*((mask0b<100)+(maskt<100)))).astype('uint8'))
+				mahotas.imsave(maskfiles[2],img.astype('uint8'))
+				mahotas.imsave(maskfiles[3],mask0b.astype('uint8'))
+				for j in range(len(maskfiles)):
+					if os.path.isfile(maskfiles[j]):
+						shutil.copyfile(maskfiles[j],maskfilet[j])
+					if os.path.isfile(maskfiles[j]):
+						os.remove(maskfiles[j])
 			shutil.copyfile(os.path.join(ResourcesDir,'style.css'),os.path.join(maskdir,'style.css'))
 			shutil.copyfile(os.path.join(ResourcesDir,'dygraph.js'),os.path.join(maskdir,'dygraph.js'))
 			shutil.copyfile(os.path.join(ResourcesDir,'dygraph.js'),os.path.join(maskdir,'dygraph-shapes.js'))
