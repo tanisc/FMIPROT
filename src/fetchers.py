@@ -224,7 +224,7 @@ def filterImageListTemporal(logger,imglistv,pathlistv,fnameconv,timec,count):
 		time2 = time2.replace(second=59)
 
 	if timec[4] == 'Last one year':
-		date1 = today - (datetime.date(2011,12,31)-datetime.date(2010,1,1))
+		date1 = today - (datetime.date(2010,12,31)-datetime.date(2010,1,1))
 		date2 = today
 		time1 = strptime2(timec[2],'%H:%M')[2]
 		time2 = strptime2(timec[3],'%H:%M')[2]
