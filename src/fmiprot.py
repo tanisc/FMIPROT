@@ -6,6 +6,7 @@
 import os
 import shutil
 import datetime
+from pytz import timezone
 from uuid import uuid4
 from definitions import *
 import fetchers
@@ -4363,6 +4364,19 @@ class monimet_gui(Tkinter.Tk):
 								datetimelistp = []
 							else:
 								datetimelistp = parsers.oTime2sTime(outputtv[0][1][1])
+							# one side has tzinfo one side does not. all aware results are utc.
+							print outputtv[0][1][1]
+							if datetimelistp != []:
+								if datetimelistp[0].tzinfo is None or datetimelistp[0].tzinfo.utcoffset(datetimelistp[0]) is None:  #old results are naive
+									if not (datetimelist[0].tzinfo is None or datetimelist[0].tzinfo.utcoffset(datetimelist[0]) is None):	#new results are not naive
+										for i_dt,dt in enumerate(datetimelistp):
+											datetimelistp[i_dt]=dt.replace(tzinfo=timezone('UTC'))
+											outputtv[0][1][1][i_dt] = str(datetimelistp[i_dt].strftime("%Y-%m-%d %H:%M:%S%z"))[:-2] + ':' + str(datetimelistp[i_dt].strftime("%Y-%m-%d-%H:%M:%S%z"))[-2:]
+								else:	#old results are aware
+									if datetimelist[0].tzinfo is None or datetimelist[0].tzinfo.utcoffset(datetimelist[0]) is None:	#new results are naive
+										for i_dt,dt in enumerate(datetimelistp):
+											datetimelistp[i_dt]=dt.replace(tzinfo=None)
+											outputtv[0][1][1][i_dt] = str(datetimelistp[i_dt].strftime("%Y-%m-%d %H:%M:%S"))
 							(imglista,datetimelista,pathlista) = (deepcopy(imglist),deepcopy(datetimelist),deepcopy(pathlist)) #all
 							if outputtv != []:
 								outputtvd = []	#out of temporal selection
