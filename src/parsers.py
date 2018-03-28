@@ -484,6 +484,7 @@ def writeSetupReport(filename,setup,logger):
 											title: '"+csvt+"', xlabel:'Time"+tzoffset+"',legend: 'onmouseover',legendFormatter: legendFormatter, labelsUTC:false, digitsAfterDecimal:3, showRangeSelector: true,rollPeriod: 24,showRoller: true,highlightCircleSize: 3,drawPoints:false,pointSize: 1,strokeWidth: 1,strokeBorderWidth:1,highlightSeriesOpts: {drawPoints:true,pointSize:2,strokeWidth: 2,strokeBorderWidth: 1,highlightCircleSize: 5},\n\
 											interactionModel : {'mousedown' : downV3,'mousemove' : moveV3,'mouseup' : upV3,'click' : clickV3,'dblclick' : dblClickV3,'mousewheel' : scrollV3}\n\
 										});\n\
+									document.getElementById(\"restore"+str(i)+str(j)+str(k)+str(l)+"\").onclick = function() {restorePositioning(g"+str(i)+str(j)+str(k)+str(l)+");};\n\
 									} else {\n\
 									g"+str(i)+str(j)+str(k)+str(l)+" = new Dygraph(\n\
 									document.getElementById(\"graphdiv"+str(i)+str(j)+str(k)+str(l)+"\"),\n\
@@ -494,8 +495,12 @@ def writeSetupReport(filename,setup,logger):
 	  										title: '"+csvt+"', xlabel:'Time"+tzoffset+"',legend: 'onmouseover',legendFormatter: legendFormatter, labelsUTC:false, digitsAfterDecimal:3, showRangeSelector: true,rollPeriod: 24,showRoller: true,highlightCircleSize: 3,drawPoints:false,pointSize: 1,strokeWidth: 1,strokeBorderWidth:1,highlightSeriesOpts: {drawPoints:true,pointSize:2,strokeWidth: 2,strokeBorderWidth: 1,highlightCircleSize: 5},\n\
 	  										interactionModel : {'mousedown' : downV3,'mousemove' : moveV3,'mouseup' : upV3,'click' : clickV3,'dblclick' : dblClickV3,'mousewheel' : scrollV3}\n\
 	  									});\n\
-									}\n\
 									document.getElementById(\"restore"+str(i)+str(j)+str(k)+str(l)+"\").onclick = function() {restorePositioning(g"+str(i)+str(j)+str(k)+str(l)+");};\n\
+									window.intervalId = setInterval(function() {\n\
+										var rndquery = Math.ceil(Math.random() * 1000000000);\n\
+								        g"+str(i)+str(j)+str(k)+str(l)+".updateOptions( { 'file': '"+path.split(csvf)[1]+"?'+rndquery } );\n\
+								      	}, 60000);\n\
+									}\n\
 								});\n\
 								</script>\
 								")

@@ -4365,7 +4365,6 @@ class monimet_gui(Tkinter.Tk):
 							else:
 								datetimelistp = parsers.oTime2sTime(outputtv[0][1][1])
 							# one side has tzinfo one side does not. all aware results are utc.
-							print outputtv[0][1][1]
 							if datetimelistp != []:
 								if datetimelistp[0].tzinfo is None or datetimelistp[0].tzinfo.utcoffset(datetimelistp[0]) is None:  #old results are naive
 									if not (datetimelist[0].tzinfo is None or datetimelist[0].tzinfo.utcoffset(datetimelist[0]) is None):	#new results are not naive
