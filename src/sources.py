@@ -1,4 +1,4 @@
-from parsers import readINI,writeINI,validateName
+from parsers import readTSVx,writeTSVx,validateName
 from fetchers import fetchFile
 from definitions import NetworklistFile, SourceDir, TmpDir,sysargv
 from os import path
@@ -14,9 +14,7 @@ else:
 #read sources from network file #remember exceptions same name and cross ref
 def readSources(tkobj,proxy,connection, logger):
 	logger.set( "Reading networks...")
-	networklist = readINI(NetworklistFile)
-	if networklist == []:
-		networklist = [{'username': None, 'host': 'monimet.fmi.fi', 'protocol': 'HTTP', 'name': 'MONIMET', 'file': 'cameras/cnif.ini', 'password': None, 'id': '1', 'localfile': 'monimet.ini'}]
+	networklist = readTSVx(NetworklistFile)
 	sourcelistlist = []
 	networklist_missing = []
 	for network in networklist:
@@ -26,7 +24,7 @@ def readSources(tkobj,proxy,connection, logger):
 			logger.set("Fetching CNIF for "+ network['name']+"...")
 			networkFile = fetchFile(tkobj,logger,TmpDir, network['localfile'], network['protocol'],network['host'], network['username'], network['password'], network['file'], proxy, connection)
 			try:
-				if 'name' not in readINI(path.join(TmpDir,networkFile))[0]:
+				if 'name' not in readTSVx(path.join(TmpDir,networkFile))[0]:
 					networkFile = False
 					logger.set('CNIF is corrupted or download failed.')
 			except:
@@ -46,7 +44,7 @@ def readSources(tkobj,proxy,connection, logger):
 				else:
 					logger.set("CNIF can not be read/written. Cameras of the network can not be read.")
 					continue
-			sourcelist = readINI(path.join(SourceDir,network['localfile']))
+			sourcelist = readTSVx(path.join(SourceDir,network['localfile']))
 			for i,s in enumerate(sourcelist):
 				sourcelist[i].update({'networkid':network['id'],'network':network['name']})
 
@@ -54,7 +52,7 @@ def readSources(tkobj,proxy,connection, logger):
 			logger.set('Checking different image sources for same location/device (e.g. IR images for existing cameras)...')
 			sharedn = 0
 			for i,source1 in enumerate(sourcelist):
-				if 'sharedsources' in source1:
+				if 'sharedsources' in source1 and source1['sharedsources'] is not None:
 					shared = source1['sharedsources']
 					if not isinstance(shared,list):
 						shared = [shared]
@@ -152,7 +150,7 @@ def fixSourcesBySetup(logger,networklist,sourcelist,setup):
 			for n,network in enumerate(networklist):
 				if 'temporary' in network and network['temporary']:
 					del networklist[n]['temporary']
-			writeINI(NetworklistFile,networklist)
+			writeTSVx(NetworklistFile,networklist)
 			for network in sources_to_save:
 				for s,source in enumerate(sourcelist):
 					if 'temporary' in source and source['temporary']:
@@ -161,16 +159,16 @@ def fixSourcesBySetup(logger,networklist,sourcelist,setup):
 				network = getSource(logger,networklist,network)
 				if network['protocol'] == 'LOCAL':
 					if tkMessageBox.askyesno('Save changes','Changes in be saved to the file: ' + network['file'] + '. Are you sure?'):
-						writeINI(network['file'],sourcedict)
+						writeTSVx(network['file'],sourcedict)
 				else:
-					tkMessageBox.showinfo('Save changes','Program now will export the CNIF. Upload it to the host \''+network['host']+'\' under directory \'' +path.split(network['file'])[0]+ ' \'with the name \''+path.split(network['file'])[1]+'\'. Notice that for HTTP connections, it might take some time until the updated file is readable.')
+					tkMessageBox.showinfo('Save changes','Program now will export the CNIF. Upload it to the host \''+network['host']+'\' under directory \'' +path.split(network['file'])[0]+ ' \'with the name \''+path.split(network['file'])[1]+'\'. Mind that for HTTP connections, it might take some time until the updated file is readable.')
 					file_opt = options = {}
-					options['defaultextension'] = '.ini'
-					options['filetypes'] = [ ('CNIFs', '.ini'),('all files', '.*')]
+					options['defaultextension'] = '.tsvx'
+					options['filetypes'] = [ ('Extended tab seperated value files', '.tsvx'),('all files', '.*')]
 					options['title'] = 'Set filename to export CNIF to...'
 					ans = path.normpath(tkFileDialog.asksaveasfilename(**file_opt))
 					if ans != '' and ans != '.':
-						writeINI(ans,sourcedict)
+						writeTSVx(ans,sourcedict)
 			for sc in scenarios_to_save:
 				del setup[sc]['source']['temporary']
 	return (networklist, sourcelist, setup)
@@ -223,7 +221,7 @@ def writeNetworks(logger,filename,sources,networklist=[]):
 	networks = []
 	for networkname in networklist:
 		networks = addNetwork(getNetwork(networkname,sources),networks)
-	writeINI(filename,networks)
+	writeTSVx(filename,networks)
 
 
 #get list of source names from dictlist, filtered by network if defined

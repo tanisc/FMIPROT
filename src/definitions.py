@@ -92,7 +92,7 @@ PreviewsDir = os.path.join(BinDir,'previews')
 PluginsDir = os.path.join(BinDir,'plugins')
 SourceDir = os.path.join(BinDir,'sources')
 settingsFile = os.path.join(ResourcesDir,'settings.ini')
-NetworklistFile = os.path.join(SourceDir,'networklist.ini')
+NetworklistFile = os.path.join(SourceDir,'networklist.tsvx')
 
 if sysargv['dev']:
     BinDir = os.path.split(os.path.realpath(os.sys.argv[0]))[0]
@@ -120,7 +120,7 @@ if sysargv['cleantemp']:
 #definitions, labels, keys for sources
 settings = ['http_proxy','https_proxy','ftp_proxy','ftp_passive','ftp_numberofconnections','results_path','images_path','images_download','timezone','convert_timezone','generate_report']
 settingsn = ['Proxy address for HTTP connections','Proxy address for HTTPS connections','Proxy address for FTP connections','Use passive connection for FTP','Maximum number of simultaneous FTP connections','Default results directory','Local image directory','Check and download new images from the camera network servers','Timezone offset','Convert time zone of timestamps of the images','Generate setup report with analysis results']
-settingso = ['(host:port)','(host:port)','(host:port)','(0/1)','(0-10)','(Path to directory)','(Path to directory)','(0/1)','(+HHMM/-HHMM or +0000 for UTC)','(0/1)','(0/1)']
+settingso = ['(host:port)','(host:port)','(host:port)','(0/1)','(0-10)','(Path to directory)','(Path to directory)','(0/1)','(+HH:MM/-HH:MM or +00:00 for UTC)','(0/1)','(0/1)']
 source_metadata_hidden = ['host','username','password','path','filenameformat','networkid']
 source_metadata_names = {'network':'Source network','protocol':'Communication protocol','host':'Host address','username':'Username','password':'Password','device':'Device type','channels':'List of channels in the images','name':'Source Name','path':'Path on the server','filenameformat':'Filename convention of the images'}
 source_metadata_names.update({'sharedsources':'Other image sources that produces image including any shared location'})
@@ -130,7 +130,7 @@ source_metadata_names.update({'lastimagetime':'Time of the latest image produced
 source_metadata_names.update({'firstimagetime':'Time of the earliest image'})
 source_metadata_names.update({'previewimagetime':'Time of the image to be used as preview image'})
 
-settingsd = ['','','','1',str(FTPNumCon),ResultsDir,ImagesDir,str(int(ImagesDownload)),'+0000','0','1']
+settingsd = ['','','','1',str(FTPNumCon),ResultsDir,ImagesDir,str(int(ImagesDownload)),'+00:00','0','1']
 
 #create missing dirs and files
 dlist = [ResultsDir,ImagesDir,LogDir,PluginsDir,TmpDir,SourceDir]
@@ -140,6 +140,14 @@ if sysargv['dev']:
 for d in dlist:
     if not os.path.exists(d):
         os.makedirs(d)
-        if d == SourceDir and not os.path.exists(NetworklistFile):
-            shutil.copyfile(os.path.join(ResourcesDir,"networklist_def.ini"),NetworklistFile)
-            shutil.copyfile(os.path.join(ResourcesDir,"monimet_demo_def.ini"),os.path.join(SourceDir,"monimet_demo.ini"))
+if not os.path.exists(NetworklistFile):
+    if os.path.exists(os.path.splitext(NetworklistFile)[0]+'.ini'): #v0.15.3 and before support
+        shutil.copyfile(os.path.splitext(NetworklistFile)[0]+'.ini',NetworklistFile)
+        os.remove(os.path.splitext(NetworklistFile)[0]+'.ini')
+    else:
+        shutil.copyfile(os.path.join(ResourcesDir,"networklist_def.tsvx"),NetworklistFile)
+    if os.path.exists(os.path.join(ResourcesDir,"monimet_demo_def.ini")): #v0.15.3 and before support
+        shutil.copyfile(os.path.join(ResourcesDir,"monimet_demo_def.ini"),os.path.join(SourceDir,"monimet_demo.tsvx"))
+        os.remove(os.path.join(ResourcesDir,"monimet_demo_def.ini"))
+    else:
+        shutil.copyfile(os.path.join(ResourcesDir,"monimet_demo_def.tsvx"),os.path.join(SourceDir,"monimet_demo.tsvx"))

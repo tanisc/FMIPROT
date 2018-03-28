@@ -114,7 +114,7 @@ def getAoiFracs(imglist, datetimelist, mask, logger, green, red, blue, white, lu
 				bmds = np.append(bmds, bmd)
 				bsds = np.append(bsds, bsd)
 
-			time = np.append(time,str(datetimelist[i]))
+			time = np.append(time,str(datetimelist[i]).replace(' ','T'))
 		except:
 			logger.set("Analyzing " + fname + " failed.")
 		logger.set('Image: |progress:4|queue:'+str(i+1)+'|total:'+str(len(imglist)))
@@ -228,7 +228,7 @@ def getCustomIndices(imglist, datetimelist, mask, logger, calcstring, ebp):
 			ind = getCustomIndex(img,mask*thmask*exmask,calcstring)
 			inds = np.append(inds, ind)
 
-			time = np.append(time,str(datetimelist[i]))
+			time = np.append(time,str(datetimelist[i]).replace(' ','T'))
 		except:
 			logger.set("Analyzing " + fname + " failed.")
 		logger.set('Image: |progress:4|queue:'+str(i+1)+'|total:'+str(len(imglist)))
@@ -309,7 +309,7 @@ def vegInd(imglist,datetimelist,mask,logger, ebp,gf,rf,gei,grvi):
 				scsfrac = np.sum(scsmask.transpose(2,0,1)[0]==0)/float(np.sum((mask*thmask*exmask).transpose(2,0,1)[0]==1))
 				scsfracs = np.append(scsfracs, scsfrac)
 
-			time = np.append(time,str(datetimelist[i]))
+			time = np.append(time,str(datetimelist[i]).replace(' ','T'))
 		except:
 			logger.set("Analyzing " + fname + " failed.")
 		logger.set('Image: |progress:4|queue:'+str(i+1)+'|total:'+str(len(imglist)))

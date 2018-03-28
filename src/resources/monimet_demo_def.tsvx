@@ -1,0 +1,7 @@
+#MONIMET Camera Network Demo CNIF for FMIPROT v0.15.4+
+#Written by Cemal Melih Tanis	cemal.melih.tanis at fmi.fi
+!network	protocol	host	username	password	device	channels	name	path	filenameformat	timezone-experimental	numberofimages	devicestate	lastimagetime	sharedsources
+'MONIMET Demo'	'FTP'	'litdb.fmi.fi'	'monimet_demo'	'xx95eIq3U1EUg'	'camera'	'red','green','blue'	'Sodankyla Pine Canopy'	'sod_ca'	'sod_pin_canopy_%Y%m%d_%H%M%S.jpg'	'+00:00'	'1817'	'ON'	'2015-12-31T13:00:00'
+'MONIMET Demo'	'FTP'	'litdb.fmi.fi'	'monimet_demo'	'xx95eIq3U1EUg'	'camera'	'red','green','blue'	'Sodankyla Pine Crown'	'sod_cr'	'sod_pin_crown_%Y%m%d_%H%M%S.jpg'	'+00:00'	'1806'	'ON'	'2015-12-31T13:00:00'
+'MONIMET Demo'	'FTP'	'litdb.fmi.fi'	'monimet_demo'	'xx95eIq3U1EUg'	'camera'	'red','green','blue'	'Sodankyla Pine Ground'	'sod_gr'	'sod_pin_ground_%Y%m%d_%H%M%S.jpg'	'+00:00'	'1805'	'ON'	'2015-12-31T13:00:00'
+'MONIMET Demo'	'FTP'	'litdb.fmi.fi'	'monimet_demo'	'xx95eIq3U1EUg'	'camera'	'red','green','blue'	'Sodankyla Pine Peatland'	'sod_pl'	'sod_pin_peatland_%Y%m%d_%H%M%S.jpg'	'+00:00'	'1806'	'ON'	'2015-12-31T13:00:00'

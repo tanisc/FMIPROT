@@ -1,0 +1,2 @@
+!username	host	protocol	name	file	password	id	localfile
+	'monimet.fmi.fi'	'HTTP'	'MONIMET Demo'	'cameras/cnif_demo.tsvx'		'0'	'monimet_demo.tsvx'

@@ -5,7 +5,7 @@ from definitions import settings, settingsd, ResourcesDir, BinDir
 from copy import deepcopy
 from os import path, listdir
 from string import ascii_letters, digits
-def strptime2(text,conv):
+def strptime2(text,conv="%Y-%m-%dT%H:%M:%S"):
 	if isinstance(text,str):
 		dt = datetime.datetime.strptime(text,conv)
 	else:
@@ -14,33 +14,39 @@ def strptime2(text,conv):
 	d = datetime.date(year=dt.year,month=dt.month,day=dt.day)
 	return [dt,d,t]
 
-def cTime2sTime(cTime):
-	return datetime.datetime.strptime(cTime,"%Y%m%d_%H%M%S")
-
-def dTime2sTime(sTime):
-	return sTime.strftime('%Y%m%d_%H%M%S')
-
-def oTime2sTime(cTime): #utc only
-	if isinstance(cTime,list):
-		oTime = []
-		if len(cTime[0]) == 19:
-			for i,c in enumerate(cTime):
-				oTime.append(datetime.datetime.strptime(c,"%Y-%m-%d %H:%M:%S"))
-		if len(cTime[0]) == 25:
-			for i,c in enumerate(cTime):
-				oTime.append(datetime.datetime.strptime(c[:-6],"%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone('UTC')))
-		return oTime
-	if isinstance(cTime,str):
-		if len(cTime) == 19:
-			return datetime.datetime.strptime(cTime,"%Y-%m-%d %H:%M:%S")
-		if len(cTime) == 25:
-			return datetime.datetime.strptime(cTime[:-6],"%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone('UTC'))
-
-def convertTZ(dt,o1,o2,semicolon=False):
-	if semicolon:
-		i = 4
+def strftime2(dTime,conv="%Y-%m-%dT%H:%M:%S",divider_index=10):
+	if isinstance(dTime,str):
+		dt = dTime
 	else:
-		i = 3
+		dt = dTime.strftime(conv)
+	d = dt[:divider_index]
+	t = dt[divider_index+1:]
+	return [dt,d,t]
+
+# remove later
+# def cTime2sTime(cTime):
+# 	return datetime.datetime.strptime(cTime,"%Y%m%d_%H%M%S")
+
+def dTime2fTime(dTime):
+	return strftime2(dTime).replace(':','')
+
+def oTime2dTime(oTime): #utc only
+	if isinstance(oTime,list):
+		dTime = []
+		if len(oTime[0]) == 19:
+			for i,o in enumerate(oTime):
+				dTime.append(strptime2(o)[0])
+		if len(oTime[0]) == 25:
+			for i,o in enumerate(oTime):
+				dTime.append(strptime2(o[:-6])[0].replace(tzinfo=timezone('UTC')))
+		return dTime
+	if isinstance(oTime,str):
+		if len(oTime) == 19:
+			return strptime2(oTime)[0]
+		if len(oTime) == 25:
+			return strptime2(oTime[:-6])[0].replace(tzinfo=timezone('UTC'))
+
+def convertTZ(dt,o1,o2):
 	if isinstance(dt,str) or isinstance(dt,datetime.datetime):
 		datetimelist = deepcopy([dt])
 	else:
@@ -48,17 +54,17 @@ def convertTZ(dt,o1,o2,semicolon=False):
 	if isinstance(datetimelist[0],str):
 		if datetimelist[0][-6] in '+-':
 			for idt,dt in enumerate(datetimelist):
-				tz = dt[-6:].replace(':','')
-				dt = strptime2(dt[:-6],'%Y-%m-%d %H:%M:%S')[0]
-				t_dif = datetime.timedelta(hours=int(o2[:3]),minutes=int(o2[i:])) - datetime.timedelta(hours=int(tz[:3]),minutes=int(tz[i:]))
-				datetimelist[idt]=str(dt+t_dif)+o2[:3]+':'+o2[i:]
+				tz = dt[-6:]
+				dt = strptime2(dt[:-6])[0]
+				t_dif = datetime.timedelta(hours=int(o2[:3]),minutes=int(o2[4:])) - datetime.timedelta(hours=int(tz[:3]),minutes=int(tz[4:]))
+				datetimelist[idt]=strftime2(dt+t_dif)[0]+o2
 		else:
-			t_dif = datetime.timedelta(hours=int(o2[:3]),minutes=int(o2[i:])) - datetime.timedelta(hours=int(o1[:3]),minutes=int(o1[i:]))
+			t_dif = datetime.timedelta(hours=int(o2[:3]),minutes=int(o2[4:])) - datetime.timedelta(hours=int(o1[:3]),minutes=int(o1[4:]))
 			for idt,dt in enumerate(datetimelist):
-				dt = strptime2(dt,'%Y-%m-%d %H:%M:%S')[0]
-				datetimelist[idt]=str(dt+t_dif)
+				dt = strptime2(dt)[0]
+				datetimelist[idt]=str(dt+t_dif).replace(' ','T')
 	else:
-		t_dif = datetime.timedelta(hours=int(o2[:3]),minutes=int(o2[i:])) - datetime.timedelta(hours=int(o1[:3]),minutes=int(o1[i:]))
+		t_dif = datetime.timedelta(hours=int(o2[:3]),minutes=int(o2[4:])) - datetime.timedelta(hours=int(o1[:3]),minutes=int(o1[4:]))
 		for idt,dt in enumerate(datetimelist):
 			datetimelist[idt]=dt+t_dif
 	return datetimelist
@@ -86,6 +92,8 @@ def readSettings(filename,logger):
 		except:
 			logger.set('Incorrect parameter "'+line[0]+'" found in settings file. Parameter is ignored.')
 	set_f.close()
+	if ':' not in settingsv[settings.index('timezone')]:	#0.15.4 and previous support
+		settingsv[settings.index('timezone')] = settingsv[settings.index('timezone')][:3] + ':' + settingsv[settings.index('timezone')][3:]
 	logger.set('Read.')
 	return settingsv
 
@@ -166,12 +174,11 @@ def readSetup(filename,sourcelist,logger):
 		config = readConfig(filename,logger)
 		setup = config2Setup(logger,config,sourcelist)
 	else:
-		setup = readINI(filename)
+		setup = readTSVx(filename)
 		logger.set( 'Read.')
 		logger.set( 'Number of scenarios: ' + str(len(setup)))
 #except:
 	#	logger.set( 'Error: Problem at reading setup file.')
-	#	logger.set( 'Setup file must be supplied as argument #1.')
 		#return False
 	return setup
 
@@ -519,63 +526,19 @@ def writeSetupReport(filename,setup,logger):
 								plt_f.close()
 		to_write = to_write.replace('<replace:results>',to_write_substr)
 		report_f.write(to_write)
-
-	plts_f.write("</body>\n")
-	plts_f.write("</html>\n")
-	plts_f.close()
-	logger.set("Result plots are saved as " + pltsf)
+	if res_data is not False:
+		plts_f.write("</body>\n")
+		plts_f.write("</html>\n")
+		plts_f.close()
+		logger.set("Result plots are saved as " + pltsf)
 
 	report_f.write("</body>\n")
 	report_f.write("</html>\n")
 	report_f.close()
 	logger.set("Report is saved as " + filename)
 
-
-#READS CAMERA INFORMATIONS FROM WEB (NEED FOR THE PATH AND FNAME CONVENTION IN FTP FOR EACH CAMERA)
-def readCams(inifile, proxy, logger):
-	from copy import deepcopy
-	proxy = deepcopy(proxy)
-	import urllib2
-	if 'http_proxy' in proxy:
-		proxy.update({'http':proxy['http_proxy']})
-		del proxy['http_proxy']
-	if 'https_proxy' in proxy:
-		proxy.update({'https':proxy['https_proxy']})
-		del proxy['https_proxy']
-	if 'ftp_proxy' in proxy:
-		proxy.update({'ftp':proxy['ftp_proxy']})
-		del proxy['ftp_proxy']
-	proxy = urllib2.ProxyHandler(proxy)
-	opener = urllib2.build_opener(proxy)
-	urllib2.install_opener(opener)
-	logger.set('Reading the camera information...')
-	try:
-		cfg = urllib2.urlopen(inifile)
-		cfg_loc = open(path.join(ResourcesDir,'camstatus.ini'),'w')
-		for line in cfg:
-			cfg_loc.write(line)
-		cfg_loc.close()
-		cfg.close()
-		cfg = urllib2.urlopen(inifile)
-		logger.set('Camera information cached.')
-	except:
-		logger.set('Problem reading camera information from the web. Check your connection and the file ' + inifile + ' on the next run.')
-		logger.set('Seaching for cached information...')
-		try:
-			cfg = open(path.join(ResourcesDir,'camstatus.ini'),'r')
-			logger.set('Found.')
-		except:
-			logger.set('No cached information found. Terminating.')
-			exit()
-	camlist = []
-	for line in cfg:
-		camlist.append(line.replace('\n','').split('\t'))
-	cfg.close()
-	logger.set('Read.')
-	return camlist
-
-def readINI(inifile):
-	f = open(inifile,'rb')
+def readTSVx(tsvxfile):
+	f = open(tsvxfile,'rb')
 	dictlist = []
 	keys = []
 	ne = 0
@@ -657,16 +620,16 @@ def readINI(inifile):
 	return dictlist
 
 
-def writeINI(inifile, dictlist,commonheader=True):
-	validini = False
+def writeTSVx(tsvxfile, dictlist,commonheader=True):
+	validtsvx = False
 	for d,dicti in enumerate(dictlist):
 		if 'temporary' not in dicti or dicti['temporary'] is False:
-			validini = True
+			validtsvx = True
 			break
-	if not validini:
+	if not validtsvx:
 		return 'Nothing to write in INI file.'
 
-	f = open(inifile,'w')
+	f = open(tsvxfile,'w')
 	if commonheader:
 		keys = []
 		for dicti in dictlist:
@@ -767,11 +730,11 @@ def writeINI(inifile, dictlist,commonheader=True):
 			f.write('\n')
 
 	f.close()
-	return 'Writing INI file successful.'
+	return 'Writing TSVx file successful.'
 
 
-def dwriteINI(inifile, dictlist,commonheader=True):
-	f = open(inifile,'w')
+def dwriteTSVx(tsvxfile, dictlist,commonheader=True):
+	f = open(tsvxfile,'w')
 	keys = []
 	for dict in dictlist:
 		for key in dict:

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # python version 2.7
 # Cemal Melih Tanis (C)
-#LIBS###############################################################################################################
+###############################################################################
 import os
 import shutil
 import datetime
@@ -399,7 +399,6 @@ class monimet_gui(Tkinter.Tk):
 		setupmenu.add_command(label="Load..", command=self.setupFileLoad)
 		setupmenu.add_command(label="Save", command=self.setupFileSave)
 		setupmenu.add_command(label="Save As...", command=self.setupFileSaveas)
-		setupmenu.add_command(label="Save As...", command=self.setupFileSaveas)
 		setupmenu.add_command(label="Save a copy with modified sources...", command=self.setupFileSaveasModified)
 		setupmenu.add_separator()
 		setupmenu.add_command(label="Generate report", command=self.setupFileReport)
@@ -523,7 +522,7 @@ class monimet_gui(Tkinter.Tk):
 		Tkinter.Label(self.manager_network_window,anchor='w',text='Path to CNIF:').grid(sticky='w'+'e',row=r,column=1)
 		Tkinter.Entry(self.manager_network_window,textvariable=self.manager_network_file).grid(sticky='w'+'e',row=r,column=2,columnspan=3)
 		Tkinter.Button(self.manager_network_window,text='Browse...',command=self.Networks_BrowseCNIF).grid(sticky='w'+'e',row=r,column=5)
-		Tkinter.Button(self.manager_network_window,text='?',command=lambda: tkMessageBox.showinfo('Network Manager','The path to the CNIF and filename of the CNIF. For example, \'mycameranetwork/mycnif.ini\'. If the protocol is LOCAL (i.e. CNIF is in this computer) use browse to find the file.')).grid(sticky='w'+'e',row=r,column=6)
+		Tkinter.Button(self.manager_network_window,text='?',command=lambda: tkMessageBox.showinfo('Network Manager','The path to the CNIF and filename of the CNIF. For example, \'mycameranetwork/mycnif.tsvx\'. If the protocol is LOCAL (i.e. CNIF is in this computer) use browse to find the file.')).grid(sticky='w'+'e',row=r,column=6)
 		r += 1
 		Tkinter.Label(self.manager_network_window,bg="RoyalBlue4",fg='white',anchor='w',text='Edit sources and CNIF').grid(sticky='w'+'e',row=r,column=1,columnspan=6)
 		r += 1
@@ -590,7 +589,7 @@ class monimet_gui(Tkinter.Tk):
 			Tkinter.Label(self.modify_source_window,anchor='w',text='Path to images:').grid(sticky='w'+'e',row=r,column=1)
 			Tkinter.Entry(self.modify_source_window,textvariable=self.modify_source_path).grid(sticky='w'+'e',row=r,column=2,columnspan=3)
 			Tkinter.Button(self.modify_source_window,text='Browse...',command=self.Networks_BrowseImages).grid(sticky='w'+'e',row=r,column=5)
-			Tkinter.Button(self.modify_source_window,text='?',command=lambda: tkMessageBox.showinfo('Edit Sources','The path of the image directory. For example, \'mycameranetwork/mycnif.ini\'. If the protocol is LOCAL (i.e. CNIF is in this computer) use browse to find the file.')).grid(sticky='w'+'e',row=r,column=6)
+			Tkinter.Button(self.modify_source_window,text='?',command=lambda: tkMessageBox.showinfo('Edit Sources','The path of the image directory. For example, \'mycameranetwork/mycnif.tsvx\'. If the protocol is LOCAL (i.e. CNIF is in this computer) use browse to find the file.')).grid(sticky='w'+'e',row=r,column=6)
 			r += 1
 			Tkinter.Label(self.modify_source_window,anchor='w',text='File name convention of images:').grid(sticky='w'+'e',row=r,column=1)
 			Tkinter.Entry(self.modify_source_window,textvariable=self.modify_source_filenameformat).grid(sticky='w'+'e',row=r,column=2,columnspan=4)
@@ -690,7 +689,7 @@ class monimet_gui(Tkinter.Tk):
 		Tkinter.Label(self.manager_source_window,anchor='w',text='Path to images:').grid(sticky='w'+'e',row=r,column=1)
 		Tkinter.Entry(self.manager_source_window,textvariable=self.manager_source_path).grid(sticky='w'+'e',row=r,column=2,columnspan=3)
 		Tkinter.Button(self.manager_source_window,text='Browse...',command=self.Networks_BrowseImages).grid(sticky='w'+'e',row=r,column=5)
-		Tkinter.Button(self.manager_source_window,text='?',command=lambda: tkMessageBox.showinfo('Edit Sources','The path of the image directory. For example, \'mycameranetwork/mycnif.ini\'. If the protocol is LOCAL (i.e. CNIF is in this computer) use browse to find the file.')).grid(sticky='w'+'e',row=r,column=6)
+		Tkinter.Button(self.manager_source_window,text='?',command=lambda: tkMessageBox.showinfo('Edit Sources','The path of the image directory.')).grid(sticky='w'+'e',row=r,column=6)
 		r += 1
 		Tkinter.Label(self.manager_source_window,anchor='w',text='File name convention of images:').grid(sticky='w'+'e',row=r,column=1)
 		Tkinter.Entry(self.manager_source_window,textvariable=self.manager_source_filenameformat).grid(sticky='w'+'e',row=r,column=2,columnspan=4)
@@ -786,7 +785,7 @@ class monimet_gui(Tkinter.Tk):
 		self.manager_network.update({'password':self.manager_network_password.get()})
 		self.manager_network.update({'file':self.manager_network_file.get()})
 		self.manager_network.update({'id':self.manager_network_id.get()})
-		self.manager_network_localfile.set(parsers.validateName(self.manager_network_name.get()).lower()+'.ini')
+		self.manager_network_localfile.set(parsers.validateName(self.manager_network_name.get()).lower()+'.tsvx')
 		self.manager_network.update({'localfile':self.manager_network_localfile.get()})
 
 		if self.manager_network['host'] == '':
@@ -927,7 +926,7 @@ class monimet_gui(Tkinter.Tk):
 			j += 1
 		nname = 'New network ' + str(j)
 		if len(sources.getSources(self.Message,self.manager_networklist,'network')) == 0 or self.Networks_UpdateNetwork():
-			self.manager_networklist.append({'id':str(i),'name':nname,'protocol':'LOCAL','host':None,'username':None,'password':None,'file':None,'localfile':parsers.validateName(nname).lower()+'.ini'})
+			self.manager_networklist.append({'id':str(i),'name':nname,'protocol':'LOCAL','host':None,'username':None,'password':None,'file':None,'localfile':parsers.validateName(nname).lower()+'.tsvx'})
 			self.manager_network_name_nxt.set(nname)
 			self.manager_network_name_pre.set(nname)
 			self.manager_network_name.set(nname)
@@ -1008,8 +1007,8 @@ class monimet_gui(Tkinter.Tk):
 	def Networks_BrowseCNIF(self):
 		if self.manager_network_protocol.get() == 'LOCAL':
 			self.file_opt = options = {}
-			options['defaultextension'] = '.ini'
-			options['filetypes'] = [ ('CNIFs', '.ini'),('all files', '.*')]
+			options['defaultextension'] = '.tsvx'
+			options['filetypes'] = [ ('Extended tab seperated value files', '.tsvx'),('all files', '.*')]
 			options['title'] = 'Select CNIF...'
 			ans = str(os.path.normpath(tkFileDialog.askopenfilename(**self.file_opt)))
 			if ans != '' and ans != '.':
@@ -1038,7 +1037,7 @@ class monimet_gui(Tkinter.Tk):
 				tkMessageBox.showwarning('Fail','Can not fetch or download CNIF. Check network parameters. If protocol is FTP, HTTP or HTTPS, check proxy settings and internet connection.')
 				return False
 			else:
-				n = sources.readINI(os.path.join(TmpDir,f))
+				n = sources.readTSVx(os.path.join(TmpDir,f))
 				if not self.manager_network['name'] in sources.listNetworks(self.Message,self.manager_networklist):
 					new_net = deepcopy(self.manager_network)
 					i = 1
@@ -1090,7 +1089,7 @@ class monimet_gui(Tkinter.Tk):
 				self.sourcelist = deepcopy(self.manager_sourcelist[:])
 				if self.NetworkNameVariable.get() not in sources.listNetworks(self.Message,self.networklist):
 					self.NetworkNameVariable.set(self.networklist[0]['name'])
-				sources.writeINI(NetworklistFile,dictlist)
+				sources.writeTSVx(NetworklistFile,dictlist)
 				self.manager_network_window.destroy()
 				self.lift()
 				self.makeDirStorage()
@@ -1122,12 +1121,12 @@ class monimet_gui(Tkinter.Tk):
 			else:
 				tkMessageBox.showinfo('Save changes','Program now will export the CNIF. Upload it to the host \''+self.manager_network_host.get()+'\' under directory \'' +os.path.split(self.manager_network_file.get())[0]+ ' \'with the name \''+os.path.split(self.manager_network_file.get())[1]+'\'. Notice that for HTTP connections, it might take some time until the updated file is readable.')
 			self.file_opt = options = {}
-			options['defaultextension'] = '.ini'
-			options['filetypes'] = [ ('CNIFs', '.ini'),('all files', '.*')]
+			options['defaultextension'] = '.tsvx'
+			options['filetypes'] = [ ('Extended tab seperated value files', '.tsvx'),('all files', '.*')]
 			options['title'] = 'Set filename to export CNIF to...'
 			ans = str(os.path.normpath(tkFileDialog.asksaveasfilename(**self.file_opt)))
 			if ans != '' and ans != '.':
-				sources.writeINI(ans,dictlist)
+				sources.writeTSVx(ans,dictlist)
 		  		if self.manager_network_protocol.get() == 'LOCAL':
 		  			self.manager_network_file.set(ans)
 			self.manager_source_window.destroy()
@@ -1153,7 +1152,7 @@ class monimet_gui(Tkinter.Tk):
 		r += 1
 		Tkinter.Label(self.manager_network_addonline_window,anchor='w',text='Link to CNIF:').grid(sticky='w'+'e',row=r,column=1,columnspan=2)
 		r += 1
-		Tkinter.Button(self.manager_network_addonline_window,text='?',width=1,command=lambda: tkMessageBox.showinfo('Network Manager','Hyperlink to the CNIF, e.g. http://johnsnetwork.com/network/cnif.ini , ftp://myftpserver.com/mycams/cnif.ini , http://192.168.23.5/cnif.ini)')).grid(sticky='w'+'e',row=r,column=2)
+		Tkinter.Button(self.manager_network_addonline_window,text='?',width=1,command=lambda: tkMessageBox.showinfo('Network Manager','Hyperlink to the CNIF, e.g. http://johnsnetwork.com/network/cnif.tsvx , ftp://myftpserver.com/mycams/cnif.tsvx , http://192.168.23.5/cnif.tsvx)')).grid(sticky='w'+'e',row=r,column=2)
 		Tkinter.Entry(self.manager_network_addonline_window,textvariable=self.manager_network_link).grid(sticky='w'+'e',row=r,column=1)
 		r += 1
 		Tkinter.Label(self.manager_network_addonline_window,anchor='w',text='Username for host:').grid(sticky='w'+'e',row=r,column=1,columnspan=2)
@@ -1283,7 +1282,7 @@ class monimet_gui(Tkinter.Tk):
 											#add source to network
 											sourcedict = {'network':nets_[nets.index(parsers.validateName(var1.get()).lower())],'networkid':sources.getSource(self.Message,self.networklist,nets_[nets.index(parsers.validateName(var1.get()).lower())])['id'],'name':var2.get(),'protocol':'LOCAL','host':None,'username':None,'password':None,'path':filepath,'filenameformat':filenameformat}
 											self.sourcelist.append(sourcedict)
-											parsers.writeINI(sources.getSource(self.Message,self.networklist,nets_[nets.index(parsers.validateName(var1.get()).lower())])['file'],sources.getSources(self.Message,self.sourcelist,sourcedict['network'],'network'))
+											parsers.writeTSVx(sources.getSource(self.Message,self.networklist,nets_[nets.index(parsers.validateName(var1.get()).lower())])['file'],sources.getSources(self.Message,self.sourcelist,sourcedict['network'],'network'))
 											tkMessageBox.showinfo('Single directory wizard','The camera is added to the network.')
 											break
 										else:
@@ -1298,12 +1297,12 @@ class monimet_gui(Tkinter.Tk):
 										ids.append(network['id'])
 								while len(ids) > 0 and str(i)  in ids:
 									i += 1
-								networkdict = {'id':str(i),'name':var1.get(),'protocol':'LOCAL','host':None,'username':None,'password':None,'file':os.path.join(SourceDir,parsers.validateName(var1.get()).lower()+'.ini'),'localfile':parsers.validateName(var1.get()).lower()+'.ini'}
+								networkdict = {'id':str(i),'name':var1.get(),'protocol':'LOCAL','host':None,'username':None,'password':None,'file':os.path.join(SourceDir,parsers.validateName(var1.get()).lower()+'.tsvx'),'localfile':parsers.validateName(var1.get()).lower()+'.tsvx'}
 								self.networklist.append(networkdict)
 								sourcedict = {'network':var1.get(),'networkid':sources.getSource(self.Message,self.networklist,var1.get())['id'],'name':var2.get(),'protocol':'LOCAL','host':None,'username':None,'password':None,'path':filepath,'filenameformat':filenameformat}
 								self.sourcelist.append(sourcedict)
-								parsers.writeINI(NetworklistFile,self.networklist)
-								parsers.writeINI(networkdict['file'],[sourcedict])
+								parsers.writeTSVx(NetworklistFile,self.networklist)
+								parsers.writeTSVx(networkdict['file'],[sourcedict])
 								tkMessageBox.showinfo('Single directory wizard','The camera network is created and the camera is added to the network.')
 								break
 
@@ -1337,8 +1336,8 @@ class monimet_gui(Tkinter.Tk):
 						self.sourcelist.remove(sources.getSource(self.Message,sources.getSources(self.Message,self.sourcelist,rem[0],'network'),rem[1]))
 					else:
 						self.sourcelist.remove(sources.getSource(self.Message,sources.getSources(self.Message,self.sourcelist,rem[0],'network'),rem[1]))
-						parsers.writeINI(sources.getSource(self.Message,self.networklist,rem[0])['file'],sources.getSources(self.Message,self.sourcelist,rem[0],'network'))
-					parsers.writeINI(NetworklistFile,self.networklist)
+						parsers.writeTSVx(sources.getSource(self.Message,self.networklist,rem[0])['file'],sources.getSources(self.Message,self.sourcelist,rem[0],'network'))
+					parsers.writeTSVx(NetworklistFile,self.networklist)
 					tkMessageBox.showinfo('Single directory wizard',var.get() + ' removed.')
 
 
@@ -1625,7 +1624,7 @@ class monimet_gui(Tkinter.Tk):
 		self.Message.set("Choosing file to export settings to...")
 		self.file_opt = options = {}
 		options['defaultextension'] = '.ini'
-		options['filetypes'] = [ ('Configuration files', '.ini'),('all files', '.*')]
+		options['filetypes'] = [ ('INI files', '.ini'),('all files', '.*')]
 		options['title'] = 'Set filename to export the settings to...'
 		ans = os.path.normpath(tkFileDialog.asksaveasfilename(**self.file_opt))
 		if ans != '' and ans != '.':
@@ -1638,7 +1637,7 @@ class monimet_gui(Tkinter.Tk):
 		self.Message.set("Choosing file to import settings from...")
 		self.file_opt = options = {}
 		options['defaultextension'] = '.ini'
-		options['filetypes'] = [ ('Configuration files', '.ini'),('all files', '.*')]
+		options['filetypes'] = [ ('INI files', '.ini'),('all files', '.*')]
 		options['title'] = 'Set filename to import the settings from...'
 		ans = os.path.normpath(tkFileDialog.askopenfilename(**self.file_opt))
 		if ans != '' and ans != '.':
@@ -1902,7 +1901,7 @@ class monimet_gui(Tkinter.Tk):
 			if key not in source_metadata_hidden:
 				if key in source_metadata_names:
 					if 'time' in key:
-						string += source_metadata_names[key] + ': ' + str(parsers.cTime2sTime(source[key])) +'\n'
+						string += source_metadata_names[key] + ': ' + str(parsers.strptime2(source[key])[0]) +'\n'
 					else:
 						string += source_metadata_names[key] + ': ' + str(source[key]) +'\n'
 				else:
@@ -2968,7 +2967,7 @@ class monimet_gui(Tkinter.Tk):
 
 	def callbackoutputmode(self,*args):
 		if self.outputmodevariable.get() == output_modes[0]:
-			timelabel = str(datetime.datetime.now()).replace('-','').replace(':','').replace(' ','-')[:15]
+			timelabel = parsers.strftime2(datetime.datetime.now())[0].replace(':','')
 			self.outputpath.set(os.path.join(self.resultspath.get(),timelabel))
 			if self.ActiveMenu.get() == 'Results':
 				self.MenuItem5.config(state='disabled')
@@ -3132,11 +3131,14 @@ class monimet_gui(Tkinter.Tk):
 		self.ResultsList = []
 		for i in range(self.NumResultsVariable.get()):
 			filename = os.path.join(self.resultspath.get(),ResultFolderNameVariable,filelist[i])
-			if not os.path.exists(os.path.join(resultfolderpath,os.path.splitext(filelist[i])[0] + '.ini')):
+			if not os.path.isfile(os.path.join(resultfolderpath,os.path.splitext(filelist[i])[0] + '.tsvx')) and not os.path.isfile(os.path.join(resultfolderpath,os.path.splitext(filelist[i])[0] + '.ini')):	#v0.15.3 and before support
 				name = os.path.splitext(filelist[i].replace('_',' '))[0] + " (no-metadata, "+os.path.splitext(filelist[i].replace('_',' '))[1]+")"
 				metadata = {}
 			else:
-				metadata = sources.readINI(os.path.join(resultfolderpath,os.path.splitext(filelist[i])[0] + '.ini'))[0]
+				if os.path.isfile(os.path.join(resultfolderpath,os.path.splitext(filelist[i])[0] + '.tsvx')):
+					metadata = sources.readTSVx(os.path.join(resultfolderpath,os.path.splitext(filelist[i])[0] + '.tsvx'))[0]
+				else:
+					metadata = sources.readTSVx(os.path.join(resultfolderpath,os.path.splitext(filelist[i])[0] + '.ini'))[0]
 				if '_S' in filename:
 					name = os.path.split(filename)[1].split('_S')[0] + ' - '
 				else:
@@ -3875,7 +3877,7 @@ class monimet_gui(Tkinter.Tk):
 		fn = self.MenuItem1.get(self.MenuItem1.curselection())
 		source = self.setup[self.AnalysisNoVariable.get()-1]['source']
 		scenario = self.setup[self.AnalysisNoVariable.get()-1]
-		pfn_ts = '-' + parsers.dTime2sTime(parsers.strptime2(fn,source['filenameformat'])[0])
+		pfn_ts = '-' + parsers.dTime2fTime(parsers.strptime2(fn,source['filenameformat'])[0])
 		if 'temporary' in source and source['temporary']:
 			pfn = validateName(source['network'])+'-'+source['protocol']+'-'+source['host']+'-'+validateName(source['username'])+'-'+validateName(source['path']) + pfn_ts + os.path.splitext(source['filenameformat'])[1]
 			pfn_prev = [validateName(source['network'])+'-'+source['protocol']+'-'+source['host']+'-'+validateName(source['username'])+'-'+validateName(source['path']), os.path.splitext(source['filenameformat'])[1]]
@@ -3889,7 +3891,7 @@ class monimet_gui(Tkinter.Tk):
 				self.PictureFileName.set(os.path.join(os.path.join(TmpDir,'tmp_images'),validateName(source['network'])+'-'+source['protocol']+'-'+source['host']+'-'+validateName(source['username'])+'-'+validateName(source['path']),fn))
 			else:
 				self.PictureFileName.set(os.path.join(self.imagespath.get(),source['networkid']+'-'+fetchers.validateName(source['network']),fetchers.validateName(source['name']),fn))
-		self.setup[self.AnalysisNoVariable.get()-1].update({'previewimagetime':parsers.dTime2sTime(parsers.strptime2(fn,source['filenameformat'])[0])})
+		self.setup[self.AnalysisNoVariable.get()-1].update({'previewimagetime':parsers.dTime2fTime(parsers.strptime2(fn,source['filenameformat'])[0])})
 		self.Message.set("Preview picture is changed.")
 		try:
 			shutil.copyfile(self.PictureFileName.get(),os.path.join(PreviewsDir,pfn))
@@ -3951,7 +3953,7 @@ class monimet_gui(Tkinter.Tk):
 					return (source,scenario)
 				else:
 					if pfn_ts is not '':
-						pfn = os.path.splitext(pfn)[0][:-len(pfn_ts)] + '-' + parsers.dTime2sTime(ts[0]) +  os.path.splitext(pfn)[1]
+						pfn = os.path.splitext(pfn)[0][:-len(pfn_ts)] + '-' + parsers.dTime2fTime(ts[0]) +  os.path.splitext(pfn)[1]
 					try:
 						shutil.copyfile(img[0],os.path.join(PreviewsDir,pfn))
 						self.Message.set('Preview image downloaded/updated for camera: '+source['network'] + ' - ' + source['name'])
@@ -4076,7 +4078,7 @@ class monimet_gui(Tkinter.Tk):
 		if self.setupFileVariable.get() == "Untitled.cfg":
 			self.setupFileSaveas()
 		else:
-			parsers.writeINI(self.setupFileVariable.get(),self.setupToWrite(self.setup))
+			parsers.writeTSVx(self.setupFileVariable.get(),self.setupToWrite(self.setup))
 			self.Message.set("Setup file saved as " + os.path.split(self.setupFileVariable.get())[1])
 
 	def setupFileSaveas(self):
@@ -4089,7 +4091,7 @@ class monimet_gui(Tkinter.Tk):
 		if ans != '' and ans != '.' and ans != ():
 			ans = os.path.normpath(ans)
 			self.setupFileVariable.set(ans)
-			parsers.writeINI(self.setupFileVariable.get(),self.setupToWrite(self.setup))
+			parsers.writeTSVx(self.setupFileVariable.get(),self.setupToWrite(self.setup))
 			self.Message.set("Setup file saved as " + os.path.split(self.setupFileVariable.get())[1])
 		else:
 			self.Message.set("Saving cancelled.")
@@ -4105,7 +4107,7 @@ class monimet_gui(Tkinter.Tk):
 			ans = os.path.normpath(ans)
 			setup = deepcopy(self.setup)
 			setup = self.modifySourcesInSetup(setup)
-			parsers.writeINI(ans,self.setupToWrite(setup))
+			parsers.writeTSVx(ans,self.setupToWrite(setup))
 			self.Message.set("Modified copy of setup file saved as " + os.path.split(ans)[1])
 		else:
 			self.Message.set("Saving cancelled.")
@@ -4318,7 +4320,7 @@ class monimet_gui(Tkinter.Tk):
 			if not os.path.exists(resultspath):
 				os.makedirs(resultspath)
 			self.Message.set('Running all scenarios...|busy:True')
-			parsers.writeINI(os.path.join(resultspath,'setup.cfg'),self.setupToWrite(self.setup))
+			parsers.writeTSVx(os.path.join(resultspath,'setup.cfg'),self.setupToWrite(self.setup))
 			self.Message.set("Setup file saved as " + os.path.split(self.setupFileVariable.get())[1] + " in results directory. ")
 			csvlist = []
 			if scn == None:
@@ -4365,24 +4367,24 @@ class monimet_gui(Tkinter.Tk):
 							if outputtv == []:
 								datetimelistp = []
 							else:
-								datetimelistp = parsers.oTime2sTime(outputtv[0][1][1])
+								datetimelistp = parsers.oTime2dTime(outputtv[0][1][1])
 							# one side has tzinfo one side does not. all aware results are utc.
 							if datetimelistp != []:
 								if datetimelistp[0].tzinfo is None or datetimelistp[0].tzinfo.utcoffset(datetimelistp[0]) is None:  #old results are naive
 									if not (datetimelist[0].tzinfo is None or datetimelist[0].tzinfo.utcoffset(datetimelist[0]) is None):	#new results are not naive
 										for i_dt,dt in enumerate(datetimelistp):
 											datetimelistp[i_dt]=dt.replace(tzinfo=timezone('UTC'))
-											outputtv[0][1][1][i_dt] = str(datetimelistp[i_dt].strftime("%Y-%m-%d %H:%M:%S%z"))[:-2] + ':' + str(datetimelistp[i_dt].strftime("%Y-%m-%d-%H:%M:%S%z"))[-2:]
+											outputtv[0][1][1][i_dt] = parsers.strftime2(datetimelistp[i_dt],"%Y-%m-%dT%H:%M:%S%z")[0][:-2] + ':' + parsers.strftime2(datetimelistp[i_dt],"%Y-%m-%d %H:%M:%S%z")[0][-2:]
 								else:	#old results are aware
 									if datetimelist[0].tzinfo is None or datetimelist[0].tzinfo.utcoffset(datetimelist[0]) is None:	#new results are naive
 										for i_dt,dt in enumerate(datetimelistp):
 											datetimelistp[i_dt]=dt.replace(tzinfo=None)
-											outputtv[0][1][1][i_dt] = str(datetimelistp[i_dt].strftime("%Y-%m-%d %H:%M:%S"))
+											outputtv[0][1][1][i_dt] = parsers.strftime2(datetimelistp[i_dt],"%Y-%m-%dT%H:%M:%S%z")[0]
 							(imglista,datetimelista,pathlista) = (deepcopy(imglist),deepcopy(datetimelist),deepcopy(pathlist)) #all
+							outputtvd = []	#out of temporal selection
 							if outputtv != []:
-								outputtvd = []	#out of temporal selection
 								for i,v in enumerate(outputtv[0][1][1]):
-									if parsers.oTime2sTime(v) not in datetimelista:
+									if parsers.oTime2dTime(v) not in datetimelista:
 										outputtvd.append(i)
 								for i in range(len(outputtv[0][1])/2)[::-1]:
 									if isinstance(outputtv[0][1][2*i+1],list):
@@ -4457,12 +4459,12 @@ class monimet_gui(Tkinter.Tk):
 									if outputtv == []:
 										datetimelistp = []
 									else:
-										datetimelistp = parsers.oTime2sTime(outputtv[r+1][1][1])
+										datetimelistp = parsers.oTime2dTime(outputtv[r+1][1][1])
 									(imglista,datetimelista,pathlista) = (deepcopy(imglist),deepcopy(datetimelist),deepcopy(pathlist)) #all
 									if outputtv != []:
 										outputtvd = []	#out of temporal selection
 										for i,v in enumerate(outputtv[r+1][1][1]):
-											if parsers.oTime2sTime(v) not in datetimelista:
+											if parsers.oTime2dTime(v) not in datetimelista:
 												outputtvd.append(i)
 										for i in range(len(outputtv[r+1][1])/2)[::-1]:
 											if isinstance(outputtv[r+1][1][2*i+1],list):
@@ -4516,11 +4518,12 @@ class monimet_gui(Tkinter.Tk):
 												output[0][1][2*i+1] = np.array(output[0][1][2*i+1])
 											output[0][1][2*i+1] = output[0][1][2*i+1][isorted]
 								if output and output[0]:
-									output[0][0] += ' - ROI' + str(r+1).zfill(3)
+									if ' - ROI' + str(r+1).zfill(3) not in output[0][0]:
+										output[0][0] += ' - ROI' + str(r+1).zfill(3)
 									outputt.append(output[0])
 								self.Message.set('ROI: |progress:6|queue:'+str(r+2)+'|total:'+str(len(scenario['polygonicmask'])+1))
 						if len(outputt)>0:
-							if self.TimeZoneConversion.get() and self.TimeZone.get() != '+0000':
+							if self.TimeZoneConversion.get() and self.TimeZone.get() != '+00:00':
 								outputt = convertTZoutput(outputt,self.TimeZone.get())
 							csvf = storeData(filelabel, analysis_captions , outputt,self.Message,csvout=True)
 							csvlist[s][a].append(csvf)

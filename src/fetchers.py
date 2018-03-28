@@ -8,7 +8,7 @@ import datetime
 from pytz import timezone
 import numpy as np
 from definitions import BinDir, source_metadata_names,sysargv
-from parsers import strptime2, validateName, convertTZ
+import parsers
 from shutil import copyfile, copystat
 if sysargv['gui']:
 	import Tkinter, tkMessageBox,tkSimpleDialog
@@ -31,15 +31,15 @@ def fetchFile(tkobj,logger,localdir, localfile, protocol,host, username, passwor
 	if username == None:
 		username = ''
 	if username == '*':
-		username = '*'+validateName(protocol+host).lower()+'*username*'
+		username = '*'+parsers.validateName(protocol+host).lower()+'*username*'
 	if password == None:
 		password = ''
 	if password == '*':
-		password = '*'+validateName(protocol+host).lower()+'*password*'
-	if username == '*'+validateName(protocol+host).lower()+'*username*' or password == '*'+validateName(protocol+host).lower()+'*password*':
+		password = '*'+parsers.validateName(protocol+host).lower()+'*password*'
+	if username == '*'+parsers.validateName(protocol+host).lower()+'*username*' or password == '*'+parsers.validateName(protocol+host).lower()+'*password*':
 		getPassword(tkobj,logger,protocol,host)
-		exec('username = tkobj.'+validateName(protocol+host).lower()+'username.get()')
-		exec('password = tkobj.'+validateName(protocol+host).lower()+'password.get()')
+		exec('username = tkobj.'+parsers.validateName(protocol+host).lower()+'username.get()')
+		exec('password = tkobj.'+parsers.validateName(protocol+host).lower()+'password.get()')
 
 	proxy = deepcopy(proxy)
 	if protocol == 'FTP':
@@ -57,8 +57,8 @@ def fetchFile(tkobj,logger,localdir, localfile, protocol,host, username, passwor
 						if e[0] == '530 Login incorrect.' and i>0:
 							logger.set("Login incorrect. Trying again ("+str(i)+")")
 							getPassword(tkobj,logger,protocol,host,renew=True)
-							exec('username = tkobj.'+validateName(protocol+host).lower()+'username.get()')
-							exec('password = tkobj.'+validateName(protocol+host).lower()+'password.get()')
+							exec('username = tkobj.'+parsers.validateName(protocol+host).lower()+'username.get()')
+							exec('password = tkobj.'+parsers.validateName(protocol+host).lower()+'password.get()')
 						else:
 							logger.set('Fetching failed.')
 							try:
@@ -77,8 +77,8 @@ def fetchFile(tkobj,logger,localdir, localfile, protocol,host, username, passwor
 						if e[0] == '530 Login incorrect.' and i>0:
 							logger.set("Login incorrect. Trying again ("+str(i)+")")
 							getPassword(tkobj,logger,protocol,host,renew=True)
-							exec('username = tkobj.'+validateName(protocol+host).lower()+'username.get()')
-							exec('password = tkobj.'+validateName(protocol+host).lower()+'password.get()')
+							exec('username = tkobj.'+parsers.validateName(protocol+host).lower()+'username.get()')
+							exec('password = tkobj.'+parsers.validateName(protocol+host).lower()+'password.get()')
 						else:
 							logger.set('Fetching failed.')
 							try:
@@ -162,12 +162,12 @@ def filterImageListTemporal(logger,imglistv,pathlistv,fnameconv,timec,count):
 
 	for i,img in enumerate(imglistv):
 		try:
-			strptime2(img,fnameconv)
+			parsers.strptime2(img,fnameconv)
 		except:
 			continue
-		timelist.append(strptime2(img,fnameconv)[2])
-		datelist.append(strptime2(img,fnameconv)[1])
-		datetimelist.append(strptime2(img,fnameconv)[0])
+		timelist.append(parsers.strptime2(img,fnameconv)[2])
+		datelist.append(parsers.strptime2(img,fnameconv)[1])
+		datetimelist.append(parsers.strptime2(img,fnameconv)[0])
 		pathlist.append(pathlistv[i])
 		imglist.append(img)
 
@@ -191,15 +191,15 @@ def filterImageListTemporal(logger,imglistv,pathlistv,fnameconv,timec,count):
 		timec[3] = "23:59"
 
 	if ":" not in timec[2]:
-		date1 = strptime2(timec[0],'%Y%m%d')[1]
-		date2 = strptime2(timec[1],'%Y%m%d')[1]
-		time1 = strptime2(timec[2],'%H%M')[2]
-		time2 = strptime2(timec[3],'%H%M')[2]
+		date1 = parsers.strptime2(timec[0],'%Y%m%d')[1]
+		date2 = parsers.strptime2(timec[1],'%Y%m%d')[1]
+		time1 = parsers.strptime2(timec[2],'%H%M')[2]
+		time2 = parsers.strptime2(timec[3],'%H%M')[2]
 	else:
-		date1 = strptime2(timec[0],'%d.%m.%Y')[1]
-		date2 = strptime2(timec[1],'%d.%m.%Y')[1]
-		time1 = strptime2(timec[2],'%H:%M')[2]
-		time2 = strptime2(timec[3],'%H:%M')[2]
+		date1 = parsers.strptime2(timec[0],'%d.%m.%Y')[1]
+		date2 = parsers.strptime2(timec[1],'%d.%m.%Y')[1]
+		time1 = parsers.strptime2(timec[2],'%H:%M')[2]
+		time2 = parsers.strptime2(timec[3],'%H:%M')[2]
 	time2 = time2.replace(second=59)
 
 	lastimagetime = deepcopy(datetimelist)
@@ -212,28 +212,28 @@ def filterImageListTemporal(logger,imglistv,pathlistv,fnameconv,timec,count):
 	if timec[4] == 'Yesterday only':
 		date1 =	yesterday
 		date2 = yesterday
-		time1 = strptime2('00:00','%H:%M')[2]
-		time2 = strptime2('23:59','%H:%M')[2]
+		time1 = parsers.strptime2('00:00','%H:%M')[2]
+		time2 = parsers.strptime2('23:59','%H:%M')[2]
 		time2 = time2.replace(second=59)
 
 	if timec[4] == 'Today only':
 		date1 =	today
 		date2 = today
-		time1 = strptime2('00:00','%H:%M')[2]
-		time2 = strptime2('23:59','%H:%M')[2]
+		time1 = parsers.strptime2('00:00','%H:%M')[2]
+		time2 = parsers.strptime2('23:59','%H:%M')[2]
 		time2 = time2.replace(second=59)
 
 	if timec[4] == 'Last one year':
 		date1 = today - (datetime.date(2010,12,31)-datetime.date(2010,1,1))
 		date2 = today
-		time1 = strptime2(timec[2],'%H:%M')[2]
-		time2 = strptime2(timec[3],'%H:%M')[2]
+		time1 = parsers.strptime2(timec[2],'%H:%M')[2]
+		time2 = parsers.strptime2(timec[3],'%H:%M')[2]
 
 	if timec[4] == 'Last one week':
 		date1 = today - (datetime.date(2010,1,7)-datetime.date(2010,1,1))
 		date2 = today
-		time1 = strptime2(timec[2],'%H:%M')[2]
-		time2 = strptime2(timec[3],'%H:%M')[2]
+		time1 = parsers.strptime2(timec[2],'%H:%M')[2]
+		time2 = parsers.strptime2(timec[3],'%H:%M')[2]
 
 	if timec[4] == 'Latest date and time intervals':
 		datestr = ' older than ' + str(date2)
@@ -325,17 +325,17 @@ def listPathCrawl(remote_path,timec,timelimc):
 	if timec[3] == 0:
 		timec[3] = '23:59'
 	if isinstance(timec[2],str) and  ":" not in timec[2]:
-		date1 = strptime2(timec[0],'%Y%m%d')[1]
-		date2 = strptime2(timec[1],'%Y%m%d')[1]
+		date1 = parsers.strptime2(timec[0],'%Y%m%d')[1]
+		date2 = parsers.strptime2(timec[1],'%Y%m%d')[1]
 	else:
 		if  isinstance(timec[2],str):
-			date1 = strptime2(timec[0],'%d.%m.%Y')[1]
-			date2 = strptime2(timec[1],'%d.%m.%Y')[1]
+			date1 = parsers.strptime2(timec[0],'%d.%m.%Y')[1]
+			date2 = parsers.strptime2(timec[1],'%d.%m.%Y')[1]
 
-	if timelimc[0] != 0 and date1 < strptime2(timelimc[0],'%d.%m.%Y')[1]:
-		date1 = strptime2(timelimc[0],'%d.%m.%Y')[1]
-	if timelimc[1] != 0 and date2 > strptime2(timelimc[1],'%d.%m.%Y')[1]:
-		date2 = strptime2(timelimc[1],'%d.%m.%Y')[1]
+	if timelimc[0] != 0 and date1 < timelimc[0]:
+		date1 = timelimc[0]
+	if timelimc[1] != 0 and date2 > timelimc[1]:
+		date2 = timelimc[1]
 	keys = checkPathCrawl(remote_path)
 	if len(keys) == 0:
 		return [remote_path]
@@ -365,33 +365,33 @@ def listPathCrawl(remote_path,timec,timelimc):
 def getPassword(tkobj,logger,protocol,host,renew=False):
 	if not sysargv['prompt']:
 		try:
-			exec('tkobj.'+validateName(protocol+host).lower()+'password.get()')
-			exec('tkobj.'+validateName(protocol+host).lower()+'username.get()')
+			exec('tkobj.'+parsers.validateName(protocol+host).lower()+'password.get()')
+			exec('tkobj.'+parsers.validateName(protocol+host).lower()+'username.get()')
 		except:
 			logger.set('Asking credentials is not supported in No-Questions mode. Using decoy credentials to fail the connection.')
-			exec('tkobj.'+validateName(protocol+host).lower()+'password = Tkinter.StringVar()')
-			exec('tkobj.'+validateName(protocol+host).lower()+'password.set(\'decoypassword\')')
-			exec('tkobj.'+validateName(protocol+host).lower()+'username = Tkinter.StringVar()')
-			exec('tkobj.'+validateName(protocol+host).lower()+'username.set(\'decoyusername\')')
+			exec('tkobj.'+parsers.validateName(protocol+host).lower()+'password = Tkinter.StringVar()')
+			exec('tkobj.'+parsers.validateName(protocol+host).lower()+'password.set(\'decoypassword\')')
+			exec('tkobj.'+parsers.validateName(protocol+host).lower()+'username = Tkinter.StringVar()')
+			exec('tkobj.'+parsers.validateName(protocol+host).lower()+'username.set(\'decoyusername\')')
 		return False
 	try:
-		exec('tkobj.'+validateName(protocol+host).lower()+'password.get()')
-		exec('tkobj.'+validateName(protocol+host).lower()+'username.get()')
+		exec('tkobj.'+parsers.validateName(protocol+host).lower()+'password.get()')
+		exec('tkobj.'+parsers.validateName(protocol+host).lower()+'username.get()')
 		if renew:
-			exec('tkobj.'+validateName(protocol+host).lower()+'password = Tkinter.StringVar()')
-			exec("tkobj."+validateName(protocol+host).lower()+"password.set('')")
-			exec('tkobj.'+validateName(protocol+host).lower()+'username = Tkinter.StringVar()')
-			exec("tkobj."+validateName(protocol+host).lower()+"username.set('')")
+			exec('tkobj.'+parsers.validateName(protocol+host).lower()+'password = Tkinter.StringVar()')
+			exec("tkobj."+parsers.validateName(protocol+host).lower()+"password.set('')")
+			exec('tkobj.'+parsers.validateName(protocol+host).lower()+'username = Tkinter.StringVar()')
+			exec("tkobj."+parsers.validateName(protocol+host).lower()+"username.set('')")
 			tkMessageBox.showwarning('Enter username and password','The password and/or the username on the host \''+protocol+'://'+host+'\' is incorrect. Please try again in the next dialog. The username and the password will be remembered for this session.')
-			eval('tkobj.'+validateName(protocol+host).lower()+'username.set')(tkSimpleDialog.askstring('Enter username and password','Enter username on the host \''+protocol+'://'+host+'\'',initialvalue=eval('tkobj.'+validateName(protocol+host).lower()+'username.get()')))
-			eval('tkobj.'+validateName(protocol+host).lower()+'password.set')(tkSimpleDialog.askstring('Enter username and password','Enter password on the host \''+protocol+'://'+host+'\'',initialvalue=eval('tkobj.'+validateName(protocol+host).lower()+'password.get()')))
+			eval('tkobj.'+parsers.validateName(protocol+host).lower()+'username.set')(tkSimpleDialog.askstring('Enter username and password','Enter username on the host \''+protocol+'://'+host+'\'',initialvalue=eval('tkobj.'+parsers.validateName(protocol+host).lower()+'username.get()')))
+			eval('tkobj.'+parsers.validateName(protocol+host).lower()+'password.set')(tkSimpleDialog.askstring('Enter username and password','Enter password on the host \''+protocol+'://'+host+'\'',initialvalue=eval('tkobj.'+parsers.validateName(protocol+host).lower()+'password.get()')))
 
 	except:
-		exec('tkobj.'+validateName(protocol+host).lower()+'password = Tkinter.StringVar()')
-		exec('tkobj.'+validateName(protocol+host).lower()+'username = Tkinter.StringVar()')
+		exec('tkobj.'+parsers.validateName(protocol+host).lower()+'password = Tkinter.StringVar()')
+		exec('tkobj.'+parsers.validateName(protocol+host).lower()+'username = Tkinter.StringVar()')
 		tkMessageBox.showwarning('Enter username and password','Enter the username and the password for the username on the host \''+protocol+'://'+host+'\'. The username and the password will be remembered for this session.')
-		eval('tkobj.'+validateName(protocol+host).lower()+'username.set')(tkSimpleDialog.askstring('Enter username and password','Enter username on the host \''+protocol+'://'+host+'\'',initialvalue=eval('tkobj.'+validateName(protocol+host).lower()+'username.get()')))
-		eval('tkobj.'+validateName(protocol+host).lower()+'password.set')(tkSimpleDialog.askstring('Enter username and password','Enter password on the host \''+protocol+'://'+host+'\'',initialvalue=eval('tkobj.'+validateName(protocol+host).lower()+'password.get()')))
+		eval('tkobj.'+parsers.validateName(protocol+host).lower()+'username.set')(tkSimpleDialog.askstring('Enter username and password','Enter username on the host \''+protocol+'://'+host+'\'',initialvalue=eval('tkobj.'+parsers.validateName(protocol+host).lower()+'username.get()')))
+		eval('tkobj.'+parsers.validateName(protocol+host).lower()+'password.set')(tkSimpleDialog.askstring('Enter username and password','Enter password on the host \''+protocol+'://'+host+'\'',initialvalue=eval('tkobj.'+parsers.validateName(protocol+host).lower()+'password.get()')))
 
 def downloadFTP(proxy,connection, username,host,password,local_path,imglist,pathlist,dllist,logger):
 	if logger is not None:
@@ -422,7 +422,7 @@ def downloadFTP(proxy,connection, username,host,password,local_path,imglist,path
 				success += 1
 				tmpfile.close()
 				try:
-					timestamp =  mktime((strptime2(ftp.sendcmd('MDTM '+p+f).split()[1],"%Y%m%d%H%M%S")[0]).timetuple())
+					timestamp =  mktime((parsers.strptime2(ftp.sendcmd('MDTM '+p+f).split()[1],"%Y%m%d%H%M%S")[0]).timetuple())
 					os.utime(tmpfname, (timestamp, timestamp))
 				except:
 					pass
@@ -464,10 +464,10 @@ multiprocessing.freeze_support()
 def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=0, online=True, download=True, care_tz = True):
 	(protocol, host, username,password,name, remote_path, filenameformat) = (source['protocol'],source['host'],source['username'],source['password'],source['name'],source['path'],source['filenameformat'])
 	if 'temporary' in source and source['temporary']:
-		local_path = os.path.join(os.path.join(TmpDir,'tmp_images'),validateName(source['network'])+'-'+source['protocol']+'-'+source['host']+'-'+validateName(source['username'])+'-'+validateName(source['path']))
+		local_path = os.path.join(os.path.join(TmpDir,'tmp_images'),parsers.validateName(source['network'])+'-'+source['protocol']+'-'+source['host']+'-'+parsers.validateName(source['username'])+'-'+parsers.validateName(source['path']))
 	else:
-		local_path = os.path.join(workdir,source['networkid']+'-'+validateName(source['network']))
-		local_path = os.path.join(local_path,validateName(source['name']))
+		local_path = os.path.join(workdir,source['networkid']+'-'+parsers.validateName(source['network']))
+		local_path = os.path.join(local_path,parsers.validateName(source['name']))
 	if not os.path.exists(local_path):
 		os.makedirs(local_path)
 	if host == None:
@@ -475,15 +475,15 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 	if username == None:
 		username = ''
 	if username == '*':
-		username = '*'+validateName(protocol+host).lower()+'*username*'
+		username = '*'+parsers.validateName(protocol+host).lower()+'*username*'
 	if password == None:
 		password = ''
 	if password == '*':
-		password = '*'+validateName(protocol+host).lower()+'*password*'
-	if (username == '*'+validateName(protocol+host).lower()+'*username*' or password == '*'+validateName(protocol+host).lower()+'*password*') and online:
+		password = '*'+parsers.validateName(protocol+host).lower()+'*password*'
+	if (username == '*'+parsers.validateName(protocol+host).lower()+'*username*' or password == '*'+parsers.validateName(protocol+host).lower()+'*password*') and online:
 		getPassword(tkobj,logger,protocol,host)
-		exec('username = tkobj.'+validateName(protocol+host).lower()+'username.get()')
-		exec('password = tkobj.'+validateName(protocol+host).lower()+'password.get()')
+		exec('username = tkobj.'+parsers.validateName(protocol+host).lower()+'username.get()')
+		exec('password = tkobj.'+parsers.validateName(protocol+host).lower()+'password.get()')
 
 	proxy = deepcopy(proxy)
 	imglistv = []
@@ -491,17 +491,15 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 
 	timelimc = [0,0,0,0]
 	if 'firstimagetime' in source:
-		timelimc[0] = source['firstimagetime'][6:8]+'.'+source['firstimagetime'][4:6]+'.'+source['firstimagetime'][0:4]
-		timelimc[2] = source['firstimagetime'][9:11]+':'+source['firstimagetime'][11:13]
+		timelimc[0] = parsers.strptime2(source['firstimagetime'])[1]
+		timelimc[2] = parsers.strptime2(source['firstimagetime'])[2]
 
 	if 'lastimagetime' in source:
-		timelimc[1] = source['lastimagetime'][6:8]+'.'+source['lastimagetime'][4:6]+'.'+source['lastimagetime'][0:4]
-		timelimc[3] = source['lastimagetime'][9:11]+':'+source['lastimagetime'][11:13]
+		timelimc[1] = parsers.strptime2(source['lastimagetime'])[1]
+		timelimc[3] = parsers.strptime2(source['lastimagetime'])[2]
 	else:
-		timelimc[1] = str(datetime.datetime.now()+datetime.timedelta(days=1))	#timezone consideration
-		timelimc[3] = str(datetime.datetime.now()+datetime.timedelta(days=1))
-		timelimc[1] = timelimc[1][8:10]+'.'+timelimc[1][5:7]+'.'+timelimc[1][0:4]
-		timelimc[3] = timelimc[3][11:13]+'.'+timelimc[3][14:16]
+		timelimc[1] = parsers.strptime2(datetime.datetime.now()+datetime.timedelta(days=1))[1]	#timezone consideration
+		timelimc[3] = parsers.strptime2(datetime.datetime.now()+datetime.timedelta(days=1))[2]
 
 	if protocol == 'FTP':
 		if timec[4] == 'List':
@@ -527,8 +525,8 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 								if e[0] == '530 Login incorrect.' and i>0:
 									logger.set("Login incorrect. Trying again ("+str(i)+")")
 									getPassword(tkobj,logger,protocol,host,renew=True)
-									exec('username = tkobj.'+validateName(protocol+host).lower()+'username.get()')
-									exec('password = tkobj.'+validateName(protocol+host).lower()+'password.get()')
+									exec('username = tkobj.'+parsers.validateName(protocol+host).lower()+'username.get()')
+									exec('password = tkobj.'+parsers.validateName(protocol+host).lower()+'password.get()')
 								else:
 									logger.set('Fetching failed.')
 									try:
@@ -547,8 +545,8 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 								if e[0] == '530 Login incorrect.' and i>0:
 									logger.set("Login incorrect. Trying again ("+str(i)+")")
 									getPassword(tkobj,logger,protocol,host,renew=True)
-									exec('username = tkobj.'+validateName(protocol+host).lower()+'username.get()')
-									exec('password = tkobj.'+validateName(protocol+host).lower()+'password.get()')
+									exec('username = tkobj.'+parsers.validateName(protocol+host).lower()+'username.get()')
+									exec('password = tkobj.'+parsers.validateName(protocol+host).lower()+'password.get()')
 								else:
 									logger.set('Fetching failed.')
 									try:
@@ -827,7 +825,7 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 				logger.set("Timezone information exists both in filename format and metadata for the source. Timezone information from filename format will be used.")
 			else:
 				tz = source['timezone']
-				datetimelist = convertTZ(datetimelist,tz,'+0000')	#convert to utc
+				datetimelist = parsers.convertTZ(datetimelist,tz,'+0000')	#convert to utc
 				for i_dt,dt in enumerate(datetimelist):#localize utc
 					datetimelist[i_dt]=dt.replace(tzinfo=timezone('UTC'))
 
@@ -843,7 +841,7 @@ def checkQuantity(tkobj,logger,source, proxy, connection, remote_path, timec, in
 
 	datelist = []
 	for dt in datetimelist:
-		datelist.append(strptime2(dt,source['filenameformat'])[1])
+		datelist.append(parsers.strptime2(dt,source['filenameformat'])[1])
 
 	if datelist == []:
 		return False

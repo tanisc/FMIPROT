@@ -5,14 +5,14 @@ import os
 import shutil
 from definitions import TmpDir
 from uuid import uuid4
-from parsers import validateName, writeINI, readINI, convertTZ
+from parsers import validateName, writeTSVx, readTSVx, convertTZ
 from copy import deepcopy
 
 def convertTZoutput(out,o):
 	for i,v in enumerate(out):
 		for j in range(len(v[1])/2):
 			if v[1][j*2] == 'Time' and '+' in v[1][j*2+1][0]:
-				out[i][1][j*2+1] = convertTZ(v[1][j*2+1],'+0000',o)
+				out[i][1][j*2+1] = convertTZ(v[1][j*2+1],'+00:00',o)
 	return out
 
 def readResultsData(fname,logger):
@@ -22,9 +22,13 @@ def readResultsData(fname,logger):
 	metalist = []
 	datalist = []
 	for r in range(1000):
-		metadatafname = fname + 'R' + str(r).zfill(3) + '.ini'
-		datafname = fname + 'R' + str(r).zfill(3) + '.dat'
-		if os.path.isfile(metadatafname) and os.path.isfile(datafname):
+		metadatafname = fname + 'R' + str(r).zfill(3)
+		datafname = fname + 'R' + str(r).zfill(3)
+		if os.path.isfile(metadatafname  + '.tsvx') and os.path.isfile(datafname  + '.tsv'):
+			rlist.append(r)
+			metalist.append(metadatafname)
+			datalist.append(datafname)
+		elif os.path.isfile(metadatafname  + '.ini') and os.path.isfile(datafname  + '.dat'):	#0.15.4 and older support
 			rlist.append(r)
 			metalist.append(metadatafname)
 			datalist.append(datafname)
@@ -36,10 +40,22 @@ def readResultsData(fname,logger):
 		analysis_captions.append({})
 		data_captions.append([])
 		if r in rlist:
-			metadata = readINI(fname + 'R' + str(r).zfill(3) + '.ini')[0]
+			if os.path.isfile(fname + 'R' + str(r).zfill(3) + '.tsvx'):
+				metadata = readTSVx(fname + 'R' + str(r).zfill(3) + '.tsvx')[0]
+			elif os.path.isfile(fname + 'R' + str(r).zfill(3) + '.ini'):	#v0.15.3 and before support
+				metadata = readTSVx(fname + 'R' + str(r).zfill(3) + '.ini')[0]
+			else:
+				logger.set("Problem reading results data.")
+				return False
 			data_captions[r] = [metadata['result'],[]]
 			del metadata['result']
-			data_f = open(fname + 'R' + str(r).zfill(3) + '.dat')
+			if os.path.isfile(fname + 'R' + str(r).zfill(3) + '.tsv'):
+				data_f = open(fname + 'R' + str(r).zfill(3) + '.tsv')
+			elif os.path.isfile(fname + 'R' + str(r).zfill(3) + '.dat'):	#v0.15.3 and before support
+				data_f = open(fname + 'R' + str(r).zfill(3) + '.dat')
+			else:
+				logger.set("Problem reading results data.")
+				return False
 			header = data_f.readline()
 			if header[0] == '!':
 				header = header[1:]
@@ -58,11 +74,8 @@ def readResultsData(fname,logger):
 			data_f.close()
 			analysis_captions[r] = metadata
 			if data_captions[r][1][0] == 'Time':
-				for i,v in enumerate(data_captions[r][1][1]):
-					data_captions[r][1][1][i] = v[:10]+' '+v[11:]	#convert to output format
 				if data_captions[r][1][1][0][-6] in '+-':	#convert to utc if TimeZone
-					data_captions[r][1][1] = convertTZ(data_captions[r][1][1],data_captions[r][1][1][0][-6:],'+00:00',semicolon=True)
-
+					data_captions[r][1][1] = convertTZ(data_captions[r][1][1],data_captions[r][1][1][0][-6:],'+00:00')
 			for i in range(len(data_captions[r][1])/2):
 				if data_captions[r][1][i*2] != 'Time':
 					if '.' in data_captions[r][1][i*2+1][0]:
@@ -108,20 +121,20 @@ def storeData(fname, analysis_captions, data_captions,logger,csvout=False):
 			metadata.update({'result':data_caption_title})
 			for c,caption in enumerate(captions):
 				metadata.update({'var' + str(c):caption})
-			writeINI(fname + 'R' + str(r).zfill(3) + '.ini', [metadata])
-			f = open(fname + 'R' + str(r).zfill(3) + '.dat','w')
-			f.write('!')
+			writeTSVx(fname + 'R' + str(r).zfill(3) + '.tsvx', [metadata])
+			f = open(fname + 'R' + str(r).zfill(3) + '.tsv','w')
+			#f.write('!')
 			for c,caption in enumerate(captions):
 					f.write('var'+str(c))
 					f.write('\t')
 			f.write('\n')
 			for d in zip(*data):
 				for v in d:
-					f.write(str(v).replace(' ','-'))
+					f.write(str(v).replace(' ','T'))
 					f.write('\t')
 				f.write('\n')
 			f.close()
-			logger.set('Results are stored in ' + fname + 'R' + str(r).zfill(3) + '.dat, ' + fname + 'R' + str(r).zfill(3) + '.ini.')
+			logger.set('Results are stored in ' + fname + 'R' + str(r).zfill(3) + '.tsv, ' + fname + 'R' + str(r).zfill(3) + '.tsvx.')
 			if csvout:
 				g = open(fname + 'R' + str(r).zfill(3) + '.csv','w')
 				for c,caption in enumerate(captions):
