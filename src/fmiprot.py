@@ -297,8 +297,6 @@ class monimet_gui(Tkinter.Tk):
 		self.outputpath = Tkinter.StringVar()
 		self.outputmodevariable = Tkinter.StringVar()
 		self.outputmodevariable.trace_variable('w',self.callbackoutputmode)
-		self.outputreportvariable = Tkinter.BooleanVar()
-		self.outputreportvariable.set(True)
 		self.imagespath.set(settingv[settings.index('images_path')])
 		self.resultspath.set(settingv[settings.index('results_path')])
 
@@ -306,6 +304,8 @@ class monimet_gui(Tkinter.Tk):
 		self.TimeZone.set(settingv[settings.index('timezone')])
 		self.TimeZoneConversion = Tkinter.BooleanVar()
 		self.TimeZoneConversion.set(bool(float(settingv[settings.index('convert_timezone')])))
+		self.outputreportvariable = Tkinter.BooleanVar()
+		self.outputreportvariable.set(bool(float(settingv[settings.index('generate_report')])))
 
 		self.updateProxy()
 		self.updateStorage()
@@ -1577,7 +1577,7 @@ class monimet_gui(Tkinter.Tk):
 		self.ClearMenu()
 		self.ActiveMenu.set("Processing Settings")
 		self.Menu_Prev("Main Menu","self.cancelProcessing")
-		NItems = 9
+		NItems = 10
 		space = 0.02
 		Item = 3
 		self.MenuItem1 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Time zone (UTC Offset):",anchor="c",bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor)
@@ -1589,26 +1589,31 @@ class monimet_gui(Tkinter.Tk):
 		self.MenuItem7 = Tkinter.Checkbutton(self,variable=self.TimeZoneConversion,wraplength=self.MenuX*0.7,text="Convert time zone of timestamps")
 		self.MenuItem7.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 6
+		self.MenuItem4 = Tkinter.Checkbutton(self,variable=self.outputreportvariable,wraplength=self.MenuX*0.7,text="Generate setup report with analysis results")
+		self.MenuItem4.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+		Item = 7
 		self.MenuItem11 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="Save",anchor="c",command=self.saveProcessing)
 		self.MenuItem11.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
-		Item = 7
+		Item = 8
 		self.MenuItem8 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="Cancel",anchor="c",command=self.cancelProcessing)
 		self.MenuItem8.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.4,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
-		Item = 7
+		Item = 8
 		self.MenuItem9 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="Defaults",anchor="c",command=self.defaultsProcessing)
 		self.MenuItem9.place(x=self.MenuOSX+self.MenuX*0.5,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.4,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 
 	def updateProcessing(self):
-		self.processing = {'timezone': self.TimeZone.get(),'convert_timezone': str(int(self.TimeZoneConversion.get()))}
+		self.processing = {'timezone': self.TimeZone.get(),'convert_timezone': str(int(self.TimeZoneConversion.get())),'generate_report': str(int(self.outputreportvariable.get()))}
 
 	def cancelProcessing(self):
 		self.TimeZone.set(self.processing['timezone'])
 		self.TimeZoneConversion.set(bool(int(self.processing['convert_timezone'])))
+		self.outputreportvariable.set(bool(int(self.processing['generate_report'])))
 		self.Menu_Main()
 
 	def defaultsProcessing(self):
 		self.TimeZone.set('+0000')
 		self.TimeZoneConversion.set(False)
+		self.outputreportvariable.set(True)
 
 	def saveProcessing(self):
 		self.updateProcessing()
@@ -2938,7 +2943,7 @@ class monimet_gui(Tkinter.Tk):
 		self.ClearMenu()
 		self.ActiveMenu.set('Results')
 		self.Menu_Prev("Main Menu","self.Menu_Main")
-		NItems = 10
+		NItems = 9
 		space = 0.02
 		Item = 3
 		self.MenuItem13 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="These options will not be stored in setup files",anchor='c',bg='RoyalBlue4',fg='white')
@@ -2958,9 +2963,6 @@ class monimet_gui(Tkinter.Tk):
 		Item = 7
 		self.MenuItem3 = Tkinter.Label(self,textvariable=self.outputpath,justify="left",wraplength=self.MenuX*0.8)
 		self.MenuItem3.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
-		Item = 8
-		self.MenuItem4 = Tkinter.Checkbutton(self,variable=self.outputreportvariable,wraplength=self.MenuX*0.7,text="Generate setup report with analysis results")
-		self.MenuItem4.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		if self.outputmodevariable.get() == output_modes[0]:
 			self.MenuItem5.config(state='disabled')
 
