@@ -23,12 +23,8 @@ def strftime2(dTime,conv="%Y-%m-%dT%H:%M:%S",divider_index=10):
 	t = dt[divider_index+1:]
 	return [dt,d,t]
 
-# remove later
-# def cTime2sTime(cTime):
-# 	return datetime.datetime.strptime(cTime,"%Y%m%d_%H%M%S")
-
 def dTime2fTime(dTime):
-	return strftime2(dTime).replace(':','')
+	return strftime2(dTime)[0].replace(':','').replace('+','')
 
 def oTime2dTime(oTime): #utc only
 	if isinstance(oTime,list):

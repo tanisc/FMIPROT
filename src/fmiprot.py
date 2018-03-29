@@ -1892,7 +1892,7 @@ class monimet_gui(Tkinter.Tk):
 			if 'temporary' in source and source['temporary']:
 				webbrowser.open('file:///'+os.path.join(os.path.join(TmpDir,'tmp_images'),validateName(source['network'])+'-'+source['protocol']+'-'+source['host']+'-'+validateName(source['username'])+'-'+validateName(source['path'])))
 			else:
-				webbrowser.open('file:///'+os.path.join(self.imagespath.get(),source['networkid']+'-'+fetchers.validateName(source['network']),fetchers.validateName(source['name'])))
+				webbrowser.open('file:///'+os.path.join(self.imagespath.get(),source['networkid']+'-'+parsers.validateName(source['network']),parsers.validateName(source['name'])))
 
 	def Menu_Main_Camera_Metadata(self):
 		string = ''
@@ -1965,7 +1965,7 @@ class monimet_gui(Tkinter.Tk):
 				if 'temporary' in source and source['temporary']:
 					imglist = os.listdir(os.path.join(os.path.join(TmpDir,'tmp_images'),validateName(source['network'])+'-'+source['protocol']+'-'+source['host']+'-'+validateName(source['username'])+'-'+validateName(source['path'])))
 				else:
-					imglist = os.listdir(os.path.join(self.imagespath.get(),source['networkid']+'-'+fetchers.validateName(source['network']),fetchers.validateName(source['name'])))
+					imglist = os.listdir(os.path.join(self.imagespath.get(),source['networkid']+'-'+parsers.validateName(source['network']),parsers.validateName(source['name'])))
 			for item in imglist:
 				if keys == [] or keys=="":
 					self.MenuItem1.insert("end",item)
@@ -3639,8 +3639,8 @@ class monimet_gui(Tkinter.Tk):
 		if self.CameraNameVariable.get() != self.CameraNameVariablePre.get() or self.NetworkNameVariable.get() != self.NetworkNameVariablePre.get() or self.PictureFileName.get() == os.path.join(TmpDir,'testmask.jpg'):
 			if not bool(self.ExceptionSwitches_ComingFromStartupSetupFileSetupReset.get()):
 				self.setup[self.AnalysisNoVariable.get()-1]['source'],self.setup[self.AnalysisNoVariable.get()-1] = self.UpdatePreviewPictureFiles(self.setup[self.AnalysisNoVariable.get()-1]['source'],self.setup[self.AnalysisNoVariable.get()-1])
-			self.UpdatePictureFileName()
-			self.UpdatePictures()
+				self.UpdatePictureFileName()
+				self.UpdatePictures()
 		self.CameraNameVariablePre.set(self.CameraNameVariable.get())
 		self.NetworkNameVariablePre.set(self.NetworkNameVariable.get())
 		self.Message.set("Camera is changed to " + self.CameraNameVariable.get())
@@ -3890,7 +3890,7 @@ class monimet_gui(Tkinter.Tk):
 			if 'temporary' in source and source['temporary']:
 				self.PictureFileName.set(os.path.join(os.path.join(TmpDir,'tmp_images'),validateName(source['network'])+'-'+source['protocol']+'-'+source['host']+'-'+validateName(source['username'])+'-'+validateName(source['path']),fn))
 			else:
-				self.PictureFileName.set(os.path.join(self.imagespath.get(),source['networkid']+'-'+fetchers.validateName(source['network']),fetchers.validateName(source['name']),fn))
+				self.PictureFileName.set(os.path.join(self.imagespath.get(),source['networkid']+'-'+parsers.validateName(source['network']),parsers.validateName(source['name']),fn))
 		self.setup[self.AnalysisNoVariable.get()-1].update({'previewimagetime':parsers.dTime2fTime(parsers.strptime2(fn,source['filenameformat'])[0])})
 		self.Message.set("Preview picture is changed.")
 		try:
@@ -3912,7 +3912,6 @@ class monimet_gui(Tkinter.Tk):
 			pfn = validateName(source['network'])+'-'+source['protocol']+'-'+source['host']+'-'+validateName(source['username'])+'-'+validateName(source['path']) + pfn_ts + os.path.splitext(source['filenameformat'])[1]
 		else:
 			pfn = source['networkid']+'-'+validateName(source['network'])+'-'+validateName(source['name']) + pfn_ts + os.path.splitext(source['filenameformat'])[1]
-
 		if pfn in os.listdir(PreviewsDir):
 			return (source,scenario)
 		else:
@@ -3922,10 +3921,10 @@ class monimet_gui(Tkinter.Tk):
 				if 'previewimagetime' in scenario and scenario['previewimagetime'] != '' and scenario['previewimagetime'] is not None:
 					self.Message.set('Looking for the image for the ' + source_metadata_names['previewimagetime'] + ' provided by the setup file....' )
 					timec = [0,0,0,0]
-					timec[0] = scenario['previewimagetime'][6:8]+'.'+scenario['previewimagetime'][4:6]+'.'+scenario['previewimagetime'][0:4]
-					timec[2] = scenario['previewimagetime'][9:11]+':'+scenario['previewimagetime'][11:13]
-					timec[1] = scenario['previewimagetime'][6:8]+'.'+scenario['previewimagetime'][4:6]+'.'+scenario['previewimagetime'][0:4]
-					timec[3] = scenario['previewimagetime'][9:11]+':'+scenario['previewimagetime'][11:13]
+					timec[0] = strftime2(strptime2(scenario['previewimagetime'],'%Y-%m-%dT%H%M%S')[0],conv="%d.%m.%Y %H:%M")[1]
+					timec[1] = strftime2(strptime2(scenario['previewimagetime'],'%Y-%m-%dT%H%M%S')[0],conv="%d.%m.%Y %H:%M")[1]
+					timec[2] = strftime2(strptime2(scenario['previewimagetime'],'%Y-%m-%dT%H%M%S')[0],conv="%d.%m.%Y %H:%M")[2]
+					timec[3] = strftime2(strptime2(scenario['previewimagetime'],'%Y-%m-%dT%H%M%S')[0],conv="%d.%m.%Y %H:%M")[2]
 					img, ts = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), timec + ['Date and time intervals'], count=1, online=True, care_tz = self.TimeZoneConversion.get())[:2]
 					if len(img) == 0:
 						del scenario['previewimagetime']
@@ -3934,10 +3933,10 @@ class monimet_gui(Tkinter.Tk):
 					if 'previewimagetime' in source and source['previewimagetime'] != '' and source['previewimagetime'] is not None:
 						self.Message.set('Looking for the image for the ' + source_metadata_names['previewimagetime'] + ' provided by CNIF....' )
 						timec = [0,0,0,0]
-						timec[0] = source['previewimagetime'][6:8]+'.'+source['previewimagetime'][4:6]+'.'+source['previewimagetime'][0:4]
-						timec[2] = source['previewimagetime'][9:11]+':'+source['previewimagetime'][11:13]
-						timec[1] = source['previewimagetime'][6:8]+'.'+source['previewimagetime'][4:6]+'.'+source['previewimagetime'][0:4]
-						timec[3] = source['previewimagetime'][9:11]+':'+source['previewimagetime'][11:13]
+						timec[0] = strftime2(strptime2(source['previewimagetime'],'%Y-%m-%dT%H%M%S')[0],conv="%d.%m.%Y %H:%M")[1]
+						timec[1] = strftime2(strptime2(source['previewimagetime'],'%Y-%m-%dT%H%M%S')[0],conv="%d.%m.%Y %H:%M")[1]
+						timec[2] = strftime2(strptime2(source['previewimagetime'],'%Y-%m-%dT%H%M%S')[0],conv="%d.%m.%Y %H:%M")[2]
+						timec[3] = strftime2(strptime2(source['previewimagetime'],'%Y-%m-%dT%H%M%S')[0],conv="%d.%m.%Y %H:%M")[2]
 						img, ts = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), timec + ['Date and time intervals'], count=1, online=True, care_tz = self.TimeZoneConversion.get())[:2]
 						if len(img) == 0:
 							self.Message.set('Can not find the image for the ' + source_metadata_names['previewimagetime'] + ' provided by CNIF.' )
@@ -3952,8 +3951,10 @@ class monimet_gui(Tkinter.Tk):
 					self.Message.set('No suitable file for preview image found for camera: '+source['network'] + ' - ' + source['name'])
 					return (source,scenario)
 				else:
-					if pfn_ts is not '':
+					if ('previewimagetime' in scenario and scenario['previewimagetime'] != '' and scenario['previewimagetime'] is not None) or ('previewimagetime' in source and source['previewimagetime'] != '' and source['previewimagetime'] is not None):
 						pfn = os.path.splitext(pfn)[0][:-len(pfn_ts)] + '-' + parsers.dTime2fTime(ts[0]) +  os.path.splitext(pfn)[1]
+					else:
+						pfn = os.path.splitext(pfn)[0][:-len(pfn_ts)] + os.path.splitext(pfn)[1]
 					try:
 						shutil.copyfile(img[0],os.path.join(PreviewsDir,pfn))
 						self.Message.set('Preview image downloaded/updated for camera: '+source['network'] + ' - ' + source['name'])
@@ -3968,10 +3969,10 @@ class monimet_gui(Tkinter.Tk):
 		scenario = self.setup[self.AnalysisNoVariable.get()-1]
 		pfn_ts = ''
 		if 'previewimagetime' in scenario and scenario['previewimagetime'] != '' and scenario['previewimagetime'] is not None:
-			pfn_ts = '-' + scenario['previewimagetime']
+			pfn_ts = '-' + parsers.dTime2fTime(scenario['previewimagetime'])
 		else:
 			if 'previewimagetime' in source and source['previewimagetime'] != '' and source['previewimagetime'] is not None:
-				pfn_ts = '-' + source['previewimagetime']
+				pfn_ts = '-' + parsers.dTime2fTime(source['previewimagetime'])
 		if 'temporary' in source and source['temporary']:
 			pfn = validateName(source['network'])+'-'+source['protocol']+'-'+source['host']+'-'+validateName(source['username'])+'-'+validateName(source['path']) + pfn_ts + os.path.splitext(source['filenameformat'])[1]
 		else:
@@ -4979,7 +4980,7 @@ class monimet_gui(Tkinter.Tk):
 
 	def LogMessage(self,*args):
 		now = datetime.datetime.now()
-		time = str(now)[:19]
+		time = parsers.strftime2(now)[0]
 		meta = {}
 		if '|' in self.Message.get():
 			for m in self.Message.get().split('|')[1:]:

@@ -5,7 +5,7 @@ import os
 import shutil
 from definitions import TmpDir
 from uuid import uuid4
-from parsers import validateName, writeTSVx, readTSVx, convertTZ
+from parsers import validateName, writeTSVx, readTSVx, convertTZ, strptime2, strftime2
 from copy import deepcopy
 
 def convertTZoutput(out,o):
@@ -42,7 +42,7 @@ def readResultsData(fname,logger):
 		if r in rlist:
 			if os.path.isfile(fname + 'R' + str(r).zfill(3) + '.tsvx'):
 				metadata = readTSVx(fname + 'R' + str(r).zfill(3) + '.tsvx')[0]
-			elif os.path.isfile(fname + 'R' + str(r).zfill(3) + '.ini'):	#v0.15.3 and before support
+			elif os.path.isfile(fname + 'R' + str(r).zfill(3) + '.ini'):	#v0.15.3 and older support
 				metadata = readTSVx(fname + 'R' + str(r).zfill(3) + '.ini')[0]
 			else:
 				logger.set("Problem reading results data.")
@@ -51,7 +51,7 @@ def readResultsData(fname,logger):
 			del metadata['result']
 			if os.path.isfile(fname + 'R' + str(r).zfill(3) + '.tsv'):
 				data_f = open(fname + 'R' + str(r).zfill(3) + '.tsv')
-			elif os.path.isfile(fname + 'R' + str(r).zfill(3) + '.dat'):	#v0.15.3 and before support
+			elif os.path.isfile(fname + 'R' + str(r).zfill(3) + '.dat'):	#v0.15.3 and older support
 				data_f = open(fname + 'R' + str(r).zfill(3) + '.dat')
 			else:
 				logger.set("Problem reading results data.")
@@ -74,6 +74,12 @@ def readResultsData(fname,logger):
 			data_f.close()
 			analysis_captions[r] = metadata
 			if data_captions[r][1][0] == 'Time':
+				try:	#v0.15.3 and older support
+					strptime2(data_captions[r][1][1][0],"%Y-%m-%d-%H:%M:%S")
+					for i,v in enumerate(data_captions[r][1][1]):
+						data_captions[r][1][1][i] = strftime2(strptime2(v,"%Y-%m-%d-%H:%M:%S")[0])[0]
+				except:
+					pass
 				if data_captions[r][1][1][0][-6] in '+-':	#convert to utc if TimeZone
 					data_captions[r][1][1] = convertTZ(data_captions[r][1][1],data_captions[r][1][1][0][-6:],'+00:00')
 			for i in range(len(data_captions[r][1])/2):
