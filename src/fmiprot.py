@@ -3921,10 +3921,10 @@ class monimet_gui(Tkinter.Tk):
 				if 'previewimagetime' in scenario and scenario['previewimagetime'] != '' and scenario['previewimagetime'] is not None:
 					self.Message.set('Looking for the image for the ' + source_metadata_names['previewimagetime'] + ' provided by the setup file....' )
 					timec = [0,0,0,0]
-					timec[0] = strftime2(strptime2(scenario['previewimagetime'],'%Y-%m-%dT%H%M%S')[0],conv="%d.%m.%Y %H:%M")[1]
-					timec[1] = strftime2(strptime2(scenario['previewimagetime'],'%Y-%m-%dT%H%M%S')[0],conv="%d.%m.%Y %H:%M")[1]
-					timec[2] = strftime2(strptime2(scenario['previewimagetime'],'%Y-%m-%dT%H%M%S')[0],conv="%d.%m.%Y %H:%M")[2]
-					timec[3] = strftime2(strptime2(scenario['previewimagetime'],'%Y-%m-%dT%H%M%S')[0],conv="%d.%m.%Y %H:%M")[2]
+					timec[0] = strftime2(strptime2(scenario['previewimagetime'],'%Y-%m-%dT%H:%M:%S')[0],conv="%d.%m.%Y %H:%M")[1]
+					timec[1] = strftime2(strptime2(scenario['previewimagetime'],'%Y-%m-%dT%H:%M:%S')[0],conv="%d.%m.%Y %H:%M")[1]
+					timec[2] = strftime2(strptime2(scenario['previewimagetime'],'%Y-%m-%dT%H:%M:%S')[0],conv="%d.%m.%Y %H:%M")[2]
+					timec[3] = strftime2(strptime2(scenario['previewimagetime'],'%Y-%m-%dT%H:%M:%S')[0],conv="%d.%m.%Y %H:%M")[2]
 					img, ts = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), timec + ['Date and time intervals'], count=1, online=True, care_tz = self.TimeZoneConversion.get())[:2]
 					if len(img) == 0:
 						del scenario['previewimagetime']
@@ -3933,10 +3933,10 @@ class monimet_gui(Tkinter.Tk):
 					if 'previewimagetime' in source and source['previewimagetime'] != '' and source['previewimagetime'] is not None:
 						self.Message.set('Looking for the image for the ' + source_metadata_names['previewimagetime'] + ' provided by CNIF....' )
 						timec = [0,0,0,0]
-						timec[0] = strftime2(strptime2(source['previewimagetime'],'%Y-%m-%dT%H%M%S')[0],conv="%d.%m.%Y %H:%M")[1]
-						timec[1] = strftime2(strptime2(source['previewimagetime'],'%Y-%m-%dT%H%M%S')[0],conv="%d.%m.%Y %H:%M")[1]
-						timec[2] = strftime2(strptime2(source['previewimagetime'],'%Y-%m-%dT%H%M%S')[0],conv="%d.%m.%Y %H:%M")[2]
-						timec[3] = strftime2(strptime2(source['previewimagetime'],'%Y-%m-%dT%H%M%S')[0],conv="%d.%m.%Y %H:%M")[2]
+						timec[0] = strftime2(strptime2(source['previewimagetime'],'%Y-%m-%dT%H:%M:%S')[0],conv="%d.%m.%Y %H:%M")[1]
+						timec[1] = strftime2(strptime2(source['previewimagetime'],'%Y-%m-%dT%H:%M:%S')[0],conv="%d.%m.%Y %H:%M")[1]
+						timec[2] = strftime2(strptime2(source['previewimagetime'],'%Y-%m-%dT%H:%M:%S')[0],conv="%d.%m.%Y %H:%M")[2]
+						timec[3] = strftime2(strptime2(source['previewimagetime'],'%Y-%m-%dT%H:%M:%S')[0],conv="%d.%m.%Y %H:%M")[2]
 						img, ts = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), timec + ['Date and time intervals'], count=1, online=True, care_tz = self.TimeZoneConversion.get())[:2]
 						if len(img) == 0:
 							self.Message.set('Can not find the image for the ' + source_metadata_names['previewimagetime'] + ' provided by CNIF.' )

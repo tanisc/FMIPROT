@@ -28,7 +28,7 @@ def readResultsData(fname,logger):
 			rlist.append(r)
 			metalist.append(metadatafname)
 			datalist.append(datafname)
-		elif os.path.isfile(metadatafname  + '.ini') and os.path.isfile(datafname  + '.dat'):	#0.15.4 and older support
+		elif os.path.isfile(metadatafname  + '.ini') and os.path.isfile(datafname  + '.dat'):	#0.15.3 and older support
 			rlist.append(r)
 			metalist.append(metadatafname)
 			datalist.append(datafname)
