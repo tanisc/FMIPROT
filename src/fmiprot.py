@@ -1010,8 +1010,9 @@ class monimet_gui(Tkinter.Tk):
 			options['defaultextension'] = '.tsvx'
 			options['filetypes'] = [ ('Extended tab seperated value files', '.tsvx'),('all files', '.*')]
 			options['title'] = 'Select CNIF...'
-			ans = str(os.path.normpath(tkFileDialog.askopenfilename(**self.file_opt)))
-			if ans != '' and ans != '.':
+			ans = tkFileDialog.askopenfilename(**self.file_opt)
+			if ans != '' and ans != '.' and ans != ():
+				ans = os.path.normpath(ans)
 				self.manager_network_file.set(ans)
 		else:
 			tkMessageBox.showwarning('Browse CNIF','CNIF can only be browsed if the protocol is LOCAL (if the file is in the local computer).')
@@ -1020,8 +1021,9 @@ class monimet_gui(Tkinter.Tk):
 		if self.manager_source_protocol.get() == 'LOCAL':
 			self.file_opt = options = {}
 			options['title'] = 'Select the directory to the images...'
-			ans = str(os.path.normpath(tkFileDialog.askdirectory(**self.file_opt)))
-			if ans != '' and ans != '.':
+			ans = tkFileDialog.askdirectory(**self.file_opt)
+			if ans != '' and ans != '.' and ans != ():
+				ans = os.path.normpath(ans)
 				self.manager_source_path.set(ans)
 		else:
 			tkMessageBox.showwarning('Browse directory to the images','Directory to the images can only be browsed if the protocol is LOCAL (if the images are in the local computer).')
@@ -1124,8 +1126,9 @@ class monimet_gui(Tkinter.Tk):
 			options['defaultextension'] = '.tsvx'
 			options['filetypes'] = [ ('Extended tab seperated value files', '.tsvx'),('all files', '.*')]
 			options['title'] = 'Set filename to export CNIF to...'
-			ans = str(os.path.normpath(tkFileDialog.asksaveasfilename(**self.file_opt)))
-			if ans != '' and ans != '.':
+			ans = tkFileDialog.asksaveasfilename(**self.file_opt)
+			if ans != '' and ans != '.' and ans != ():
+				ans = os.path.normpath(ans)
 				sources.writeTSVx(ans,dictlist)
 		  		if self.manager_network_protocol.get() == 'LOCAL':
 		  			self.manager_network_file.set(ans)
@@ -1626,12 +1629,13 @@ class monimet_gui(Tkinter.Tk):
 		options['defaultextension'] = '.ini'
 		options['filetypes'] = [ ('INI files', '.ini'),('all files', '.*')]
 		options['title'] = 'Set filename to export the settings to...'
-		ans = os.path.normpath(tkFileDialog.asksaveasfilename(**self.file_opt))
-		if ans != '' and ans != '.':
+		ans = tkFileDialog.asksaveasfilename(**self.file_opt)
+		if ans != '' and ans != '.' and ans != ():
+			ans = os.path.normpath(ans)
 			parsers.writeSettings(parsers.dictSettings(parsers.readSettings(settingsFile,self.Message)),ans,self.Message)
+			self.Message.set("Settings are exported to "+ans)
 		else:
 			self.Message.set("Exporting settings is cancelled.")
-		self.Message.set("Settings are exported to "+ans)
 
 	def Settings_Import(self):
 		self.Message.set("Choosing file to import settings from...")
@@ -1639,14 +1643,15 @@ class monimet_gui(Tkinter.Tk):
 		options['defaultextension'] = '.ini'
 		options['filetypes'] = [ ('INI files', '.ini'),('all files', '.*')]
 		options['title'] = 'Set filename to import the settings from...'
-		ans = os.path.normpath(tkFileDialog.askopenfilename(**self.file_opt))
-		if ans != '' and ans != '.':
+		ans = tkFileDialog.askopenfilename(**self.file_opt)
+		if ans != '' and ans != '.' and ans != ():
+			ans = os.path.normpath(ans)
 			parsers.writeSettings(parsers.dictSettings(parsers.readSettings(ans,self.Message)),settingsFile,self.Message)
+			self.Menu_Main()
+			self.initSettings()
+			self.Message.set("Settings are imported from "+ans)
 		else:
 			self.Message.set("Importing settings is cancelled.")
-		self.Menu_Main()
-		self.initSettings()
-		self.Message.set("Settings are imported from "+ans)
 
 	def Plugins_Add(self):
 		self.Message.set("Choosing plugin binary file to add.")
@@ -1660,8 +1665,9 @@ class monimet_gui(Tkinter.Tk):
 				options['defaultextension'] = '.exe'
 				options['filetypes'] = [ ('Binary files', '.exe'),('all files', '.*')]
 			options['title'] = 'Choose plugin binary file to add...'
-			ans = os.path.normpath(tkFileDialog.askopenfilename(**self.file_opt))
-			if ans != '' and ans != '.':
+			ans = tkFileDialog.askopenfilename(**self.file_opt)
+			if ans != '' and ans != '.' and ans != ():
+				ans = os.path.normpath(ans)
 				if os.path.splitext(ans)[1] != pext or not os.path.isfile(ans):
 					tkMessageBox.showwarning('Error','Chosen file is not an executable binary file.')
 					self.Message.set("Choose plugin binary file is cancelled.")
@@ -1966,6 +1972,7 @@ class monimet_gui(Tkinter.Tk):
 					imglist = os.listdir(os.path.join(os.path.join(TmpDir,'tmp_images'),validateName(source['network'])+'-'+source['protocol']+'-'+source['host']+'-'+validateName(source['username'])+'-'+validateName(source['path'])))
 				else:
 					imglist = os.listdir(os.path.join(self.imagespath.get(),source['networkid']+'-'+parsers.validateName(source['network']),parsers.validateName(source['name'])))
+			imglist.sort()
 			for item in imglist:
 				if keys == [] or keys=="":
 					self.MenuItem1.insert("end",item)
@@ -2368,9 +2375,10 @@ class monimet_gui(Tkinter.Tk):
 		options['defaultextension'] = '.cfg'
 		options['filetypes'] = [ ('FMIPROT setup files', '.cfg'),('FMIPROT configuration files', '.cfg'),('all files', '.*')]
 		options['title'] = 'Choose setup file to copy polygons from...'
-		ans = os.path.normpath(tkFileDialog.askopenfilename(**self.file_opt))
+		ans = tkFileDialog.askopenfilename(**self.file_opt)
 		try:
-			if ans != '' and ans != '.':
+			if ans != '' and ans != '.' and ans != ():
+				ans = os.path.normpath(ans)
 				setup = parsers.readSetup(ans,self.sourcelist,self.Message)
 				#fix polygons
 				for i,scenario in enumerate(setup):
@@ -2967,7 +2975,7 @@ class monimet_gui(Tkinter.Tk):
 
 	def callbackoutputmode(self,*args):
 		if self.outputmodevariable.get() == output_modes[0]:
-			timelabel = parsers.strftime2(datetime.datetime.now())[0].replace(':','')
+			timelabel = parsers.dTime2fTime(datetime.datetime.now())
 			self.outputpath.set(os.path.join(self.resultspath.get(),timelabel))
 			if self.ActiveMenu.get() == 'Results':
 				self.MenuItem5.config(state='disabled')
@@ -2987,8 +2995,9 @@ class monimet_gui(Tkinter.Tk):
 		ask = True
 		while ask:
 			ask = False
-			ans = str(os.path.normpath(tkFileDialog.askdirectory(**self.file_opt)))
-			if ans != '' and ans != '.':
+			ans = tkFileDialog.askdirectory(**self.file_opt)
+			if ans != '' and ans != '.' and ans != ():
+				ans = os.path.normpath(ans)
 				self.outputpath.set(ans)
 				if self.outputmodevariable.get() == output_modes[1]:
 					if self.checkemptyoutput():
@@ -3104,8 +3113,9 @@ class monimet_gui(Tkinter.Tk):
 		elif self.ResultFolderNameVariable.get() == '(Choose) Custom directory':
 			self.file_opt = options = {}
 			options['title'] = 'Choose path to load results...'
-			ans = os.path.normpath(tkFileDialog.askdirectory(**self.file_opt))
-			if ans != '' and ans != '.':
+			ans = tkFileDialog.askdirectory(**self.file_opt)
+			if ans != '' and ans != '.' and ans != ():
+				ans = os.path.normpath(ans)
 				ResultFolderNameVariable = ans
 				self.ResultFolderNameVariable.set(ans)
 				self.Message.set('Directory chosen for results viewer.')
@@ -3515,8 +3525,9 @@ class monimet_gui(Tkinter.Tk):
 			options['defaultextension'] = '.png'
 			options['filetypes'] = [ ('PNG', '.png'),('all files', '.*')]
 			options['title'] = 'Set filename to save the image...'
-			ans = os.path.normpath(tkFileDialog.asksaveasfilename(**self.file_opt))
-			if ans != '' and ans != '.':
+			ans = tkFileDialog.asksaveasfilename(**self.file_opt)
+			if ans != '' and ans != '.' and ans != ():
+				ans = os.path.normpath(ans)
 				self.PlotFigure.savefig(ans)
 				self.Message.set("Plot is saved as " + ans )
 			else:
@@ -3531,8 +3542,9 @@ class monimet_gui(Tkinter.Tk):
 			options['defaultextension'] = '.png'
 			options['filetypes'] = [ ('PNG', '.png'),('all files', '.*')]
 			options['title'] = 'Set filename to save the data...'
-			ans = os.path.normpath(tkFileDialog.asksaveasfilename(**self.file_opt))
-			if ans != '' and ans != '.':
+			ans = tkFileDialog.asksaveasfilename(**self.file_opt)
+			if ans != '' and ans != '.' and ans != ():
+				ans = os.path.normpath(ans)
 				mahotas.imread.imsave(ans,np.array(self.ResultsData[1][self.ResultsCaptions.index(self.ResultVariableNameVariable.get())*2+1]))
 				self.Message.set("Plot is saved as " + ans )
 			else:
@@ -3921,10 +3933,10 @@ class monimet_gui(Tkinter.Tk):
 				if 'previewimagetime' in scenario and scenario['previewimagetime'] != '' and scenario['previewimagetime'] is not None:
 					self.Message.set('Looking for the image for the ' + source_metadata_names['previewimagetime'] + ' provided by the setup file....' )
 					timec = [0,0,0,0]
-					timec[0] = strftime2(strptime2(scenario['previewimagetime'],'%Y-%m-%dT%H:%M:%S')[0],conv="%d.%m.%Y %H:%M")[1]
-					timec[1] = strftime2(strptime2(scenario['previewimagetime'],'%Y-%m-%dT%H:%M:%S')[0],conv="%d.%m.%Y %H:%M")[1]
-					timec[2] = strftime2(strptime2(scenario['previewimagetime'],'%Y-%m-%dT%H:%M:%S')[0],conv="%d.%m.%Y %H:%M")[2]
-					timec[3] = strftime2(strptime2(scenario['previewimagetime'],'%Y-%m-%dT%H:%M:%S')[0],conv="%d.%m.%Y %H:%M")[2]
+					timec[0] = parsers.strftime2(parsers.strptime2(scenario['previewimagetime'],'%Y-%m-%dT%H:%M:%S')[0],conv="%d.%m.%Y %H:%M")[1]
+					timec[1] = parsers.strftime2(parsers.strptime2(scenario['previewimagetime'],'%Y-%m-%dT%H:%M:%S')[0],conv="%d.%m.%Y %H:%M")[1]
+					timec[2] = parsers.strftime2(parsers.strptime2(scenario['previewimagetime'],'%Y-%m-%dT%H:%M:%S')[0],conv="%d.%m.%Y %H:%M")[2]
+					timec[3] = parsers.strftime2(parsers.strptime2(scenario['previewimagetime'],'%Y-%m-%dT%H:%M:%S')[0],conv="%d.%m.%Y %H:%M")[2]
 					img, ts = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), timec + ['Date and time intervals'], count=1, online=True, care_tz = self.TimeZoneConversion.get())[:2]
 					if len(img) == 0:
 						del scenario['previewimagetime']
@@ -3933,10 +3945,10 @@ class monimet_gui(Tkinter.Tk):
 					if 'previewimagetime' in source and source['previewimagetime'] != '' and source['previewimagetime'] is not None:
 						self.Message.set('Looking for the image for the ' + source_metadata_names['previewimagetime'] + ' provided by CNIF....' )
 						timec = [0,0,0,0]
-						timec[0] = strftime2(strptime2(source['previewimagetime'],'%Y-%m-%dT%H:%M:%S')[0],conv="%d.%m.%Y %H:%M")[1]
-						timec[1] = strftime2(strptime2(source['previewimagetime'],'%Y-%m-%dT%H:%M:%S')[0],conv="%d.%m.%Y %H:%M")[1]
-						timec[2] = strftime2(strptime2(source['previewimagetime'],'%Y-%m-%dT%H:%M:%S')[0],conv="%d.%m.%Y %H:%M")[2]
-						timec[3] = strftime2(strptime2(source['previewimagetime'],'%Y-%m-%dT%H:%M:%S')[0],conv="%d.%m.%Y %H:%M")[2]
+						timec[0] = parsers.strftime2(parsers.strptime2(source['previewimagetime'],'%Y-%m-%dT%H:%M:%S')[0],conv="%d.%m.%Y %H:%M")[1]
+						timec[1] = parsers.strftime2(parsers.strptime2(source['previewimagetime'],'%Y-%m-%dT%H:%M:%S')[0],conv="%d.%m.%Y %H:%M")[1]
+						timec[2] = parsers.strftime2(parsers.strptime2(source['previewimagetime'],'%Y-%m-%dT%H:%M:%S')[0],conv="%d.%m.%Y %H:%M")[2]
+						timec[3] = parsers.strftime2(parsers.strptime2(source['previewimagetime'],'%Y-%m-%dT%H:%M:%S')[0],conv="%d.%m.%Y %H:%M")[2]
 						img, ts = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), timec + ['Date and time intervals'], count=1, online=True, care_tz = self.TimeZoneConversion.get())[:2]
 						if len(img) == 0:
 							self.Message.set('Can not find the image for the ' + source_metadata_names['previewimagetime'] + ' provided by CNIF.' )
@@ -4001,6 +4013,7 @@ class monimet_gui(Tkinter.Tk):
 			(self.networklist,self.sourcelist, self.setup) = sources.fixSourcesBySetup(self.Message,self.networklist,self.sourcelist, self.setup)
 			self.setupFileVariable.set(ans)
 			self.Message.set("Setup file is loaded.")
+			parsers.debugDict(self.setup)
 			if not sysargv['gui']:
 				return False
 			self.AnalysisNoVariable.set(1)
@@ -4071,6 +4084,18 @@ class monimet_gui(Tkinter.Tk):
 		for i,scenario in enumerate(setup):
 			if len(scenario['temporal']) < 5:
 				setup[i]['temporal'].append(temporal_modes[1])
+		#fix timestamps from v0.15.4 and older
+		for i,scenario in enumerate(setup):
+			for key in ['previewimagetime','lastimagetime','firstimagetime']:
+				if key in scenario and scenario[key] is not None:
+					if 'T' not in scenario[key]:
+						setup[i][key] = parsers.strftime2(parsers.strptime2(scenario[key],'%Y%m%d_%H%M%S')[0])[0]
+				if key in scenario['source'] and scenario['source'][key] is not None:
+					if 'T' not in scenario['source'][key]:
+						setup[i]['source'][key] = parsers.strftime2(parsers.strptime2(scenario['source'][key],'%Y%m%d_%H%M%S')[0])[0]
+			if 'timezone' in scenario['source'] and scenario['source']['timezone'] is not None:
+				if ':' not in scenario['source']['timezone']:
+					setup[i]['source']['timezone'] = scenario['source']['timezone'][:-2] + ':' + scenario['source']['timezone'][-2:]
 		return setup
 
 
@@ -4590,8 +4615,9 @@ class monimet_gui(Tkinter.Tk):
 		self.file_opt = options = {}
 		options['title'] = 'Choose path to save results...'
 		self.Message.set("Choosing results path...")
-		ans = os.path.normpath(tkFileDialog.askdirectory(**self.file_opt))
-		if ans != '' and ans != '.':
+		ans = tkFileDialog.askdirectory(**self.file_opt)
+		if ans != '' and ans != '.' and ans != ():
+			ans = os.path.normpath(ans)
 			self.resultspath.set(ans)
 		else:
 			self.Message.set("Selection of results path is cancelled.")
@@ -4603,8 +4629,9 @@ class monimet_gui(Tkinter.Tk):
 		self.file_opt = options = {}
 		options['title'] = 'Choose path for local images...'
 		self.Message.set("Choosing path for local images...")
-		ans = str(os.path.normpath(tkFileDialog.askdirectory(**self.file_opt)))
-		if ans != '' and ans != '.':
+		ans = tkFileDialog.askdirectory(**self.file_opt)
+		if ans != '' and ans != '.' and ans != ():
+			ans = os.path.normpath(ans)
 			self.imagespath.set(ans)
 		else:
 			self.Message.set("Selection of images path is cancelled.")
