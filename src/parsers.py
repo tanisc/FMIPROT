@@ -617,12 +617,7 @@ def readTSVx(tsvxfile):
 
 
 def writeTSVx(tsvxfile, dictlist,commonheader=True):
-	validtsvx = False
-	for d,dicti in enumerate(dictlist):
-		if 'temporary' not in dicti or dicti['temporary'] is False:
-			validtsvx = True
-			break
-	if not validtsvx:
+	if len(dictlist) == 0:
 		return 'Nothing to write in INI file.'
 
 	f = open(tsvxfile,'w')
@@ -641,8 +636,6 @@ def writeTSVx(tsvxfile, dictlist,commonheader=True):
 		f.write('\n')
 
 	for d,dicti in enumerate(dictlist):
-		if 'temporary' in dicti and dicti['temporary']:
-			continue
 		nedict = {}
 		if not commonheader:
 			keys = []

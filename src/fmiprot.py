@@ -4013,7 +4013,6 @@ class monimet_gui(Tkinter.Tk):
 			(self.networklist,self.sourcelist, self.setup) = sources.fixSourcesBySetup(self.Message,self.networklist,self.sourcelist, self.setup)
 			self.setupFileVariable.set(ans)
 			self.Message.set("Setup file is loaded.")
-			parsers.debugDict(self.setup)
 			if not sysargv['gui']:
 				return False
 			self.AnalysisNoVariable.set(1)
@@ -4139,7 +4138,15 @@ class monimet_gui(Tkinter.Tk):
 			self.Message.set("Saving cancelled.")
 
 	def setupToWrite(self,setup):
-		setuptowrite = deepcopy(setup)
+		setuptowrite = []
+		for i,scenario in enumerate(setup):
+			if 'temporary' not in scenario:
+				setuptowrite.append(scenario)
+			else:
+				if scenario['temporary'] is False:
+					del scenario['temporary']
+					setuptowrite.append(scenario)
+
 		for i,scenario in enumerate(setuptowrite):
 			if isinstance(scenario['polygonicmask'][0],list):
 				coordlist = scenario['polygonicmask']
@@ -4147,6 +4154,7 @@ class monimet_gui(Tkinter.Tk):
 				for j, coord in enumerate(coordlist):
 					coordict.update({str(j):coord})
 				setuptowrite[i].update({'polygonicmask':coordict})
+
 		return setuptowrite
 
 	def setupFileClear(self):
