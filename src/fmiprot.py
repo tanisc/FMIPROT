@@ -4205,10 +4205,10 @@ class monimet_gui(Tkinter.Tk):
 				(source,scenario) = self.UpdatePreviewPictureFiles(source,scenario)
 				pfn_ts = ''
 				if 'previewimagetime' in scenario and scenario['previewimagetime'] != '' and scenario['previewimagetime'] is not None:
-					pfn_ts = '-' + scenario['previewimagetime']
+					pfn_ts = '-' + parsers.sTime2fTime(scenario['previewimagetime'])
 				else:
 					if 'previewimagetime' in source and source['previewimagetime'] != '' and source['previewimagetime'] is not None:
-						pfn_ts = '-' + source['previewimagetime']
+						pfn_ts = '-' + parsers.sTime2fTime(source['previewimagetime'])
 				if 'temporary' in source and source['temporary']:
 					pfn = validateName(source['network'])+'-'+source['protocol']+'-'+source['host']+'-'+validateName(source['username'])+'-'+validateName(source['path']) + pfn_ts + os.path.splitext(source['filenameformat'])[1]
 				else:
@@ -4241,6 +4241,7 @@ class monimet_gui(Tkinter.Tk):
 					if os.path.isfile(maskfilet[j]):
 						os.remove(maskfilet[j])
 				if pfn not in os.listdir(PreviewsDir):
+					self.Message.set("Preview image not found.")
 					continue
 				img = mahotas.imread(os.path.join(PreviewsDir,pfn))
 				rat = 160.0/img.shape[1]
