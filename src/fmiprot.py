@@ -2618,8 +2618,8 @@ class monimet_gui(Tkinter.Tk):
 		if self.NumResultsVariable.get() == 0:
 			self.MenuItem4 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="No results in the directory",anchor="c")
 			self.MenuItem8 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="No results in the directory",anchor="c")
-			self.PlotCanvasSwitch.set(False)
-			self.MenuItem5 = Tkinter.Checkbutton(self,variable=self.PlotCanvasSwitch,wraplength=self.MenuX*0.7,text="Plot",state="disabled")
+			self.MenuItem5Switch.set(False)
+			self.MenuItem5 = Tkinter.Checkbutton(self,variable=self.MenuItem5Switch,wraplength=self.MenuX*0.7,text="Plot",state="disabled")
 			self.MenuItem7 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="Open File",anchor="c",command=self.Menu_Main_Results_Open,state="disabled")
 		else:
 			self.MenuItem4 = Tkinter.OptionMenu(self,self.ResultNameVariable,1,2)
@@ -2627,7 +2627,16 @@ class monimet_gui(Tkinter.Tk):
 			self.MenuItem8 = Tkinter.OptionMenu(self,self.ResultVariableNameVariable,1,2)
 			self.LoadResultVariableNameVariable()
 			self.MenuItem5 = Tkinter.Checkbutton(self,variable=self.MenuItem5Switch,wraplength=self.MenuX*0.7,text="Plot")
-			self.MenuItem7 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="Open File",anchor="c",command=self.Menu_Main_Results_Open,state="disabled")
+			self.MenuItem7 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="Open File",anchor="c",command=self.Menu_Main_Results_Open,state="normal")
+		if self.PlotCanvasSwitch.get() == False:
+			self.MenuItem6 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="Customize Graph",anchor="c",command=self.Menu_Main_Results_Customize,state="disabled")
+			self.MenuItem13 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="-",command=self.SensMinus,state="disabled")
+			self.MenuItem14 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="+",command=self.SensPlus,state="disabled")
+		else:
+			self.MenuItem6 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="Customize Graph",anchor="c",command=self.Menu_Main_Results_Customize,state="normal")
+			self.MenuItem13 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="-",command=self.SensMinus,state="normal")
+			self.MenuItem14 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="+",command=self.SensPlus,state="normal")
+
 		Item = 1
 		self.MenuItem1 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Directory:",anchor='c',bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor)
 		self.MenuItem1.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
@@ -2640,7 +2649,6 @@ class monimet_gui(Tkinter.Tk):
 		self.MenuItem3 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Variable:",anchor='c',bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor)
 		self.MenuItem3.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 4
-		self.MenuItem6 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="Customize Graph",anchor="c",command=self.Menu_Main_Results_Customize)
 		self.MenuItem4.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 6
 		self.MenuItem8.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
@@ -2651,14 +2659,11 @@ class monimet_gui(Tkinter.Tk):
 		Item = 9
 		self.MenuItem7.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 10
-		self.MenuItem13 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="-",command=self.SensMinus)
 		self.MenuItem13.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.2,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
-		self.MenuItem14 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="+",command=self.SensPlus)
 		self.MenuItem14.place(x=self.MenuOSX+self.MenuX*0.7,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.2,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
-
 		self.MenuItem15 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Size")
 		self.MenuItem15.place(x=self.MenuOSX+self.MenuX*0.3,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.4,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
-		self.MenuEnablerFunc.set("self.MenuEnabler([5,[6,7,13,14,15],['self.PlotCanvasSwitch'],['0'],['self.PlotCanvasSwitch.set(self.MenuItem5Switch.get())']])")
+		self.MenuEnablerFunc.set("self.MenuEnabler([5,[6,13,14],['self.PlotCanvasSwitch'],['0'],['self.PlotCanvasSwitch.set(self.MenuItem5Switch.get())']])")
 		exec(self.MenuEnablerFunc.get())
 
 	def LoadResultVariableNameVariable(self,*args):
@@ -3129,19 +3134,19 @@ class monimet_gui(Tkinter.Tk):
 		else:
 			resultfolderpath = ResultFolderNameVariable
 		filelist = []
-		extlist = [".dat",".h5",".png","jpg"]
+		extlist = [".tsv",".dat",".h5",".png","jpg"]
 		try:
-			for file in os.listdir(resultfolderpath):
+			for fname in os.listdir(resultfolderpath):
 				for ext in extlist:
-					if ext in file[-5:]:
-						filelist.append(file)
+					if ext == os.path.splitext(fname)[1]:
+						filelist.append(fname)
 			self.NumResultsVariable.set(len(filelist))
 		except:
 			self.NumResultsVariable.set(0)
 		self.ResultsList = []
 		for i in range(self.NumResultsVariable.get()):
 			filename = os.path.join(self.resultspath.get(),ResultFolderNameVariable,filelist[i])
-			if not os.path.isfile(os.path.join(resultfolderpath,os.path.splitext(filelist[i])[0] + '.tsvx')) and not os.path.isfile(os.path.join(resultfolderpath,os.path.splitext(filelist[i])[0] + '.ini')):	#v0.15.3 and before support
+			if not os.path.isfile(os.path.join(resultfolderpath,os.path.splitext(filelist[i])[0] + '.tsvx')) and not os.path.isfile(os.path.join(resultfolderpath,os.path.splitext(filelist[i])[0] + '.ini')):	#v0.15.4 and before support
 				name = os.path.splitext(filelist[i].replace('_',' '))[0] + " (no-metadata, "+os.path.splitext(filelist[i].replace('_',' '))[1]+")"
 				metadata = {}
 			else:
@@ -3169,10 +3174,13 @@ class monimet_gui(Tkinter.Tk):
 				self.ResultsFileMetadata = deepcopy(res[2])
 				self.ResultsName = deepcopy(res[0])
 				break
-		if ext == ".dat":
+		if ext == ".tsv" or ext == ".dat":	#v0.15.4 and before support
 			f = open(self.ResultsFileNameVariable.get(),'r')
 			line = f.readline()
-			line = line[1:].split('\t')
+			if line[0] == '!':
+				line = line[1:].split('\t')
+			else:
+				line = line.split('\t')
 			while '\t' in line:
 				line.remove('\t')
 			while '\n' in line:
