@@ -4148,8 +4148,9 @@ class monimet_gui(Tkinter.Tk):
 			self.Message.set("Saving cancelled.")
 
 	def setupToWrite(self,setup):
+		setup_ = deepcopy(setup)
 		setuptowrite = []
-		for i,scenario in enumerate(setup):
+		for i,scenario in enumerate(setup_):
 			if 'temporary' not in scenario:
 				setuptowrite.append(scenario)
 			else:
