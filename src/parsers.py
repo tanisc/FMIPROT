@@ -26,6 +26,9 @@ def strftime2(dTime,conv="%Y-%m-%dT%H:%M:%S",divider_index=10):
 def dTime2fTime(dTime):
 	return strftime2(dTime)[0].replace(':','').replace('+','')
 
+def sTime2fTime(sTime):
+	return dTime2fTime(strptime2(sTime)[0])
+
 def oTime2dTime(oTime): #utc only
 	if isinstance(oTime,list):
 		dTime = []

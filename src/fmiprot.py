@@ -267,6 +267,7 @@ class monimet_gui(Tkinter.Tk):
 				sysargv['setupfile'] = None
 			else:
 				self.setupFileClear()
+				self.ExceptionSwitches_ComingFromStartupSetupFileSetupReset.set(False)
 			self.Menu_Main()
 			self.Message.set("GUI initialized.")
 
@@ -3101,6 +3102,7 @@ class monimet_gui(Tkinter.Tk):
 		exec(self.MenuEnablerFunc.get())
 
 	def callbackPreviewCanvasSwitch(self,event,*args):
+		self.UpdatePictureFileName()
 		self.UpdatePictures()
 		if self.ActiveMenu.get() == "Polygonic Masking":
 			try:
@@ -3656,7 +3658,7 @@ class monimet_gui(Tkinter.Tk):
 			self.setup[self.AnalysisNoVariable.get()-1]['source'].update(sources.getSource(self.Message,sources.getSources(self.Message,self.sourcelist,self.NetworkNameVariable.get(),'network'),self.CameraNameVariable.get()))
 		except:
 			pass
-		if self.CameraNameVariable.get() != self.CameraNameVariablePre.get() or self.NetworkNameVariable.get() != self.NetworkNameVariablePre.get() or self.PictureFileName.get() == os.path.join(TmpDir,'testmask.jpg'):
+		if self.PictureFileName.get() == '' or self.CameraNameVariable.get() != self.CameraNameVariablePre.get() or self.NetworkNameVariable.get() != self.NetworkNameVariablePre.get() or self.PictureFileName.get() == os.path.join(TmpDir,'testmask.jpg'):
 			if not bool(self.ExceptionSwitches_ComingFromStartupSetupFileSetupReset.get()):
 				self.setup[self.AnalysisNoVariable.get()-1]['source'],self.setup[self.AnalysisNoVariable.get()-1] = self.UpdatePreviewPictureFiles(self.setup[self.AnalysisNoVariable.get()-1]['source'],self.setup[self.AnalysisNoVariable.get()-1])
 				self.UpdatePictureFileName()
@@ -3911,7 +3913,7 @@ class monimet_gui(Tkinter.Tk):
 				self.PictureFileName.set(os.path.join(os.path.join(TmpDir,'tmp_images'),validateName(source['network'])+'-'+source['protocol']+'-'+source['host']+'-'+validateName(source['username'])+'-'+validateName(source['path']),fn))
 			else:
 				self.PictureFileName.set(os.path.join(self.imagespath.get(),source['networkid']+'-'+parsers.validateName(source['network']),parsers.validateName(source['name']),fn))
-		self.setup[self.AnalysisNoVariable.get()-1].update({'previewimagetime':parsers.dTime2fTime(parsers.strptime2(fn,source['filenameformat'])[0])})
+		self.setup[self.AnalysisNoVariable.get()-1].update({'previewimagetime':parsers.strftime2(parsers.strptime2(fn,source['filenameformat'])[0])[0]})
 		self.Message.set("Preview picture is changed.")
 		try:
 			shutil.copyfile(self.PictureFileName.get(),os.path.join(PreviewsDir,pfn))
@@ -3924,10 +3926,10 @@ class monimet_gui(Tkinter.Tk):
 		self.Message.set('Checking preview picture for '+source['name']+'...')
 		pfn_ts = ''
 		if 'previewimagetime' in scenario and scenario['previewimagetime'] != '' and scenario['previewimagetime'] is not None:
-			pfn_ts = '-' + scenario['previewimagetime']
+			pfn_ts = '-' + parsers.sTime2fTime(scenario['previewimagetime'])
 		else:
 			if 'previewimagetime' in source and source['previewimagetime'] != '' and source['previewimagetime'] is not None:
-				pfn_ts = '-' + source['previewimagetime']
+				pfn_ts = '-' + parsers.sTime2fTime(source['previewimagetime'])
 		if 'temporary' in source and source['temporary']:
 			pfn = validateName(source['network'])+'-'+source['protocol']+'-'+source['host']+'-'+validateName(source['username'])+'-'+validateName(source['path']) + pfn_ts + os.path.splitext(source['filenameformat'])[1]
 		else:
@@ -3989,10 +3991,10 @@ class monimet_gui(Tkinter.Tk):
 		scenario = self.setup[self.AnalysisNoVariable.get()-1]
 		pfn_ts = ''
 		if 'previewimagetime' in scenario and scenario['previewimagetime'] != '' and scenario['previewimagetime'] is not None:
-			pfn_ts = '-' + parsers.dTime2fTime(scenario['previewimagetime'])
+			pfn_ts = '-' + parsers.sTime2fTime(scenario['previewimagetime'])
 		else:
 			if 'previewimagetime' in source and source['previewimagetime'] != '' and source['previewimagetime'] is not None:
-				pfn_ts = '-' + parsers.dTime2fTime(source['previewimagetime'])
+				pfn_ts = '-' + parsers.sTime2fTime(source['previewimagetime'])
 		if 'temporary' in source and source['temporary']:
 			pfn = validateName(source['network'])+'-'+source['protocol']+'-'+source['host']+'-'+validateName(source['username'])+'-'+validateName(source['path']) + pfn_ts + os.path.splitext(source['filenameformat'])[1]
 		else:
