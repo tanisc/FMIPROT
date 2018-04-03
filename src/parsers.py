@@ -598,6 +598,8 @@ def readTSVx(tsvxfile):
 							except:
 								pass
 						dict.update({key:line[i]})
+				if dict == {}:
+					continue
 				if ne == 0:
 					dictlist.append(dict)
 					if nc != 0:
@@ -621,7 +623,9 @@ def readTSVx(tsvxfile):
 
 def writeTSVx(tsvxfile, dictlist,commonheader=True):
 	if len(dictlist) == 0:
-		return 'Nothing to write in INI file.'
+		f = open(tsvxfile,'w')
+		f.close()
+		return 'Writing TSVx file successful.'
 
 	f = open(tsvxfile,'w')
 	if commonheader:

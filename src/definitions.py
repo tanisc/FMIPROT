@@ -93,6 +93,7 @@ PluginsDir = os.path.join(BinDir,'plugins')
 SourceDir = os.path.join(BinDir,'sources')
 settingsFile = os.path.join(ResourcesDir,'settings.ini')
 NetworklistFile = os.path.join(SourceDir,'networklist.tsvx')
+ProxylistFile = os.path.join(SourceDir,'proxylist.tsvx')
 
 if sysargv['dev']:
     BinDir = os.path.split(os.path.realpath(os.sys.argv[0]))[0]
@@ -151,3 +152,6 @@ if not os.path.exists(NetworklistFile):
         os.remove(os.path.join(ResourcesDir,"monimet_demo_def.ini"))
     else:
         shutil.copyfile(os.path.join(ResourcesDir,"monimet_demo_def.tsvx"),os.path.join(SourceDir,"monimet_demo.tsvx"))
+if not os.path.exists(ProxylistFile):
+    f = open(ProxylistFile,'w')
+    f.close()

@@ -218,7 +218,7 @@ class monimet_gui(Tkinter.Tk):
 		self.ActiveMenu.trace('w',self.callbackActiveMenu)
 
 		global  scenario_def, setup_def ,temporal_modes, output_modes
-		(self.networklist,self.sourcelist) = sources.readSources(self, self.proxy, self.connection, self.Message)
+		(self.networklist,self.sourcelist,self.proxylist) = sources.readSources(self, self.proxy, self.connection, self.Message)
 		self.makeDirStorage()
 
 		scenario_def = {'source':self.sourcelist[0],'name':'Scenario-1','previewimagetime':'','temporal':['01.01.1970','31.12.2026','00:00','23:59','All'],'polygonicmask':[0,0,0,0,0,0,0,0],'multiplerois':1,'thresholds':[0.0,1.0,0.0,1.0,0.0,1.0,0.0,1.0,0.0,255.0,0.0,255.0,0.0,255.0,0.0,1.0],'analyses':['analysis-1'],'analysis-1':{'id':calcids[calcids.index("0")],'name':calcnames[calcids.index("0")]}}
@@ -420,6 +420,7 @@ class monimet_gui(Tkinter.Tk):
 		NetMenu.add_command(label="Camera network manager...",command=self.Networks_NetworkManager)
 		NetMenu.add_command(label="Add camera network from an online CNIF...",command=self.Networks_AddOnlineCNIF)
 		NetMenu.add_command(label="Single directory wizard...",command=self.Networks_Wizard)
+		NetMenu.add_command(label="Camera network proxy manager...",command=self.Networks_ProxyManager)
 		NetMenu.add_separator()
 		#NetMenu.add_command(label="Import camera network(s)...",command=self.Networks_Import)
 		#NetMenu.add_command(label="Export camera network(s)...",command=self.Networks_Export)
@@ -1355,6 +1356,223 @@ class monimet_gui(Tkinter.Tk):
 	def Networks_Export(self):
 		return False
 
+	def Networks_ProxyManager(self):
+		self.manager_proxy_window = Tkinter.Toplevel(self,padx=10,pady=10)
+		self.manager_proxy_window.grab_set()
+		self.manager_proxy_window.wm_title('Camera Network Proxy Manager')
+		self.manager_proxy_window.columnconfigure(1, minsize=20)
+		self.manager_proxy_window.columnconfigure(2, minsize=40)
+		self.manager_proxy_window.columnconfigure(3, minsize=20)
+		self.manager_proxy_window.columnconfigure(4, minsize=20)
+		self.manager_proxy_window.columnconfigure(5, minsize=100)
+		self.manager_proxy_window.columnconfigure(6, minsize=100)
+		self.manager_proxy_window.columnconfigure(7, minsize=25)
+
+		self.manager_proxylist = self.proxylist[:]
+
+		self.manager_proxy_number = Tkinter.IntVar()
+		self.manager_proxy_number.set(1)
+		self.manager_proxy_number.trace('w',self.Networks_LoadProxy)
+		self.manager_proxy_protocol = Tkinter.StringVar()
+		self.manager_proxy_host = Tkinter.StringVar()
+		self.manager_proxy_username = Tkinter.StringVar()
+		self.manager_proxy_password = Tkinter.StringVar()
+		self.manager_proxy_path = Tkinter.StringVar()
+		self.manager_proxy_filenameformat = Tkinter.StringVar()
+		self.manager_proxy_protocol_target = Tkinter.StringVar()
+		self.manager_proxy_host_target = Tkinter.StringVar()
+		self.manager_proxy_username_target = Tkinter.StringVar()
+		self.manager_proxy_password_target = Tkinter.StringVar()
+		self.manager_proxy_path_target = Tkinter.StringVar()
+		self.manager_proxy_filenameformat_target = Tkinter.StringVar()
+
+		r = 0
+		r += 1
+		Tkinter.Label(self.manager_proxy_window,bg="RoyalBlue4",fg='white',anchor='w',text='Edit camera network proxies').grid(sticky='w'+'e',row=r,column=1,columnspan=7)
+		r += 1
+		Tkinter.Button(self.manager_proxy_window,text='<',command=self.Networks_PrevProxy).grid(sticky='w'+'e',row=r,column=1)
+		Tkinter.Label(self.manager_proxy_window,anchor='w',text="Proxy No:").grid(sticky='w'+'e',row=r,column=2)
+		Tkinter.Label(self.manager_proxy_window,anchor='e',textvariable=self.manager_proxy_number).grid(sticky='w'+'e',row=r,column=3)
+		Tkinter.Button(self.manager_proxy_window,text='>',command=self.Networks_NextProxy).grid(sticky='w'+'e',row=r,column=4)
+		Tkinter.Button(self.manager_proxy_window,text='Add',command=self.Networks_AddProxy).grid(sticky='w'+'e',row=r,column=5)
+		Tkinter.Button(self.manager_proxy_window,text='Duplicate',command=self.Networks_DuplicateProxy).grid(sticky='w'+'e',row=r,column=6)
+		Tkinter.Button(self.manager_proxy_window,text='Remove',command=self.Networks_RemoveProxy).grid(sticky='w'+'e',row=r,column=7)
+		r += 1
+		Tkinter.Label(self.manager_proxy_window,bg="RoyalBlue4",fg='white',anchor='w',text='Edit proxy parameters').grid(sticky='w'+'e',row=r,column=1,columnspan=7)
+		r += 1
+		Tkinter.Label(self.manager_proxy_window,anchor='w',text='Parameter').grid(sticky='w'+'e',row=r,column=1,columnspan=4)
+		Tkinter.Label(self.manager_proxy_window,anchor='w',text='Original value').grid(sticky='w'+'e',row=r,column=5,columnspan=1)
+		Tkinter.Label(self.manager_proxy_window,anchor='w',text='Proxy value').grid(sticky='w'+'e',row=r,column=6,columnspan=1)
+		r += 1
+		Tkinter.Label(self.manager_proxy_window,anchor='w',text='Camera Communication Protocol:').grid(sticky='w'+'e',row=r,column=1,columnspan=4)
+		Tkinter.OptionMenu(self.manager_proxy_window,self.manager_proxy_protocol,'FTP','HTTP','LOCAL').grid(sticky='w'+'e',row=r,column=5)
+		Tkinter.OptionMenu(self.manager_proxy_window,self.manager_proxy_protocol_target,'FTP','HTTP','LOCAL').grid(sticky='w'+'e',row=r,column=6)
+		Tkinter.Button(self.manager_proxy_window,text='?',command=lambda: tkMessageBox.showinfo('Edit Sources','The communication protocol to fetch camera images. If the images are/will be in this computer, select LOCAL.')).grid(sticky='w'+'e',row=r,column=7)
+		r += 1
+		Tkinter.Label(self.manager_proxy_window,anchor='w',text='Image archive Host:').grid(sticky='w'+'e',row=r,column=1,columnspan=4)
+		Tkinter.Entry(self.manager_proxy_window,textvariable=self.manager_proxy_host).grid(sticky='w'+'e',row=r,column=5)
+		Tkinter.Entry(self.manager_proxy_window,textvariable=self.manager_proxy_host_target).grid(sticky='w'+'e',row=r,column=6)
+		Tkinter.Button(self.manager_proxy_window,text='?',command=lambda: tkMessageBox.showinfo('Edit Sources','Host address of the server that bears the images. \nDo not include the protocol here. For example, do not enter \'ftp://myserver.com\' but enter \'myserver.com\' instead.\nLeave empty if protocol is LOCAL.')).grid(sticky='w'+'e',row=r,column=7)
+		r += 1
+		Tkinter.Label(self.manager_proxy_window,anchor='w',text='Username for host:').grid(sticky='w'+'e',row=r,column=1,columnspan=4)
+		Tkinter.Entry(self.manager_proxy_window,textvariable=self.manager_proxy_username).grid(sticky='w'+'e',row=r,column=5)
+		Tkinter.Entry(self.manager_proxy_window,textvariable=self.manager_proxy_username_target).grid(sticky='w'+'e',row=r,column=6)
+		Tkinter.Button(self.manager_proxy_window,text='?',command=lambda: tkMessageBox.showinfo('Edit Sources','Username for the host that bears the images, if applicable.\nLeave empty if protocol is LOCAL.')).grid(sticky='w'+'e',row=r,column=7)
+		r += 1
+		Tkinter.Label(self.manager_proxy_window,anchor='w',text='Password for host:').grid(sticky='w'+'e',row=r,column=1,columnspan=4)
+		Tkinter.Entry(self.manager_proxy_window,textvariable=self.manager_proxy_password).grid(sticky='w'+'e',row=r,column=5)
+		Tkinter.Entry(self.manager_proxy_window,textvariable=self.manager_proxy_password_target).grid(sticky='w'+'e',row=r,column=6)
+		Tkinter.Button(self.manager_proxy_window,text='?',command=lambda: tkMessageBox.showinfo('Edit Sources','Password for the username for the host that bears the images, if applicable.\nIf \'*\' is used, the program will ask for the password each time it is trying to connect to the host. For security, prefer \'*\', because that information is saved in a file in your local disk.\nLeave empty if protocol is LOCAL.')).grid(sticky='w'+'e',row=r,column=7)
+		r += 1
+		Tkinter.Label(self.manager_proxy_window,anchor='w',text='Path to images:').grid(sticky='w'+'e',row=r,column=1,columnspan=4)
+		Tkinter.Entry(self.manager_proxy_window,textvariable=self.manager_proxy_path).grid(sticky='w'+'e',row=r,column=5)
+		Tkinter.Entry(self.manager_proxy_window,textvariable=self.manager_proxy_path_target).grid(sticky='w'+'e',row=r,column=6)
+		Tkinter.Button(self.manager_proxy_window,text='?',command=lambda: tkMessageBox.showinfo('Edit Sources','The path of the image directory.')).grid(sticky='w'+'e',row=r,column=7)
+		r += 1
+		Tkinter.Label(self.manager_proxy_window,anchor='w',text='File name convention of images:').grid(sticky='w'+'e',row=r,column=1,columnspan=4)
+		Tkinter.Entry(self.manager_proxy_window,textvariable=self.manager_proxy_filenameformat).grid(sticky='w'+'e',row=r,column=5)
+		Tkinter.Entry(self.manager_proxy_window,textvariable=self.manager_proxy_filenameformat_target).grid(sticky='w'+'e',row=r,column=6)
+		Tkinter.Button(self.manager_proxy_window,text='?',command=lambda: tkMessageBox.showinfo('Edit Sources','File name convention is how the files are named according to the time of the image. For example, if the file name convention is \'researchsite_1_north_%Y_%m_%d_%H:%M:%S.jpg\' and an image is named as \'researchsite_1_north_2016_09_24_18:27:05.jpg\', then the time that the image taken is 24 September 2016 18:27:05. Do not forget to include the extension (e.g. \'.jpg\', \'.png\'). For the meanings of time directives, refer to the user manual or visit  https://docs.python.org/2/library/datetime.html#strftime-strptime-behavior')).grid(sticky='w'+'e',row=r,column=7)
+		r += 1
+		Tkinter.Label(self.manager_proxy_window,anchor='w',text='').grid(sticky='w'+'e',row=r,column=1)
+		Tkinter.Button(self.manager_proxy_window,bg="darkgreen",fg='white',text='Save changes',command=self.Networks_Proxy_Save).grid(sticky='w'+'e'+'s'+'n',row=r,column=5,rowspan=2)
+		Tkinter.Button(self.manager_proxy_window,bg="brown",fg='white',text='Discard changes',command=self.Networks_Proxy_Discard).grid(sticky='w'+'e'+'s'+'n',row=r,column=6,rowspan=2)
+		self.centerWindow(self.manager_proxy_window)
+		self.manager_proxy_window.grab_set()
+		self.manager_proxy_window.lift()
+
+		self.Networks_LoadProxy()
+		if len(self.proxylist) == 0:
+			tkMessageBox.showinfo('Camera Network Proxy Manager','There is no camera network proxy defined yet. In the manager window, a proxy with default values to edit is added. To quit editing, simply close the manager window.')
+			self.manager_proxy_window.grab_set()
+			self.manager_proxy_window.lift()
+
+	def Networks_LoadProxy(self,*args):
+		if len(self.manager_proxylist) == 0:
+			self.Networks_AddProxy()
+		self.manager_proxy_protocol.set(self.manager_proxylist[self.manager_proxy_number.get()-1]['protocol'])
+		self.manager_proxy_host.set(self.manager_proxylist[self.manager_proxy_number.get()-1]['host'])
+		self.manager_proxy_username.set(self.manager_proxylist[self.manager_proxy_number.get()-1]['username'])
+		self.manager_proxy_password.set(self.manager_proxylist[self.manager_proxy_number.get()-1]['password'])
+		self.manager_proxy_path.set(self.manager_proxylist[self.manager_proxy_number.get()-1]['path'])
+		self.manager_proxy_filenameformat.set(self.manager_proxylist[self.manager_proxy_number.get()-1]['filenameformat'])
+		self.manager_proxy_protocol_target.set(self.manager_proxylist[self.manager_proxy_number.get()-1]['protocol_proxy'])
+		self.manager_proxy_host_target.set(self.manager_proxylist[self.manager_proxy_number.get()-1]['host_proxy'])
+		self.manager_proxy_username_target.set(self.manager_proxylist[self.manager_proxy_number.get()-1]['username_proxy'])
+		self.manager_proxy_password_target.set(self.manager_proxylist[self.manager_proxy_number.get()-1]['password_proxy'])
+		self.manager_proxy_path_target.set(self.manager_proxylist[self.manager_proxy_number.get()-1]['path_proxy'])
+		self.manager_proxy_filenameformat_target.set(self.manager_proxylist[self.manager_proxy_number.get()-1]['filenameformat_proxy'])
+
+	def Networks_UpdateProxy(self,*args):
+		if len(self.manager_proxylist) != 0:
+			self.manager_proxylist[self.manager_proxy_number.get()-1]['protocol'] = self.manager_proxy_protocol.get()
+			self.manager_proxylist[self.manager_proxy_number.get()-1]['host'] = self.manager_proxy_host.get()
+			self.manager_proxylist[self.manager_proxy_number.get()-1]['username'] = self.manager_proxy_username.get()
+			self.manager_proxylist[self.manager_proxy_number.get()-1]['password'] = self.manager_proxy_password.get()
+			self.manager_proxylist[self.manager_proxy_number.get()-1]['path'] = self.manager_proxy_path.get()
+			self.manager_proxylist[self.manager_proxy_number.get()-1]['filenameformat'] = self.manager_proxy_filenameformat.get()
+			self.manager_proxylist[self.manager_proxy_number.get()-1]['protocol_proxy'] = self.manager_proxy_protocol_target.get()
+			self.manager_proxylist[self.manager_proxy_number.get()-1]['host_proxy'] = self.manager_proxy_host_target.get()
+			self.manager_proxylist[self.manager_proxy_number.get()-1]['username_proxy'] = self.manager_proxy_username_target.get()
+			self.manager_proxylist[self.manager_proxy_number.get()-1]['password_proxy'] = self.manager_proxy_password_target.get()
+			self.manager_proxylist[self.manager_proxy_number.get()-1]['path_proxy'] = self.manager_proxy_path_target.get()
+			self.manager_proxylist[self.manager_proxy_number.get()-1]['filenameformat_proxy'] = self.manager_proxy_filenameformat_target.get()
+			proxyvalid = True
+			errors = 'There is an error with the parameters of the camera network proxy. Please fix it to continue:\n'
+			if (self.manager_proxylist[self.manager_proxy_number.get()-1]['protocol'] == 'LOCAL' and self.manager_proxylist[self.manager_proxy_number.get()-1]['username'] != '' and self.manager_proxylist[self.manager_proxy_number.get()-1]['password'] != '' and self.manager_proxylist[self.manager_proxy_number.get()-1]['host'] != '') or (self.manager_proxylist[self.manager_proxy_number.get()-1]['protocol_proxy'] == 'LOCAL' and self.manager_proxylist[self.manager_proxy_number.get()-1]['username_proxy'] != '' and self.manager_proxylist[self.manager_proxy_number.get()-1]['password_proxy'] != None and self.manager_proxylist[self.manager_proxy_number.get()-1]['host_proxy'] != ''):
+				errors += 'Host, username and password can not be defined (have to be empty) if the protocol is LOCAL.\n'
+				proxyvalid = False
+			if (self.manager_proxylist[self.manager_proxy_number.get()-1]['protocol'] != 'LOCAL' and self.manager_proxylist[self.manager_proxy_number.get()-1]['host'] == '') or (self.manager_proxylist[self.manager_proxy_number.get()-1]['protocol_proxy'] != 'LOCAL' and self.manager_proxylist[self.manager_proxy_number.get()-1]['host_proxy'] == ''):
+				errors += 'Host can not be empty if protocol is HTTP or FTP.'
+				proxyvalid = False
+			if self.manager_proxylist[self.manager_proxy_number.get()-1]['protocol'] == self.manager_proxylist[self.manager_proxy_number.get()-1]['protocol_proxy'] and self.manager_proxylist[self.manager_proxy_number.get()-1]['host'] == self.manager_proxylist[self.manager_proxy_number.get()-1]['host_proxy'] and self.manager_proxylist[self.manager_proxy_number.get()-1]['username'] == self.manager_proxylist[self.manager_proxy_number.get()-1]['username_proxy'] and self.manager_proxylist[self.manager_proxy_number.get()-1]['password'] == self.manager_proxylist[self.manager_proxy_number.get()-1]['password_proxy'] and self.manager_proxylist[self.manager_proxy_number.get()-1]['path'] == self.manager_proxylist[self.manager_proxy_number.get()-1]['path_proxy'] and self.manager_proxylist[self.manager_proxy_number.get()-1]['filenameformat'] == self.manager_proxylist[self.manager_proxy_number.get()-1]['filenameformat_proxy']:
+				errors += 'Proxy is identical with the original camera parameters. Proxy is useless.'
+				proxyvalid = False
+			if self.manager_proxylist[self.manager_proxy_number.get()-1]['filenameformat'] == '' or self.manager_proxylist[self.manager_proxy_number.get()-1]['filenameformat_proxy'] == '':
+				errors += 'File name convention of the images can not be empty.'
+			for i,proxy in enumerate(self.manager_proxylist):
+				if i == self.manager_proxy_number.get() -1:
+					continue
+				if proxy['protocol'] == self.manager_proxylist[self.manager_proxy_number.get()-1]['protocol'] and proxy['host'] == self.manager_proxylist[self.manager_proxy_number.get()-1]['host'] and proxy['username'] == self.manager_proxylist[self.manager_proxy_number.get()-1]['username'] and proxy['password'] == self.manager_proxylist[self.manager_proxy_number.get()-1]['password'] and proxy['path'] == self.manager_proxylist[self.manager_proxy_number.get()-1]['path'] and proxy['filenameformat'] == self.manager_proxylist[self.manager_proxy_number.get()-1]['filenameformat']:
+					errors += 'A proxy for identical camera network parameters exists. (Proxy no: '+str(i+1)+')'
+					proxyvalid = False
+					break
+			if not proxyvalid:
+				tkMessageBox.showerror('Invalid parameters',errors)
+				self.manager_proxy_window.grab_set()
+				self.manager_proxy_window.lift()
+				return False
+			else:
+				return True
+		else:
+			return True
+
+	def Networks_NextProxy(self):
+		if self.Networks_UpdateProxy():
+			if self.manager_proxy_number.get() == len(self.manager_proxylist):
+				self.manager_proxy_number.set(1)
+			else:
+				self.manager_proxy_number.set(self.manager_proxy_number.get()+1)
+			self.Networks_LoadProxy()
+
+	def Networks_PrevProxy(self):
+		if self.Networks_UpdateProxy():
+			if self.manager_proxy_number.get() == 1:
+				self.manager_proxy_number.set(len(self.manager_proxylist))
+			else:
+				self.manager_proxy_number.set(self.manager_proxy_number.get()-1)
+			self.Networks_LoadProxy()
+
+	def Networks_AddProxy(self):
+		if self.Networks_UpdateProxy():
+			proxydict = {'protocol':'FTP','host':'*','username':'*','password':'*','path':'*','filenameformat':'*','protocol_proxy':'FTP','host_proxy':'*','username_proxy':'*','password_proxy':'*','path_proxy':'*','filenameformat_proxy':'*'}
+			if len(self.manager_proxylist) != 0 and self.manager_proxylist[self.manager_proxy_number.get()-1] == proxydict:
+				self.Message.set('No need to add a camera network proxy. It is the default which needs to be edited.')
+			else:
+				self.manager_proxylist.append(proxydict)
+				self.Message.set('New camera network proxy added.')
+				self.manager_proxy_number.set(len(self.manager_proxylist))
+				self.Networks_LoadProxy()
+
+	def Networks_DuplicateProxy(self):
+		if self.Networks_UpdateProxy():
+			proxydict = {'protocol':'FTP','host':'*','username':'*','password':'*','path':'*','filenameformat':'*','protocol_proxy':'FTP','host_proxy':'*','username_proxy':'*','password_proxy':'*','path_proxy':'*','filenameformat_proxy':'*'}
+			if self.manager_proxylist[self.manager_proxy_number.get()-1] == proxydict:
+				self.Message.set('No need to duplicate the camera network proxy. It is the default which needs to be edited.')
+			else:
+				self.manager_proxylist.append(self.manager_proxylist[self.manager_proxy_number.get()-1])
+				self.Message.set('Camera network proxy duplicated.')
+				self.manager_proxy_number.set(len(self.manager_proxylist))
+				self.Networks_LoadProxy()
+
+	def Networks_RemoveProxy(self):
+		del self.manager_proxylist[self.manager_proxy_number.get()-1]
+		self.Message.set('Camera network proxy removed.')
+		if len(self.manager_proxylist) == 0:
+			self.Networks_AddProxy()
+		else:
+			self.manager_proxy_number.set(len(self.manager_proxylist))
+		self.Networks_LoadProxy()
+
+	def Networks_Proxy_Discard(self):
+		if tkMessageBox.askyesno('Discard changes','Changes in all camera network proxies will be discarded. Are you sure?'):
+			self.manager_proxylist = self.proxylist[:]
+			if len(self.manager_proxylist) != 0:
+				self.manager_proxy_number.set(len(self.manager_proxylist))
+			self.Networks_LoadProxy()
+		self.manager_proxy_window.grab_set()
+		self.manager_proxy_window.lift()
+
+	def Networks_Proxy_Save(self):
+		if self.Networks_UpdateProxy():
+			if tkMessageBox.askyesno('Save changes','Changes will be permanent. Are you sure?'):
+				sources.writeTSVx(ProxylistFile,self.manager_proxylist)
+				self.Message.set('Camera network proxy list saved.')
+				self.proxylist = deepcopy(self.manager_proxylist)
+			self.manager_proxy_window.grab_set()
+			self.manager_proxy_window.lift()
+			self.makeDirStorage()
+
 	def Settings_Storage(self):
 		self.ClearMenu()
 		self.ActiveMenu.set("Storage Settings")
@@ -1417,7 +1635,8 @@ class monimet_gui(Tkinter.Tk):
 			os.makedirs(self.resultspath.get())
 		if not os.path.exists(self.imagespath.get()):
 			os.makedirs(self.imagespath.get())
-		for source in self.sourcelist:
+		for source_ in self.sourcelist:
+			source = sources.getProxySource(self.Message,source_,self.proxylist)
 			if source['protocol'] != 'LOCAL':
 				if 'temporary' in source and source['temporary']:
 					local_path = os.path.join(os.path.join(TmpDir,'tmp_images'),validateName(source['network'])+'-'+source['protocol']+'-'+source['host']+'-'+validateName(source['username'])+'-'+validateName(source['path']))
@@ -1887,7 +2106,8 @@ class monimet_gui(Tkinter.Tk):
 		exec(self.MenuEnablerFunc.get())
 
 	def Menu_Main_Camera_Open(self):
-		source = self.setup[self.AnalysisNoVariable.get()-1]['source']
+		source_ = self.setup[self.AnalysisNoVariable.get()-1]['source']
+		source = sources.getProxySource(self.Message,source_,self.proxylist)
 		self.makeDirStorage()
 		if source['protocol'] == 'LOCAL':
 			if 'temporary' in source and source['temporary']:
@@ -1913,10 +2133,24 @@ class monimet_gui(Tkinter.Tk):
 						string += source_metadata_names[key] + ': ' + str(source[key]) +'\n'
 				else:
 					string += key + ': ' + str(source[key]) +'\n'
+		source_ = sources.getSource(self.Message,self.sourcelist,self.CameraNameVariable.get())
+		source = sources.getProxySource(self.Message,source_,self.proxylist)
+		if source == source_:
+			string += 'Proxy metadata\n'
+			for key in source:
+				if key not in source_metadata_hidden:
+					if key in source_metadata_names:
+						if 'time' in key:
+							string += source_metadata_names[key] + ': ' + str(parsers.strptime2(source[key])[0]) +'\n'
+						else:
+							string += source_metadata_names[key] + ': ' + str(source[key]) +'\n'
+					else:
+						string += key + ': ' + str(source[key]) +'\n'
 		tkMessageBox.showwarning('Camera Metadata',string)
 
 	def Menu_Main_Camera_Picture(self):
-		source = self.setup[self.AnalysisNoVariable.get()-1]['source']
+		source_ = self.setup[self.AnalysisNoVariable.get()-1]['source']
+		source = sources.getProxySource(self.Message,source_,self.proxylist)
 		if source['protocol'] == 'LOCAL' and 'temporary' in source and source['temporary']:
 			tkMessageBox.showwarning('No directory','Directory does not exist. This camera was temporarily added and the images of the camera refer to local directories and they do not exist. It probably means that the setup file loaded is saved in another computer with a camera network or camera which is not defined identically in this computer. To fix it, load the setup file again, confirm the permanent save of the camera/network and the open camera network manager and set up directories accordingly.')
 			return False
@@ -1960,7 +2194,8 @@ class monimet_gui(Tkinter.Tk):
 			keys = self.ChoosePictureKeywords.get().split()
 		try:
 			self.MenuItem1.delete(0,"end")
-			source = self.setup[self.AnalysisNoVariable.get()-1]['source']
+			source_ = self.setup[self.AnalysisNoVariable.get()-1]['source']
+			source = sources.getProxySource(self.Message,source_,self.proxylist)
 			if source['protocol'] == 'LOCAL':
 				if 'temporary' in source and source['temporary']:
 					tkMessageBox.showwarning('No directory','Directory does not exist. This camera was temporarily added and the images of the camera refer to local directories and they do not exist. It probably means that the setup file loaded is saved in another computer with a camera network or camera which is not defined identically in this computer. To fix it, load the setup file again, confirm the permanent save of the camera/network and the open camera network manager and set up directories accordingly.')
@@ -2450,7 +2685,8 @@ class monimet_gui(Tkinter.Tk):
 		self.grab_set()
 
 	def Menu_Main_Masking_Polygonic_Picture(self):
-		source = self.setup[self.AnalysisNoVariable.get()-1]['source']
+		source_ = self.setup[self.AnalysisNoVariable.get()-1]['source']
+		source = sources.getProxySource(self.Message,source_,self.proxylist)
 		if source['protocol'] == 'LOCAL' and 'temporary' in source and source['temporary']:
 			tkMessageBox.showwarning('No directory','Directory does not exist. This camera was temporarily added and the images of the camera refer to local directories and they do not exist. It probably means that the setup file loaded is saved in another computer with a camera network or camera which is not defined identically in this computer. To fix it, load the setup file again, confirm the permanent save of the camera/network and the open camera network manager and set up directories accordingly.')
 			return False
@@ -3660,7 +3896,7 @@ class monimet_gui(Tkinter.Tk):
 			pass
 		if self.PictureFileName.get() == '' or self.CameraNameVariable.get() != self.CameraNameVariablePre.get() or self.NetworkNameVariable.get() != self.NetworkNameVariablePre.get() or self.PictureFileName.get() == os.path.join(TmpDir,'testmask.jpg'):
 			if not bool(self.ExceptionSwitches_ComingFromStartupSetupFileSetupReset.get()):
-				self.setup[self.AnalysisNoVariable.get()-1]['source'],self.setup[self.AnalysisNoVariable.get()-1] = self.UpdatePreviewPictureFiles(self.setup[self.AnalysisNoVariable.get()-1]['source'],self.setup[self.AnalysisNoVariable.get()-1])
+				self.setup[self.AnalysisNoVariable.get()-1]['source'],self.setup[self.AnalysisNoVariable.get()-1] = self.UpdatePreviewPictureFiles(sources.getProxySource(self.Message,self.setup[self.AnalysisNoVariable.get()-1]['source'],self.proxylist),self.setup[self.AnalysisNoVariable.get()-1])
 				self.UpdatePictureFileName()
 				self.UpdatePictures()
 		self.CameraNameVariablePre.set(self.CameraNameVariable.get())
@@ -3897,7 +4133,8 @@ class monimet_gui(Tkinter.Tk):
 
 	def ChangePictureFileName(self,*args):
 		fn = self.MenuItem1.get(self.MenuItem1.curselection())
-		source = self.setup[self.AnalysisNoVariable.get()-1]['source']
+		source_ = self.setup[self.AnalysisNoVariable.get()-1]['source']
+		source = sources.getProxySource(self.Message,source_,self.proxylist)
 		scenario = self.setup[self.AnalysisNoVariable.get()-1]
 		pfn_ts = '-' + parsers.dTime2fTime(parsers.strptime2(fn,source['filenameformat'])[0])
 		if 'temporary' in source and source['temporary']:
@@ -3974,9 +4211,15 @@ class monimet_gui(Tkinter.Tk):
 					return (source,scenario)
 				else:
 					if ('previewimagetime' in scenario and scenario['previewimagetime'] != '' and scenario['previewimagetime'] is not None) or ('previewimagetime' in source and source['previewimagetime'] != '' and source['previewimagetime'] is not None):
-						pfn = os.path.splitext(pfn)[0][:-len(pfn_ts)] + '-' + parsers.dTime2fTime(ts[0]) +  os.path.splitext(pfn)[1]
+						if len(pfn_ts) == 0:
+							pfn = os.path.splitext(pfn)[0] + '-' + parsers.dTime2fTime(ts[0]) +  os.path.splitext(pfn)[1]
+						else:
+							pfn = os.path.splitext(pfn)[0][:-len(pfn_ts)] + '-' + parsers.dTime2fTime(ts[0]) +  os.path.splitext(pfn)[1]
 					else:
-						pfn = os.path.splitext(pfn)[0][:-len(pfn_ts)] + os.path.splitext(pfn)[1]
+						if len(pfn_ts) == 0:
+							pfn = os.path.splitext(pfn)[0] + os.path.splitext(pfn)[1]
+						else:
+							pfn = os.path.splitext(pfn)[0][:-len(pfn_ts)] + os.path.splitext(pfn)[1]
 					try:
 						shutil.copyfile(img[0],os.path.join(PreviewsDir,pfn))
 						self.Message.set('Preview image downloaded/updated for camera: '+source['network'] + ' - ' + source['name'])
@@ -3987,7 +4230,8 @@ class monimet_gui(Tkinter.Tk):
 		self.Message.set('Checking complete.')
 
 	def UpdatePictureFileName(self):
-		source = self.setup[self.AnalysisNoVariable.get()-1]['source']
+		source_ = self.setup[self.AnalysisNoVariable.get()-1]['source']
+		source = sources.getProxySource(self.Message,source_,self.proxylist)
 		scenario = self.setup[self.AnalysisNoVariable.get()-1]
 		pfn_ts = ''
 		if 'previewimagetime' in scenario and scenario['previewimagetime'] != '' and scenario['previewimagetime'] is not None:
@@ -4201,7 +4445,8 @@ class monimet_gui(Tkinter.Tk):
 			if s is not False:
 				setup = [deepcopy(self.setup[s])]
 			for i,scenario in enumerate(setup):
-				source = scenario['source']
+				source_ = scenario['source']
+				source = sources.getProxySource(self.Message,source_,self.proxylist)
 				(source,scenario) = self.UpdatePreviewPictureFiles(source,scenario)
 				pfn_ts = ''
 				if 'previewimagetime' in scenario and scenario['previewimagetime'] != '' and scenario['previewimagetime'] is not None:
@@ -4374,7 +4619,8 @@ class monimet_gui(Tkinter.Tk):
 			for s,scenario in enumerate(self.setup):
 				csvlist.append([])
 				if scn == None or scn == s:
-					source = sources.getSource(self.Message,sources.getSources(self.Message,self.sourcelist,scenario['source']['network'],prop='network'),scenario['source']['name'])
+					source_ = sources.getSource(self.Message,sources.getSources(self.Message,self.sourcelist,scenario['source']['network'],prop='network'),scenario['source']['name'])
+					source = sources.getProxySource(self.Message,source_,self.proxylist)
 					self.Message.set('Analyzing ' + source['name'].replace('_',' ') + ' Camera images:')
 					(imglist_uf,datetimelist_uf,pathlist_uf) = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), scenario['temporal'], online=self.imagesdownload.get(),download=False, care_tz = self.TimeZoneConversion.get())
 					if imglist_uf == []:
@@ -4902,7 +5148,8 @@ class monimet_gui(Tkinter.Tk):
 
 					for n,network in enumerate(sources.listNetworks(self.Message,self.networklist)):
 						slist = sources.getSources(self.Message,sourcelist,network,'network')
-						for s,source in enumerate(slist):
+						for s,source_ in enumerate(slist):
+							source = sources.getProxySource(self.Message,source_,self.proxylist)
 							self.Message.set('Checking the images from the camera network: ' + network + ' and the camera: ' + source['name'] + '...')
 							output = fetchers.checkQuantity(self,self.Message,source, self.proxy, self.connection, self.imagespath.get(), timec,30,15)
 							analysis_captions = {'source': source['name'], 'analysis': 'Quantity Report', 'scenario': 'Quantity Report', 'network': network}
@@ -5019,7 +5266,8 @@ class monimet_gui(Tkinter.Tk):
 			else:
 				if tkMessageBox.askyesno("Download images",str(len(sourcelist)) + " cameras are selected. Depending on the number of images in the server, downloading can take a long time to be completed. Do you want to proceed?"):
 					self.Message.set('Downloading images...|busy:True')
-					for source in sourcelist:
+					for source_ in sourcelist:
+						source = sources.getProxySource(self.Message,source_,self.proxylist)
 						self.Message.set('Downloading images of ' + source['network'] + ' - ' + source['name'] + ' camera...')
 						fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), timec,online=True, care_tz = self.TimeZoneConversion.get())
 					self.Message.set("Downloading completed.|busy:False")

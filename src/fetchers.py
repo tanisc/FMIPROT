@@ -37,9 +37,12 @@ def fetchFile(tkobj,logger,localdir, localfile, protocol,host, username, passwor
 	if password == '*':
 		password = '*'+parsers.validateName(protocol+host).lower()+'*password*'
 	if username == '*'+parsers.validateName(protocol+host).lower()+'*username*' or password == '*'+parsers.validateName(protocol+host).lower()+'*password*':
-		getPassword(tkobj,logger,protocol,host)
-		exec('username = tkobj.'+parsers.validateName(protocol+host).lower()+'username.get()')
-		exec('password = tkobj.'+parsers.validateName(protocol+host).lower()+'password.get()')
+		if getPassword(tkobj,logger,protocol,host) is True:
+			exec('username = tkobj.'+parsers.validateName(protocol+host).lower()+'username.get()')
+			exec('password = tkobj.'+parsers.validateName(protocol+host).lower()+'password.get()')
+		else:
+			logger.set('Fetching file cancelled.')
+			return False
 
 	proxy = deepcopy(proxy)
 	if protocol == 'FTP':
@@ -56,9 +59,16 @@ def fetchFile(tkobj,logger,localdir, localfile, protocol,host, username, passwor
 					except ftplib.error_perm as e:
 						if e[0] == '530 Login incorrect.' and i>0:
 							logger.set("Login incorrect. Trying again ("+str(i)+")")
-							getPassword(tkobj,logger,protocol,host,renew=True)
-							exec('username = tkobj.'+parsers.validateName(protocol+host).lower()+'username.get()')
-							exec('password = tkobj.'+parsers.validateName(protocol+host).lower()+'password.get()')
+							if getPassword(tkobj,logger,protocol,host,renew=True) is True:
+								exec('username = tkobj.'+parsers.validateName(protocol+host).lower()+'username.get()')
+								exec('password = tkobj.'+parsers.validateName(protocol+host).lower()+'password.get()')
+							else:
+								logger.set('Fetching failed.')
+								try:
+									ftp.quit()
+								except:
+									pass
+								return False
 						else:
 							logger.set('Fetching failed.')
 							try:
@@ -76,9 +86,16 @@ def fetchFile(tkobj,logger,localdir, localfile, protocol,host, username, passwor
 					except ftplib.error_perm as e:
 						if e[0] == '530 Login incorrect.' and i>0:
 							logger.set("Login incorrect. Trying again ("+str(i)+")")
-							getPassword(tkobj,logger,protocol,host,renew=True)
-							exec('username = tkobj.'+parsers.validateName(protocol+host).lower()+'username.get()')
-							exec('password = tkobj.'+parsers.validateName(protocol+host).lower()+'password.get()')
+							if getPassword(tkobj,logger,protocol,host,renew=True) is True:
+								exec('username = tkobj.'+parsers.validateName(protocol+host).lower()+'username.get()')
+								exec('password = tkobj.'+parsers.validateName(protocol+host).lower()+'password.get()')
+							else:
+								logger.set('Fetching failed.')
+								try:
+									ftp.quit()
+								except:
+									pass
+								return False
 						else:
 							logger.set('Fetching failed.')
 							try:
@@ -370,28 +387,35 @@ def getPassword(tkobj,logger,protocol,host,renew=False):
 		except:
 			logger.set('Asking credentials is not supported in No-Questions mode. Using decoy credentials to fail the connection.')
 			exec('tkobj.'+parsers.validateName(protocol+host).lower()+'password = Tkinter.StringVar()')
-			exec('tkobj.'+parsers.validateName(protocol+host).lower()+'password.set(\'decoypassword\')')
+			exec('tkobj.'+parsers.validateName(protocol+host).lower()+'password.set(\'decoypassword\)')
 			exec('tkobj.'+parsers.validateName(protocol+host).lower()+'username = Tkinter.StringVar()')
 			exec('tkobj.'+parsers.validateName(protocol+host).lower()+'username.set(\'decoyusername\')')
-		return False
-	try:
-		exec('tkobj.'+parsers.validateName(protocol+host).lower()+'password.get()')
-		exec('tkobj.'+parsers.validateName(protocol+host).lower()+'username.get()')
-		if renew:
+		return True
+	else:
+		try:
+			exec('tkobj.'+parsers.validateName(protocol+host).lower()+'password.get()')
+			exec('tkobj.'+parsers.validateName(protocol+host).lower()+'username.get()')
+			if renew:
+				exec('tkobj.'+parsers.validateName(protocol+host).lower()+'password = Tkinter.StringVar()')
+				exec("tkobj."+parsers.validateName(protocol+host).lower()+"password.set('')")
+				exec('tkobj.'+parsers.validateName(protocol+host).lower()+'username = Tkinter.StringVar()')
+				exec("tkobj."+parsers.validateName(protocol+host).lower()+"username.set('')")
+				tkMessageBox.showwarning('Enter username and password','The password and/or the username on the host \''+protocol+'://'+host+'\' is incorrect. Please try again in the next dialog. The username and the password will be remembered for this session.')
+				eval('tkobj.'+parsers.validateName(protocol+host).lower()+'username.set')(tkSimpleDialog.askstring('Enter username and password','Enter username on the host \''+protocol+'://'+host+'\'',initialvalue=eval('tkobj.'+parsers.validateName(protocol+host).lower()+'username.get()')))
+				eval('tkobj.'+parsers.validateName(protocol+host).lower()+'password.set')(tkSimpleDialog.askstring('Enter username and password','Enter password on the host \''+protocol+'://'+host+'\'',initialvalue=eval('tkobj.'+parsers.validateName(protocol+host).lower()+'password.get()')))
+
+		except:
 			exec('tkobj.'+parsers.validateName(protocol+host).lower()+'password = Tkinter.StringVar()')
-			exec("tkobj."+parsers.validateName(protocol+host).lower()+"password.set('')")
 			exec('tkobj.'+parsers.validateName(protocol+host).lower()+'username = Tkinter.StringVar()')
-			exec("tkobj."+parsers.validateName(protocol+host).lower()+"username.set('')")
-			tkMessageBox.showwarning('Enter username and password','The password and/or the username on the host \''+protocol+'://'+host+'\' is incorrect. Please try again in the next dialog. The username and the password will be remembered for this session.')
+			tkMessageBox.showwarning('Enter username and password','Enter the username and the password for the username on the host \''+protocol+'://'+host+'\'. The username and the password will be remembered for this session.')
 			eval('tkobj.'+parsers.validateName(protocol+host).lower()+'username.set')(tkSimpleDialog.askstring('Enter username and password','Enter username on the host \''+protocol+'://'+host+'\'',initialvalue=eval('tkobj.'+parsers.validateName(protocol+host).lower()+'username.get()')))
 			eval('tkobj.'+parsers.validateName(protocol+host).lower()+'password.set')(tkSimpleDialog.askstring('Enter username and password','Enter password on the host \''+protocol+'://'+host+'\'',initialvalue=eval('tkobj.'+parsers.validateName(protocol+host).lower()+'password.get()')))
-
-	except:
-		exec('tkobj.'+parsers.validateName(protocol+host).lower()+'password = Tkinter.StringVar()')
-		exec('tkobj.'+parsers.validateName(protocol+host).lower()+'username = Tkinter.StringVar()')
-		tkMessageBox.showwarning('Enter username and password','Enter the username and the password for the username on the host \''+protocol+'://'+host+'\'. The username and the password will be remembered for this session.')
-		eval('tkobj.'+parsers.validateName(protocol+host).lower()+'username.set')(tkSimpleDialog.askstring('Enter username and password','Enter username on the host \''+protocol+'://'+host+'\'',initialvalue=eval('tkobj.'+parsers.validateName(protocol+host).lower()+'username.get()')))
-		eval('tkobj.'+parsers.validateName(protocol+host).lower()+'password.set')(tkSimpleDialog.askstring('Enter username and password','Enter password on the host \''+protocol+'://'+host+'\'',initialvalue=eval('tkobj.'+parsers.validateName(protocol+host).lower()+'password.get()')))
+	if eval('tkobj.'+parsers.validateName(protocol+host).lower()+'username.get')() == 'None' or eval('tkobj.'+parsers.validateName(protocol+host).lower()+'password.get')() == 'None':
+		exec('tkobj.'+parsers.validateName(protocol+host).lower()+'username = None')
+		exec('tkobj.'+parsers.validateName(protocol+host).lower()+'password = None')
+		return False
+	else:
+		return True
 
 def downloadFTP(proxy,connection, username,host,password,local_path,imglist,pathlist,dllist,logger):
 	if logger is not None:
@@ -481,9 +505,12 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 	if password == '*':
 		password = '*'+parsers.validateName(protocol+host).lower()+'*password*'
 	if (username == '*'+parsers.validateName(protocol+host).lower()+'*username*' or password == '*'+parsers.validateName(protocol+host).lower()+'*password*') and online:
-		getPassword(tkobj,logger,protocol,host)
-		exec('username = tkobj.'+parsers.validateName(protocol+host).lower()+'username.get()')
-		exec('password = tkobj.'+parsers.validateName(protocol+host).lower()+'password.get()')
+		if getPassword(tkobj,logger,protocol,host) is True:
+			exec('username = tkobj.'+parsers.validateName(protocol+host).lower()+'username.get()')
+			exec('password = tkobj.'+parsers.validateName(protocol+host).lower()+'password.get()')
+		else:
+			logger.set('Fetching images cancelled.')
+			return ([],[],[])
 
 	proxy = deepcopy(proxy)
 	imglistv = []
@@ -533,7 +560,7 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 										ftp.quit()
 									except:
 										pass
-									return False
+									return ([],[],[])
 					else:
 						ftp = ftplib.FTP(host)
 						ftp.set_pasv(bool(int(connection['ftp_passive'])))
@@ -553,7 +580,7 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 										ftp.quit()
 									except:
 										pass
-									return False
+									return ([],[],[])
 					logger.set('Connection established.')
 					logger.set('Looking for images...')
 					paths_to_crawl = listPathCrawl(remote_path,timec,timelimc)

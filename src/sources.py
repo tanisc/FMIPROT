@@ -1,6 +1,6 @@
 from parsers import readTSVx,writeTSVx,validateName
 from fetchers import fetchFile
-from definitions import NetworklistFile, SourceDir, TmpDir,sysargv
+from definitions import NetworklistFile, ProxylistFile, SourceDir, TmpDir,sysargv
 from os import path
 from shutil import copyfile
 from copy import deepcopy
@@ -113,7 +113,8 @@ def readSources(tkobj,proxy,connection, logger):
 	for network in networklist_missing:
 		networklist.append(network)
 	sourcelist = sourcelistlist[:]
-	return (networklist,sourcelist)
+	proxylist = readTSVx(ProxylistFile)
+	return (networklist,sourcelist,proxylist)
 
 def fixSourcesBySetup(logger,networklist,sourcelist,setup):
 	warn = ''
@@ -274,6 +275,25 @@ def dseditSource(logger,dictlist, name, propdict):
 	else:
 		logger.set('Warning: updating properties of a camera is failed. Check the camera network manager for missing names.')
 	return sortSources(dictlist)
+
+#get proxy for the source
+def getProxySource(logger,source,proxylist):
+	#logger.set('Looking for camera network proxy for the camera...')
+	if len(proxylist) == 0:
+		#logger.set('Camera network proxy for the camera not found, Using original source.')
+		return source
+	for p,proxy in enumerate(proxylist):
+		if proxy['protocol'] == source['protocol'] and (proxy['host'] == '*' or proxy['host'] == source['host']) and (proxy['username'] == '*' or proxy['username'] == source['username']) and (proxy['password'] == '*' or proxy['password'] == source['password']) and (proxy['path'] == '*' or proxy['path'] == source['path']) and (proxy['filenameformat'] == '*' or proxy['filenameformat'] == source['filenameformat']):
+			break
+		if p == len(proxylist)-1:
+			#logger.set('Camera network proxy for the camera not found, Using original source.')
+			return source
+	proxysource = deepcopy(source)
+	for key in ['protocol','host','username','password','path','filenameformat']:
+		if proxy[key+'_proxy'] != '*':
+			proxysource.update({key:proxy[key+'_proxy']})
+	logger.set('Camera network proxy for the camera found. Using proxy.')
+	return proxysource
 
 
 
