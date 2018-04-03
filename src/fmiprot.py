@@ -1403,6 +1403,7 @@ class monimet_gui(Tkinter.Tk):
 		Tkinter.Label(self.manager_proxy_window,anchor='w',text='Parameter').grid(sticky='w'+'e',row=r,column=1,columnspan=4)
 		Tkinter.Label(self.manager_proxy_window,anchor='w',text='Original value').grid(sticky='w'+'e',row=r,column=5,columnspan=1)
 		Tkinter.Label(self.manager_proxy_window,anchor='w',text='Proxy value').grid(sticky='w'+'e',row=r,column=6,columnspan=1)
+		Tkinter.Button(self.manager_proxy_window,text='?',command=lambda: tkMessageBox.showinfo('Edit Sources','When reaching images of a camera with parameters on the "Original value" side, instead the parameters in "Proxy value" will be used. Use "*" as a wildcard to include any value for a parameter. Check the user manual for detailed information and examples.')).grid(sticky='w'+'e',row=r,column=7)
 		r += 1
 		Tkinter.Label(self.manager_proxy_window,anchor='w',text='Camera Communication Protocol:').grid(sticky='w'+'e',row=r,column=1,columnspan=4)
 		Tkinter.OptionMenu(self.manager_proxy_window,self.manager_proxy_protocol,'FTP','HTTP','LOCAL').grid(sticky='w'+'e',row=r,column=5)
