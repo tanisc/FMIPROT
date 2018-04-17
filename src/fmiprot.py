@@ -245,9 +245,13 @@ class monimet_gui(Tkinter.Tk):
 			self.imagesdownload.set(True)
 
 		if not sysargv['gui']:
-			if sysargv['config']:
+			if sysargv['config_settings']:
 				self.configSettings()
 				os._exit(1)
+			if sysargv['config_proxies']:
+				self.configProxies()
+				os._exit(1)
+
 			if sysargv['setupfile'] is None:
 				tkMessageBox.showerror('Usage error','Setup file must be provided if GUI is off.')
 				os._exit(1)
@@ -321,8 +325,8 @@ class monimet_gui(Tkinter.Tk):
 		while True:
 			if ans == '0':
 				break
-			print 'ID','\t', 'Parameter',' : ', 'Value'
 			settingv = parsers.readSettings(settingsFile,self.Message)
+			print 'ID','\t', 'Parameter',' : ', 'Value'
 			for s,setting in enumerate(settings):
 				print str(s+1),'\t', settingsn[settings.index(setting)],' : ', settingv[settings.index(setting)]
 			ans = raw_input('Enter ID to modify the parameter or 0 to exit\n')
@@ -343,6 +347,90 @@ class monimet_gui(Tkinter.Tk):
 			if conf in ['y','Y']:
 				settingv[s] = val
 				parsers.writeSettings(parsers.dictSettings(settingv),settingsFile,self.Message)
+
+	def configProxies(self):
+		ans = ''
+		self.manager_proxy_window = Tkinter.Toplevel(self,padx=10,pady=10)
+		self.manager_proxylist = self.proxylist[:]
+		self.manager_proxy_number = Tkinter.IntVar()
+		self.manager_proxy_number.set(1)
+		self.manager_proxy_number.trace('w',self.Networks_LoadProxy)
+		self.manager_proxy_protocol = Tkinter.StringVar()
+		self.manager_proxy_host = Tkinter.StringVar()
+		self.manager_proxy_username = Tkinter.StringVar()
+		self.manager_proxy_password = Tkinter.StringVar()
+		self.manager_proxy_path = Tkinter.StringVar()
+		self.manager_proxy_filenameformat = Tkinter.StringVar()
+		self.manager_proxy_protocol_target = Tkinter.StringVar()
+		self.manager_proxy_host_target = Tkinter.StringVar()
+		self.manager_proxy_username_target = Tkinter.StringVar()
+		self.manager_proxy_password_target = Tkinter.StringVar()
+		self.manager_proxy_path_target = Tkinter.StringVar()
+		self.manager_proxy_filenameformat_target = Tkinter.StringVar()
+		labels = ['Camera Comm. Protocol','Image archive Host','Username for host','Password for host','Path to images','File name convention']
+		variables = [self.manager_proxy_protocol,self.manager_proxy_protocol_target,self.manager_proxy_host,self.manager_proxy_host_target,self.manager_proxy_username,self.manager_proxy_username_target,self.manager_proxy_password,self.manager_proxy_password_target,self.manager_proxy_path,self.manager_proxy_path_target,self.manager_proxy_filenameformat,self.manager_proxy_filenameformat_target]
+		while True:
+			self.Networks_LoadProxy()
+			print 'Edit camera network proxies'
+			print 'When reaching images of a camera with parameters on the "Original value" side, instead the parameters in "Proxy value" will be used. Use "*" as a wildcard to include any value for a parameter. Check the user manual for detailed information and examples.'
+			print '| <(P)revious | Proxy No: ',self.manager_proxy_number.get(), ' | (N)ext> | (A)dd | (R)emove |'
+			print '|Parameter',
+			print '\t\t|',
+			print 'Original Value',
+			print '|',
+			print 'Proxy Value'
+
+			for i in range(len(labels)):
+				print '|'+labels[i],
+				print '\t|',
+				print variables[i*2].get(),
+				print ' ('+str(i*2+1)+')',
+				print '|',
+				print variables[i*2+1].get(),
+				print ' ('+str(i*2+2)+')',
+				print '|'
+
+			print '| (S)ave changes | (D)iscard changes | (E)xit |'
+
+			if len(self.proxylist) == 0:
+				tkMessageBox.showinfo('Camera Network Proxy Manager','There is no camera network proxy defined yet. In the manager window, a proxy with default values to edit is added. To quit editing, simply close the manager window.')
+
+			ans = raw_input('Enter (C)haracters for related action or enter numbers to edit fields\n')
+			if ans in ['E','e']:
+				break
+			if ans in ['P','p','N','n','A','a','R','r','S','s','D','d']:
+				if ans in ['P','p']:
+					self.Networks_PrevProxy()
+				if ans in ['N','n']:
+					self.Networks_NextProxy()
+				if ans in ['A','a']:
+					self.Networks_AddProxy()
+				if ans in ['R','r']:
+					self.Networks_RemoveProxy()
+				if ans in ['S','s']:
+					self.Networks_Proxy_Save()
+				if ans in ['D','d']:
+					self.Networks_Proxy_Discard()
+			else:
+				try:
+					if int(ans) <= 1 or int(ans) > 12:
+						print 'Incorrect input.'
+						continue
+				except:
+					print 'Incorrect input'
+					continue
+				else:
+					i = int(ans)
+					val = raw_input('Enter new value for ' + labels[(i-1)/2] + ' ['+variables[i-1].get()+']\n')
+					conf = ''
+					while conf not in ['y','n','Y','N']:
+						conf = raw_input('Are you sure? (y/n)')
+						if conf not in ['y','n','Y','N']:
+							print 'Incorrect answer. ',
+					if conf in ['y','Y']:
+						variables[i-1].set(val)
+						print self.Networks_UpdateProxy()
+
 
 	def centerWindow(self,toplevel=None,ontheside=False):
 		if toplevel != None:

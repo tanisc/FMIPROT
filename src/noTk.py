@@ -50,6 +50,9 @@ class Toplevel(object):
     def grab_set(self):
         return False
 
+    def lift(self):
+        return False
+
     def geometry(self,*args):
         return "100x100"
 

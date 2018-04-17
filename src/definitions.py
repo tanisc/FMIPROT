@@ -7,15 +7,16 @@ parser.add_argument('-g','--gui', action='store_false', help="Switch GUI off.")
 parser.add_argument('-r','--resultdir', help="Path to directory that results will be stored. Directory should be empty or nonexisting for new results to be stored. If the directory is not empty, the results will be merged with the old results only if the setup is identical. Otherwise setup will not be run.")
 parser.add_argument('-p','--prompt', action='store_false', help="Turn the prompts off, for example asking yes no questions or prompting credentials. Only valid when GUI is swiched off." )
 parser.add_argument('-o','--offline', action='store_true', help="Switch the program to offline mode, so that it does not check and download images with online protocols, for example FTP or HTTP. It will only consider images on the local directories.")
-parser.add_argument('-c','--config',action='store_true', help="Configure settings without GUI.")
-parser.add_argument('--cleantemp',action='store_true', help="Clean temporary files. DO NOT USE THAT OPTION IF ANY INSTANCE OF THE PROGRAM IS RUNNING. These files also include images downloaded for temporarily added cameras and camera networks. Exits after cleaning.")
+parser.add_argument('-x','--config-proxies',action='store_true', help="Configure camera network proxies without GUI.")
+parser.add_argument('-c','--config-settings',action='store_true', help="Configure settings without GUI.")
+parser.add_argument('--cleantemp',action='store_true', help="Clean temporary files. DO NOT USE THAT OPTION IF ANY INSTANCE OF THE PROGRAM IS RUNNING. These files also include files used by other running instances. Exits after cleaning.")
 parser.add_argument('--version', action='version', version='Version: ' + version)
 parser.add_argument('-d','--dev', action='store_true', help="Devmode")
 #parser.print_help()
 global sysargv
 sysargv = vars(parser.parse_args())
 sysargv.update({'version': version})
-if sysargv['config']:
+if sysargv['config_settings'] or sysargv['config_proxies']:
     sysargv['gui'] = False
 if 'dev' not in sysargv:
     sysargv.update({'dev':False})
