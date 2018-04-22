@@ -514,6 +514,7 @@ class monimet_gui(Tkinter.Tk):
 		#NetMenu.add_command(label="Export camera network(s)...",command=self.Networks_Export)
 		NetMenu.add_command(label="Quantity report...",command=self.CheckArchive)
 		NetMenu.add_command(label="Download images...",command=self.DownloadArchive)
+		NetMenu.add_command(label="Update preview images...",command=self.UpdatePreviewPictureFilesAll)
 		menubar.add_cascade(label="Camera networks", menu=NetMenu)
 		self.config(menu=menubar)
 
@@ -4240,7 +4241,7 @@ class monimet_gui(Tkinter.Tk):
 			else:
 				self.PictureFileName.set(os.path.join(self.imagespath.get(),source['networkid']+'-'+parsers.validateName(source['network']),parsers.validateName(source['name']),fn))
 		self.setup[self.AnalysisNoVariable.get()-1].update({'previewimagetime':parsers.strftime2(parsers.strptime2(fn,source['filenameformat'])[0])[0]})
-		self.Message.set("Preview picture is changed.")
+		self.Message.set("Preview image is changed.")
 		try:
 			shutil.copyfile(self.PictureFileName.get(),os.path.join(PreviewsDir,pfn))
 			self.Message.set('Preview image file is updated camera: '+source['network'] + ' - ' + source['name'])
@@ -4248,8 +4249,13 @@ class monimet_gui(Tkinter.Tk):
 			self.Message.set('Preview image file could not be updated for camera: '+source['network'] + ' - ' + source['name'] + '.')
 		self.UpdatePictures()
 
-	def UpdatePreviewPictureFiles(self,source,scenario):
-		self.Message.set('Checking preview picture for '+source['name']+'...')
+	def UpdatePreviewPictureFilesAll(self):
+		if tkMessageBox.askyesno('Preview images','Preview images will be checked and downloaded. This process can take a long time depending on the number of cameras and networks. If needed, passwords and usernames will also be asked.\nDo you want to proceed?'):
+			for source in self.sourcelist:
+				self.UpdatePreviewPictureFiles(source,[],noconfirm=True)
+
+	def UpdatePreviewPictureFiles(self,source,scenario,noconfirm=False):
+		self.Message.set('Checking preview image for '+source['name']+'...')
 		pfn_ts = ''
 		if 'previewimagetime' in scenario and scenario['previewimagetime'] != '' and scenario['previewimagetime'] is not None:
 			pfn_ts = '-' + parsers.sTime2fTime(scenario['previewimagetime'])
@@ -4263,7 +4269,7 @@ class monimet_gui(Tkinter.Tk):
 		if pfn in os.listdir(PreviewsDir):
 			return (source,scenario)
 		else:
-			if not sysargv['prompt'] or tkMessageBox.askyesno('Missing preview image','Preview image is missing for '+source['network']+' '+source['name']+'. Do you want to fetch one?'):
+			if noconfirm or not sysargv['prompt'] or tkMessageBox.askyesno('Missing preview image','Preview image is missing for '+source['network']+' '+source['name']+'. Do you want to fetch one?'):
 				self.Message.set('Updating preview image for camera: '+source['network'] + ' - ' + source['name'])
 				img = []
 				if 'previewimagetime' in scenario and scenario['previewimagetime'] != '' and scenario['previewimagetime'] is not None:

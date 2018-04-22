@@ -316,10 +316,7 @@ def getProxySource(logger,source,proxylist):
 			proxysource.update({key:proxysource[key].replace(proxy[key].replace('*',''),proxy[key+'_proxy'].replace('*',''))})
 			continue
 
-
 	logger.set('Camera network proxy for the camera found. Using proxy.')
-	for key in ['protocol','host','username','password','path','filenameformat']:
-		print source[key],proxysource[key]
 	return proxysource
 
 
