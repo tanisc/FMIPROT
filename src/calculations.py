@@ -17,6 +17,7 @@ calcdescs = []
 from uuid import uuid4
 import maskers
 from definitions import PluginsDir, TmpDir
+import parsers
 
 #check operation system
 if os.path.sep == '/':
@@ -686,7 +687,56 @@ def RadDistTrans(Pp,origin,ax,ay,inverse=False):	#PP is normalized  and pp[0] = 
 	else:
 		return Pp
 
+def temporalAnalysis(imglist,datetimelist,mask,logger, daily):#, latency, average):	#only daily num of images correct. others need discarding invlaid times from temporal selection
+	latency = False
+	average = False
+	[daily, latency, average] = map(bool,[daily,latency,average])
+	if datetimelist == []:
+		return False
+	output = []
+	if daily:
+		datelist = []
+		for dt in datetimelist:
+			datelist.append(parsers.strptime2(dt,None)[1])
 
+		start = min(datelist)
+		end = max(datelist)
+
+		days = []
+		ps = []
+		while start <= end:
+			days = np.append(days,start)
+			start = start + datetime.timedelta(days=1)
+			ps = np.append(ps,0)
+
+		for day in datelist:
+			ps[np.where(days==day)] += 1
+
+		output.append(["Temporal analysis - Daily",["Date",days,"Number of images",ps]])
+
+	if latency or average:
+		p = []
+		for d,dt in enumerate(datetimelist[1:]):
+			p = np.append(p,(dt-datetimelist[d]).total_seconds())
+
+		if latency:
+			if datetimelist[-1].tzinfo is not None:
+				latency_now = (datetime.datetime.utcnow().replace(tzinfo=timezone('UTC')).astimezone(dt.tzinfo) - datetimelist[-1]).total_seconds()
+			else:
+				latency_now = (datetime.datetime.now() - datetimelist[-1]).total_seconds()
+			output.append(["Temporal analysis - Resolution",['Time',np.array(datetimelist),'Latency after the image [s]',np.append(p,latency_now)]])
+
+		if average:
+			n = []
+			for d,dt in enumerate(datetimelist[:-1]):
+				n = np.append(n,(datetimelist[d]-dt).total_seconds())
+			p = np.append(n[0],p)
+			n = np.append(n,p[-1])
+			avg = 7200.0/(p + n)
+
+			output.append(["Temporal analysis - Frequency",['Time',np.array(datetimelist),'Average number of images per hour',avg]])
+
+	return output
 
 calcids.append("DUMMY")
 calcsw.append(False)
@@ -727,6 +777,16 @@ paramopts.append(["Checkbox","Checkbox","Checkbox","Checkbox","Checkbox","Checkb
 paramdefs.append([1,1,1,1,1,1,0,0,0])
 paramhelps.append(["Calculate Green Fraction","Calculate Red Fraction","Calculate Blue Fraction","Calculate Brightness","Calculate Luminance","Exclude burned pixels. A pixel is burned if at least value of one channel is 255.","Calculate mean, median and standard deviation for red channel","Calculate mean, median and standard deviation for green channel","Calculate  mean, median and standard deviation for blue channel"])
 calcdescs.append("Extracts the fractions of colors (mean channel value over mean brightness) per image as red, green and blue and also average brightness and luminance.")
+
+calcids.append("TEMPO01")
+calcsw.append(False)#dev
+calcnames.append("Temporal analysis")
+calccommands.append("temporalAnalysis(imglist,datetimelist,mask,logger,params)")
+paramnames.append(["Daily number of images"])#,"Temporal resolution (latency)","Average number of images per hour"])
+paramopts.append(["Checkbox"])#,"Checkbox","Checkbox"])
+paramdefs.append([1])#,1,1])
+paramhelps.append(["Calculate number of images for each day"])#,"Calculate latency from the previous image","Calculate average number of images per hour using next and previous image"])
+calcdescs.append("Temporal analysis of the images. This analysis does not download images.")# Temporal selection is also applied when calculating.")
 
 calcids.append("HIST001")
 calcsw.append(False)#dev

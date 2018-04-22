@@ -4430,11 +4430,17 @@ class monimet_gui(Tkinter.Tk):
 		for i,scenario in enumerate(setup):
 			for key in ['previewimagetime','lastimagetime','firstimagetime']:
 				if key in scenario and scenario[key] is not None:
-					if 'T' not in scenario[key]:
-						setup[i][key] = parsers.strftime2(parsers.strptime2(scenario[key],'%Y%m%d_%H%M%S')[0])[0]
+					if scenario[key] == '':
+						scenario[key] = None
+					else:
+						if 'T' not in scenario[key]:
+							setup[i][key] = parsers.strftime2(parsers.strptime2(scenario[key],'%Y%m%d_%H%M%S')[0])[0]
 				if key in scenario['source'] and scenario['source'][key] is not None:
-					if 'T' not in scenario['source'][key]:
-						setup[i]['source'][key] = parsers.strftime2(parsers.strptime2(scenario['source'][key],'%Y%m%d_%H%M%S')[0])[0]
+					if scenario['source'][key] == '':
+						scenario['source'][key] = None
+					else:
+						if 'T' not in scenario['source'][key]:
+							setup[i]['source'][key] = parsers.strftime2(parsers.strptime2(scenario['source'][key],'%Y%m%d_%H%M%S')[0])[0]
 			if 'timezone' in scenario['source'] and scenario['source']['timezone'] is not None:
 				if ':' not in scenario['source']['timezone']:
 					setup[i]['source']['timezone'] = scenario['source']['timezone'][:-2] + ':' + scenario['source']['timezone'][-2:]
@@ -4782,23 +4788,27 @@ class monimet_gui(Tkinter.Tk):
 									datetimelist.append(v)
 									pathlist.append(pathlista[i])
 							self.Message.set(str(len(datetimelistp))+' images are already processed. '+ str(len(imglist))+' images will be processed. Results of '+ str(len(outputtvd))+' images which do not fit the temporal selection will be deleted.')
-						(imglist,datetimelist,pathlist) = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), scenario['temporal'][:4]+['List',imglist,datetimelist,pathlist], online=self.imagesdownload.get(),download=True, care_tz = self.TimeZoneConversion.get())
+						if analysis['id'] != 'TEMPO01':
+							(imglist,datetimelist,pathlist) = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), scenario['temporal'][:4]+['List',imglist,datetimelist,pathlist], online=self.imagesdownload.get(),download=True, care_tz = self.TimeZoneConversion.get())
 						outputValid = True
 						if imglist == []:
 							outputValid = False
-							if scenario['multiplerois'] and isinstance(scenario['polygonicmask'][0],list):
+							if analysis['id'] != 'TEMPO01' and scenario['multiplerois'] and isinstance(scenario['polygonicmask'][0],list):
 								self.Message.set("No pictures are valid after filtering with thresholds. ROI is skipped.")
 								self.Message.set('ROI: |progress:6|queue:'+str(0)+'|total:'+str(len(scenario['polygonicmask'])+1))
 							else:
 								self.Message.set("No pictures are valid after filtering with thresholds. Scenario is skipped.")
 								self.Message.set('Scenario: |progress:10|queue:'+str(s+1)+'|total:'+str(len(self.setup)))
 						if outputValid:
-							mask = maskers.polymask(imglist[0],scenario['polygonicmask'],self.Message)
-							mask = (mask,scenario['polygonicmask'],scenario['thresholds'])
-							(imglist,datetimelist) = calculations.filterThresholds(imglist,datetimelist, mask,logger)
+							if analysis['id'] == 'TEMPO01':
+								mask = None
+							else:
+								mask = maskers.polymask(imglist[0],scenario['polygonicmask'],self.Message)
+								mask = (mask,scenario['polygonicmask'],scenario['thresholds'])
+								(imglist,datetimelist) = calculations.filterThresholds(imglist,datetimelist, mask,logger)
 						if imglist == []:
 							outputValid = False
-							if scenario['multiplerois'] and isinstance(scenario['polygonicmask'][0],list):
+							if analysis['id'] != 'TEMPO01' and scenario['multiplerois'] and isinstance(scenario['polygonicmask'][0],list):
 								self.Message.set("No pictures are valid after filtering with thresholds. ROI is skipped.")
 								self.Message.set('ROI: |progress:6|queue:'+str(0)+'|total:'+str(len(scenario['polygonicmask'])+1))
 							else:
@@ -4831,7 +4841,7 @@ class monimet_gui(Tkinter.Tk):
 						outputt = []
 						if output:
 							outputt.append(output[0])
-						if scenario['multiplerois'] and isinstance(scenario['polygonicmask'][0],list):
+						if analysis['id'] != 'TEMPO01' and scenario['multiplerois'] and isinstance(scenario['polygonicmask'][0],list):
 							for r, roi in enumerate(scenario['polygonicmask']):
 								self.Message.set("Running for ROI"+str(r+1).zfill(3))
 								(imglist,datetimelist,pathlist) = (deepcopy(imglist_uf),deepcopy(datetimelist_uf),deepcopy(pathlist_uf))
