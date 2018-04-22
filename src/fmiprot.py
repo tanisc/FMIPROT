@@ -1274,7 +1274,7 @@ class monimet_gui(Tkinter.Tk):
 		self.Networks_AddNetwork()
 		if 'http://' in self.manager_network_link.get() or 'https://' in self.manager_network_link.get():
 			self.manager_network_host.set(self.manager_network_link.get().split('/')[2])
-			self.manager_network_file.set(self.manager_network_link.get().replace(self.manager_network_link.get().split('/')[0]+'//'+self.manager_network_link.get().split('/')[2],''))
+			self.manager_network_file.set(self.manager_network_link.get().replace(self.manager_network_link.get().split('/')[0]+'//'+self.manager_network_link.get().split('/')[2]+'/',''))
 			self.manager_network_protocol.set('HTTP')
 		if 'ftp://' in self.manager_network_link.get():
 			self.manager_network_host.set(self.manager_network_link.get().split('/')[2])
