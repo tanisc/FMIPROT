@@ -387,7 +387,7 @@ def getPassword(tkobj,logger,protocol,host,renew=False):
 		except:
 			logger.set('Asking credentials is not supported in No-Questions mode. Using decoy credentials to fail the connection.')
 			exec('tkobj.'+parsers.validateName(protocol+host).lower()+'password = Tkinter.StringVar()')
-			exec('tkobj.'+parsers.validateName(protocol+host).lower()+'password.set(\'decoypassword\)')
+			exec('tkobj.'+parsers.validateName(protocol+host).lower()+'password.set(\'decoypassword\')')
 			exec('tkobj.'+parsers.validateName(protocol+host).lower()+'username = Tkinter.StringVar()')
 			exec('tkobj.'+parsers.validateName(protocol+host).lower()+'username.set(\'decoyusername\')')
 		return True

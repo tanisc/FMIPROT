@@ -283,16 +283,43 @@ def getProxySource(logger,source,proxylist):
 		#logger.set('Camera network proxy for the camera not found, Using original source.')
 		return source
 	for p,proxy in enumerate(proxylist):
-		if proxy['protocol'] == source['protocol'] and (proxy['host'] == '*' or proxy['host'] == source['host']) and (proxy['username'] == '*' or proxy['username'] == source['username']) and (proxy['password'] == '*' or proxy['password'] == source['password']) and (proxy['path'] == '*' or proxy['path'] == source['path']) and (proxy['filenameformat'] == '*' or proxy['filenameformat'] == source['filenameformat']):
+		if proxy['protocol'] == source['protocol'] and (proxy['host'] == '*' or ('*' in proxy['host'] and proxy['host'][:proxy['host'].index('*')] ==  source['host'][:proxy['host'].index('*')]) or proxy['host'] == source['host']) and (proxy['username'] == '*' or ('*' in proxy['username'] and proxy['username'][:proxy['username'].index('*')] ==  source['username'][:proxy['username'].index('*')]) or proxy['username'] == source['username']) and (proxy['password'] == '*' or ('*' in proxy['password'] and proxy['password'][:proxy['password'].index('*')] ==  source['password'][:proxy['password'].index('*')]) or proxy['password'] == source['password']) and (proxy['path'] == '*' or ('*' in proxy['path'] and proxy['path'][:proxy['path'].index('*')] ==  source['path'][:proxy['path'].index('*')]) or proxy['path'] == source['path']) and (proxy['filenameformat'] == '*' or ('*' in proxy['filenameformat'] and proxy['filenameformat'][:proxy['filenameformat'].index('*')] ==  source['filenameformat'][:proxy['filenameformat'].index('*')]) or proxy['filenameformat'] == source['filenameformat']):
 			break
 		if p == len(proxylist)-1:
 			#logger.set('Camera network proxy for the camera not found, Using original source.')
 			return source
 	proxysource = deepcopy(source)
 	for key in ['protocol','host','username','password','path','filenameformat']:
-		if proxy[key+'_proxy'] != '*':
+		if '*' not in proxy[key] and '*' not in proxy[key+'_proxy']:
 			proxysource.update({key:proxy[key+'_proxy']})
+			continue
+
+		if proxy[key] == '*' and proxy[key+'_proxy'] == '*':
+			continue
+
+		if proxy[key] == '*' and '*' not in proxy[key+'_proxy']:
+			proxysource.update({key:proxy[key+'_proxy']})
+			continue
+
+		if '*' not in proxy[key] and proxy[key+'_proxy'] == '*':
+			continue
+
+		if proxy[key] == '*' and '*' in proxy[key+'_proxy']:
+			proxysource.update({key:proxy[key+'_proxy'].replace('*',proxysource[key])})
+			continue
+
+		if '*' in proxy[key] and proxy[key+'_proxy'] == '*':
+			proxysource.update({key:proxysource[key].replace(proxy[key].replace('*',''),'')})
+			continue
+
+		if '*' in proxy[key] and '*' in proxy[key+'_proxy']:
+			proxysource.update({key:proxysource[key].replace(proxy[key].replace('*',''),proxy[key+'_proxy'].replace('*',''))})
+			continue
+
+
 	logger.set('Camera network proxy for the camera found. Using proxy.')
+	for key in ['protocol','host','username','password','path','filenameformat']:
+		print source[key],proxysource[key]
 	return proxysource
 
 
