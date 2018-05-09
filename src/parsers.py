@@ -487,7 +487,7 @@ def writeSetupReport(filename,setup,logger):
 								csv_f.close()
 								plt_f.write("\",\n\
 										{\n\
-											title: '"+csvt+"', xlabel:'Time"+tzoffset+"',legend: 'onmouseover',legendFormatter: legendFormatter, labelsUTC:false, digitsAfterDecimal:3, showRangeSelector: true,rollPeriod: 24,showRoller: true,highlightCircleSize: 3,drawPoints:false,pointSize: 1,strokeWidth: 1,strokeBorderWidth:1,highlightSeriesOpts: {drawPoints:true,pointSize:2,strokeWidth: 2,strokeBorderWidth: 1,highlightCircleSize: 5},\n\
+											title: '"+csvt+"', xlabel:'Time"+tzoffset+"',legend: 'onmouseover',legendFormatter: legendFormatter, labelsUTC:false, digitsAfterDecimal:3, showRangeSelector: true,rollPeriod: 1,showRoller: true,highlightCircleSize: 3,drawPoints:false,pointSize: 1,strokeWidth: 1,strokeBorderWidth:1,highlightSeriesOpts: {drawPoints:true,pointSize:2,strokeWidth: 2,strokeBorderWidth: 1,highlightCircleSize: 5},\n\
 											interactionModel : {'mousedown' : downV3,'mousemove' : moveV3,'mouseup' : upV3,'click' : clickV3,'dblclick' : dblClickV3,'mousewheel' : scrollV3}\n\
 										});\n\
 									document.getElementById(\"restore"+str(i)+str(j)+str(k)+str(l)+"\").onclick = function() {restorePositioning(g"+str(i)+str(j)+str(k)+str(l)+");};\n\
@@ -498,7 +498,7 @@ def writeSetupReport(filename,setup,logger):
   								plt_f.write(path.split(csvf)[1])
   								plt_f.write("\",\n\
 	  									{\n\
-	  										title: '"+csvt+"', xlabel:'Time"+tzoffset+"',legend: 'onmouseover',legendFormatter: legendFormatter, labelsUTC:false, digitsAfterDecimal:3, showRangeSelector: true,rollPeriod: 24,showRoller: true,highlightCircleSize: 3,drawPoints:false,pointSize: 1,strokeWidth: 1,strokeBorderWidth:1,highlightSeriesOpts: {drawPoints:true,pointSize:2,strokeWidth: 2,strokeBorderWidth: 1,highlightCircleSize: 5},\n\
+	  										title: '"+csvt+"', xlabel:'Time"+tzoffset+"',legend: 'onmouseover',legendFormatter: legendFormatter, labelsUTC:false, digitsAfterDecimal:3, showRangeSelector: true,rollPeriod: 1,showRoller: true,highlightCircleSize: 3,drawPoints:false,pointSize: 1,strokeWidth: 1,strokeBorderWidth:1,highlightSeriesOpts: {drawPoints:true,pointSize:2,strokeWidth: 2,strokeBorderWidth: 1,highlightCircleSize: 5},\n\
 	  										interactionModel : {'mousedown' : downV3,'mousemove' : moveV3,'mouseup' : upV3,'click' : clickV3,'dblclick' : dblClickV3,'mousewheel' : scrollV3}\n\
 	  									});\n\
 									document.getElementById(\"restore"+str(i)+str(j)+str(k)+str(l)+"\").onclick = function() {restorePositioning(g"+str(i)+str(j)+str(k)+str(l)+");};\n\
@@ -510,16 +510,16 @@ def writeSetupReport(filename,setup,logger):
 								});\n\
 								</script>\
 								")
-								plt_f.write("\n<img style=\"position: relative; left: 80%;width:20%;\" src=\""+path.join(path.splitext(path.split(filename)[1])[0]+'_files',"Scenario_"+str(i+1)+"_Mask_Preview_"+("ROI"+str(l).zfill(3))*(l!=0)+"0"*(l==0)+".jpg")+"\"><br>")
-								plt_f.write("\n<p style=\"position: absolute; left: 80%;\"><b><a href=\""+path.split(filename)[1]+"\" target=\"_blank\" style=\"color:black;\">>Setup report page</a><br><a href=\""+path.split(csvf)[1]+"\" target=\"_blank\" style=\"color:black;\">>Download/Open data file</a></b><br>")
+								plt_f.write("\n<img style=\"position: relative; left: 82%;width:18%;\" src=\""+path.join(path.splitext(path.split(filename)[1])[0]+'_files',"Scenario_"+str(i+1)+"_Mask_Preview_"+("ROI"+str(l).zfill(3))*(l!=0)+"0"*(l==0)+".jpg")+"\"><br>")
+								plt_f.write("\n<p style=\"position: absolute; left: 82%;\"><b><a href=\""+path.split(filename)[1]+"\" target=\"_blank\" style=\"color:black;\">>Setup report page</a><br><a href=\""+path.split(csvf)[1]+"\" target=\"_blank\" style=\"color:black;\">>Download/Open data file</a></b><br>")
 								plt_f.write("<b>Plot:</b><br>")
 								csv_f = open(csvf,'rb')
 								csv_header = csv_f.readline().replace('\n','').split(',')
 								csv_f.close()
 								csv_header = csv_header[1:]	#exclude time
 								for i_h,h in enumerate(csv_header):
-									plt_f.write("<input type=\"checkbox\" id=\""+str(i)+str(j)+str(k)+str(l)+str(i_h)+"\" onclick=\"vischange"+str(i)+str(j)+str(k)+str(l)+"(this)\" checked=\"\"><label for=\""+str(i)+str(j)+str(k)+str(l)+str(i_h)+"\">"+h+"</label><br>")
-								plt_f.write("<b>Zoom in:</b> double-click, scroll wheel<br><b>Zoom out:</b> ctrl-double-click, scroll wheel<br><b>Standard Zoom:</b> shift-click-drag<br><b>Standard Pan:</b> click-drag<br><b>Restore zoom level:</b> <button id=\"restore"+str(i)+str(j)+str(k)+str(l)+"\">Restore position</button><br></p>\n")
+									plt_f.write("<input type=\"checkbox\" id=\""+str(i)+str(j)+str(k)+str(l)+str(i_h)+"\" onclick=\"vischange"+str(i)+str(j)+str(k)+str(l)+"(this)\" checked=\"\"><label for=\""+str(i)+str(j)+str(k)+str(l)+str(i_h)+"\">"+h+"</label><br><button id=\"restore"+str(i)+str(j)+str(k)+str(l)+"\" style='width:50%;'>Reset plot</button>")
+								plt_f.write("<button id='help"+str(i)+str(j)+str(k)+str(l)+str(i_h)+"' style='width:50%;' onclick=\"if(document.getElementById('helptext"+str(i)+str(j)+str(k)+str(l)+str(i_h)+"').style.display == null || document.getElementById('helptext"+str(i)+str(j)+str(k)+str(l)+str(i_h)+"').style.display == 'none') {document.getElementById('helptext"+str(i)+str(j)+str(k)+str(l)+str(i_h)+"').style.display = 'block';}else{document.getElementById('helptext"+str(i)+str(j)+str(k)+str(l)+str(i_h)+"').style.display = 'none';}\">Toggle help</button><br><span id='helptext"+str(i)+str(j)+str(k)+str(l)+str(i_h)+"' style='display:none;position: absolute;border: 1px solid;background: white;top: 0%;left: -350%;width: 325%;'><br><b>Zoom in:</b> double-click, scroll wheel<br><b>Zoom out:</b> ctrl-double-click, scroll wheel<br><b>Standard Zoom:</b> shift-click-drag<br><b>Standard Pan:</b> click-drag<br><b>Number of points for moving average window:</b>Enter into the box in lower left corner</span></p>\n")
 								plt_f.write("</body>\n\n")
 								plt_f.write("</html>\n\n")
 								plt_f.close()

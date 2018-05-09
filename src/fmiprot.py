@@ -226,7 +226,7 @@ class monimet_gui(Tkinter.Tk):
 			scenario_def['analysis-1'].update({paramnames[calcids.index("0")][i]:paramdefs[calcids.index("0")][i]})
 		setup_def = [scenario_def]
 
-		temporal_modes = ['All','Date and time intervals','Earliest date and time intervals','Latest date and time intervals','Yesterday only','Today only','Latest 1 hour only','Latest image only','Last one year','Last one week','Last 48 hours','Last 24 hours']
+		temporal_modes = ['All','Date and time intervals','Earliest date and time intervals','Latest date and time intervals','Yesterday only','Today only','Latest 1 hour','Latest image only','Latest one year','Latest one month','Latest one week','Latest 48 hours','Latest 24 hours','Last one year','Last one month','Last one week','Last 48 hours','Last 24 hours']
 		output_modes = ['New directory in results directory','Existing empty directory','Merge with existing results']
 		if sysargv['resultdir'] is not None:
 			if not os.path.exists(sysargv['resultdir']):
@@ -2334,13 +2334,13 @@ class monimet_gui(Tkinter.Tk):
 		self.callbackTemporalMode()
 
 	def callbackTemporalMode(self,*args):
-		if self.TemporalModeVariable.get() in ['All','Latest 1 hour only','Latest image only','Last 48 hours','Last 24 hours']:
+		if self.TemporalModeVariable.get() in ['All','Latest 1 hour','Latest image only','Latest 48 hours','Latest 24 hours','Last 48 hours','Last 24 hours']:
 			if self.ActiveMenu.get() == "Temporal":
 				self.MenuItem3.config(state='disabled')
 				self.MenuItem4.config(state='disabled')
 			if (self.ActiveMenu.get() == "Dates" or self.ActiveMenu.get() == "Time of the day"):
 				self.Menu_Main_Temporal()
-		if self.TemporalModeVariable.get() in ['Yesterday only','Today only','Last one year','Last one week']:
+		if self.TemporalModeVariable.get() in ['Yesterday only','Today only','Last one year','Last one week','Last one month','Latest one year','Latest one week','Latest one month']:
 			if self.ActiveMenu.get() == "Temporal":
 				self.MenuItem3.config(state='disabled')
 				self.MenuItem4.config(state='normal')

@@ -240,15 +240,46 @@ def filterImageListTemporal(logger,imglistv,pathlistv,fnameconv,timec,count):
 		time2 = parsers.strptime2('23:59','%H:%M')[2]
 		time2 = time2.replace(second=59)
 
-	if timec[4] == 'Last one year':
-		date1 = today - (datetime.date(2010,12,31)-datetime.date(2010,1,1))
+	if timec[4] == 'Last one week':
+		date1 = today - (datetime.date(today.year,1,7)-datetime.date(today.year,1,1))
 		date2 = today
 		time1 = parsers.strptime2(timec[2],'%H:%M')[2]
 		time2 = parsers.strptime2(timec[3],'%H:%M')[2]
 
-	if timec[4] == 'Last one week':
-		date1 = today - (datetime.date(2010,1,7)-datetime.date(2010,1,1))
+	if timec[4] == 'Last one month':
+		if today.month == 1:
+			date1 = datetime.date(today.year-1,12,today.day)
+		else:
+			date1 = datetime.date(today.year,today.month-1,today.day)
 		date2 = today
+		time1 = parsers.strptime2(timec[2],'%H:%M')[2]
+		time2 = parsers.strptime2(timec[3],'%H:%M')[2]
+
+	if timec[4] == 'Last one year':
+		date1 = datetime.date(today.year-1,today.month,today.day)
+		date2 = today
+		time1 = parsers.strptime2(timec[2],'%H:%M')[2]
+		time2 = parsers.strptime2(timec[3],'%H:%M')[2]
+
+	lastimageday = datetime.date(lastimagetime.year,lastimagetime.month,lastimagetime.day)
+	if timec[4] == 'Latest one week':
+		date1 = lastimageday - (datetime.date(lastimageday.year,1,7)-datetime.date(lastimageday.year,1,1))
+		date2 = lastimageday
+		time1 = parsers.strptime2(timec[2],'%H:%M')[2]
+		time2 = parsers.strptime2(timec[3],'%H:%M')[2]
+
+	if timec[4] == 'Latest one month':
+		if lastimageday.month == 1:
+			date1 = datetime.date(lastimageday.year-1,12,lastimageday.day)
+		else:
+			date1 = datetime.date(lastimageday.year,lastimageday.month-1,lastimageday.day)
+		date2 = lastimageday
+		time1 = parsers.strptime2(timec[2],'%H:%M')[2]
+		time2 = parsers.strptime2(timec[3],'%H:%M')[2]
+
+	if timec[4] == 'Latest one year':
+		date1 = datetime.date(lastimageday.year-1,lastimageday.month,lastimageday.day)
+		date2 = lastimageday
 		time1 = parsers.strptime2(timec[2],'%H:%M')[2]
 		time2 = parsers.strptime2(timec[3],'%H:%M')[2]
 
@@ -260,7 +291,7 @@ def filterImageListTemporal(logger,imglistv,pathlistv,fnameconv,timec,count):
 		datestr = ' between dates ' + str(date1) + ' - ' + str(date2)
 	timestr = ' between times of the day ' + str(time1) + ' - ' + str(time2)
 
-	if timec[4] in ['Date and time intervals','Today only','Yesterday only','Last one week','Last one year','Latest date and time intervals','Earliest date and time intervals']:
+	if timec[4] in ['Date and time intervals','Today only','Yesterday only','Last one week','Last one year','Last one month','Latest one week','Latest one year','Latest one month','Latest date and time intervals','Earliest date and time intervals']:
 		if count == 0:
 			logger.set('Listing images' + datestr +  timestr + '...')
 		else:
@@ -285,7 +316,7 @@ def filterImageListTemporal(logger,imglistv,pathlistv,fnameconv,timec,count):
 				pathlistv.append(pathlist[i])
 		return (imglistv, datetimelistv, pathlistv)
 
-	if timec[4] in ['Date and time intervals','Today only','Yesterday only','Last one week','Last one year']:
+	if timec[4] in ['Date and time intervals','Today only','Yesterday only','Last one week','Last one year','Last one month','Latest one week','Latest one year','Latest one month']:
 		for i,img in enumerate(imglist):
 			if timelist[i] <= time2 and timelist[i] >= time1 and datelist[i] >= date1 and datelist[i] <= date2:
 				imglistv.append(img)
@@ -293,18 +324,27 @@ def filterImageListTemporal(logger,imglistv,pathlistv,fnameconv,timec,count):
 				pathlistv.append(pathlist[i])
 		return (imglistv, datetimelistv, pathlistv)
 
-	#now, today, lastimagetime
-	if timec[4] == ['Latest 1 hour only']:
+	if timec[4] == ['Latest 1 hour']:
 		datetime1 = lastimagetime - datetime.timedelta(hours=1)
 		datetime2 = lastimagetime
+
+	if timec[4] == 'Latest 24 hours':
+		datetime1 = lastimagetime - datetime.timedelta(hours=24)
+		datetime2 = lastimagetime
+
+	if timec[4] == 'Latest 48 hours':
+		datetime1 = lastimagetime - datetime.timedelta(hours=48)
+		datetime2 = lastimagetime
+
+	if timec[4] == 'Last 24 hours':
+		datetime1 = now - datetime.timedelta(hours=24)
+		datetime2 = now
 
 	if timec[4] == 'Last 48 hours':
 		datetime1 = now - datetime.timedelta(hours=48)
 		datetime2 = now
 
-	if timec[4] == 'Last 24 hours':
-		datetime1 = now - datetime.timedelta(hours=24)
-		datetime2 = now
+
 
 	if count == 0:
 		logger.set('Listing images between ' + str(datetime1)[:19] + ' and ' + str(datetime2)[:19] + '...')
