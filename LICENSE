@@ -9,7 +9,7 @@ Cannot modify source-code for any purpose (cannot create derivative works).
 Attribution to software creator must be made as specified:
 Whenever the software is used in research, the publication should refer at least to the user manual. The manual is published at https://doi.org/10.5281/zenodo.891068 .
 Whenever the software is used in application or service, name of the software should be mentioned, the user manual at https://doi.org/10.5281/zenodo.891068 should be linked and the copyright notice below should be included to the webpage, manual, book of the application or the service or any other similar type of publication:
-Copyright (c) 2017, Finnish Meteorological Institute
+Copyright (c) 2018, Finnish Meteorological Institute
 Authors: Cemal Melih Tanis, Ali Nadir Arslan.
 All rights reserved.
 --------------------
@@ -18,7 +18,7 @@ Parts of the software are provided under separate licenses which are added to th
 dygraphs 2.0.0:
 Copyright (c) 2009 Dan Vanderkam
 
-h5py 2.6.0:
+h5py 2.7.1:
 Copyright (c) 2008 Andrew Collette and contributors
 http://h5py.alfven.org
 All rights reserved.
@@ -26,59 +26,44 @@ All rights reserved.
 jQuery 1.10.1:
 Copyright JS Foundation and other contributors, https://js.foundation/
 
-Mahotas 1.4.3:
+Mahotas 1.4.4:
 Copyright (c) 2008-2013
 Luis Pedro Coelho <luis@luispedro.org>
 Zachary Pincus
 Peter J. Verveer
 Davis King
 
-matplotlib 1.5.3:
+matplotlib 2.2.0:
 Copyright (c) 2012-2013 Matplotlib Development Team; All Rights Reserved.
 
-numpy 1.11.2:
+numpy 1.14.1:
 Copyright (c) 2005, NumPy Developers
 All rights reserved.
 
-Pillow 3.4.2:
+Pillow 5.0.0:
 Copyright (c) 1997-2011 by Secret Labs AB
 Copyright (c) 1995-2011 by Fredrik Lundh
 
 Polygon2 2.0.8 is under LGPL.
 
-PyInstaller 3.2 is under GPL, with a special exception which allows to use PyInstaller to build and distribute non-free programs (including commercial ones):
-Copyright (c) 2010-2017, PyInstaller Development Team
-Copyright (c) 2005-2009, Giovanni Bajo
-Based on previous work under copyright (c) 2002 McMillan Enterprises, Inc.
+PyInstaller 3.3.1
 
 pyproj 1.9.5.1:
 Copyright (c) 2013 by Jeffrey Whitaker.
 
 Python 2.7.6
 
-Tkinter is under Python license.
-colorsys is under Python license.
+python-dateutil 2.6.1:
+Copyright 2017- Paul Ganssle <paul@ganssle.io>
+Copyright 2017- dateutil contributors
 
-python-dateutil 2.5.3:
-Copyright (c) 2003-2011 - Gustavo Niemeyer
-Copyright (c) 2012-2014 - Tomi Pieviläinen
-Copyright (c) 2014 - Yaron de Leeuw
-All rights reserved.
-
-pytz 2016.7:
+pytz 2018.3:
 Copyright (c) 2003-2005 Stuart Bishop <stuart@stuartbishop.net>
-
-scipy 0.18.1:
-Copyright (c) 2001, 2002 Enthought, Inc.
-All rights reserved.
-Copyright (c) 2003-2013 SciPy Developers.
-All rights reserved.
-
 
 -------------------------------------------------------------------------------
 Finnish Meteorological Institute Image Processing Toolbox (FMIPROT) - Terms and conditions
 -------------------------------------------------------------------------------
-1.	Preamble: This Agreement, signed on Aug 31, 2017 (hereinafter: Effective Date) governs the relationship between User, any individual person, institute, company or business entity (hereinafter: Licensee) and Finnish Meteorological Institute, a public research institute whose principal place of headquarters is Erik Palménin Aukio 1 Helsinki 00560, Finland (hereinafter: Licensor). This Agreement sets the terms, rights, restrictions and obligations on using Finnish Meteorological Institute Image Processing Toolbox (FMIPROT) (hereinafter: The Software) created and owned by Licensor, as detailed herein.
+1.	Preamble: This Agreement, signed on May 1, 2018 (hereinafter: Effective Date) governs the relationship between User, any individual person, institute, company or business entity (hereinafter: Licensee) and Finnish Meteorological Institute, a public research institute whose principal place of headquarters is Erik Palménin Aukio 1 Helsinki 00560, Finland (hereinafter: Licensor). This Agreement sets the terms, rights, restrictions and obligations on using Finnish Meteorological Institute Image Processing Toolbox (FMIPROT) (hereinafter: The Software) created and owned by Licensor, as detailed herein.
 2.	License Grant: Licensor hereby grants Licensee a Personal, Non-assignable & non-transferable, Perpetual, Commercial, Royalty free, Without rights to create derivative works, Non-exclusive license all in accordance to FMIPROT with the following terms:
   2.1.	Limitation: Licensee may use Software for the purpose of:
     2.1.1.	Running Software on Licensee’s Website[s] and Server[s];
@@ -146,8 +131,8 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 h5py License
 -------------------------------------------------------------------------------
-Copyright (c) 2008 Andrew Collette and contributors
-http://h5py.alfven.org
+Copyright (c) 2008-2013 Andrew Collette and contributors
+http://www.h5py.org
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -155,16 +140,16 @@ modification, are permitted provided that the following conditions are
 met:
 
 a. Redistributions of source code must retain the above copyright
-   notice, this list of conditions and the following disclaimer.
+notice, this list of conditions and the following disclaimer.
 
 b. Redistributions in binary form must reproduce the above copyright
-   notice, this list of conditions and the following disclaimer in the
-   documentation and/or other materials provided with the
-   distribution.
+notice, this list of conditions and the following disclaimer in the
+documentation and/or other materials provided with the
+distribution.
 
-c. Neither the name of the author nor the names of contributors may
-   be used to endorse or promote products derived from this software
-   without specific prior written permission.
+c. Neither the name of the author nor the names of contributors may 
+be used to endorse or promote products derived from this software 
+without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -253,19 +238,19 @@ matplotlib License
 -------------------------------------------------------------------------------
 1. This LICENSE AGREEMENT is between the Matplotlib Development Team (“MDT”), and the Individual or Organization (“Licensee”) accessing and otherwise using matplotlib software in source or binary form and its associated documentation.
 
-2. Subject to the terms and conditions of this License Agreement, MDT hereby grants Licensee a nonexclusive, royalty-free, world-wide license to reproduce, analyze, test, perform and/or display publicly, prepare derivative works, distribute, and otherwise use matplotlib 2.0.2 alone or in any derivative version, provided, however, that MDT’s License Agreement and MDT’s notice of copyright, i.e., “Copyright (c) 2012-2013 Matplotlib Development Team; All Rights Reserved” are retained in matplotlib 2.0.2 alone or in any derivative version prepared by Licensee.
+2. Subject to the terms and conditions of this License Agreement, MDT hereby grants Licensee a nonexclusive, royalty-free, world-wide license to reproduce, analyze, test, perform and/or display publicly, prepare derivative works, distribute, and otherwise use matplotlib 2.2.2 alone or in any derivative version, provided, however, that MDT’s License Agreement and MDT’s notice of copyright, i.e., “Copyright (c) 2012-2013 Matplotlib Development Team; All Rights Reserved” are retained in matplotlib 2.2.2 alone or in any derivative version prepared by Licensee.
 
-3. In the event Licensee prepares a derivative work that is based on or incorporates matplotlib 2.0.2 or any part thereof, and wants to make the derivative work available to others as provided herein, then Licensee hereby agrees to include in any such work a brief summary of the changes made to matplotlib 2.0.2.
+3. In the event Licensee prepares a derivative work that is based on or incorporates matplotlib 2.2.2 or any part thereof, and wants to make the derivative work available to others as provided herein, then Licensee hereby agrees to include in any such work a brief summary of the changes made to matplotlib 2.2.2.
 
-4. MDT is making matplotlib 2.0.2 available to Licensee on an “AS IS” basis. MDT MAKES NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED. BY WAY OF EXAMPLE, BUT NOT LIMITATION, MDT MAKES NO AND DISCLAIMS ANY REPRESENTATION OR WARRANTY OF MERCHANTABILITY OR FITNESS FOR ANY PARTICULAR PURPOSE OR THAT THE USE OF MATPLOTLIB 2.0.2 WILL NOT INFRINGE ANY THIRD PARTY RIGHTS.
+4. MDT is making matplotlib 2.2.2 available to Licensee on an “AS IS” basis. MDT MAKES NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED. BY WAY OF EXAMPLE, BUT NOT LIMITATION, MDT MAKES NO AND DISCLAIMS ANY REPRESENTATION OR WARRANTY OF MERCHANTABILITY OR FITNESS FOR ANY PARTICULAR PURPOSE OR THAT THE USE OF MATPLOTLIB 2.2.2 WILL NOT INFRINGE ANY THIRD PARTY RIGHTS.
 
-5. MDT SHALL NOT BE LIABLE TO LICENSEE OR ANY OTHER USERS OF MATPLOTLIB 2.0.2 FOR ANY INCIDENTAL, SPECIAL, OR CONSEQUENTIAL DAMAGES OR LOSS AS A RESULT OF MODIFYING, DISTRIBUTING, OR OTHERWISE USING MATPLOTLIB 2.0.2, OR ANY DERIVATIVE THEREOF, EVEN IF ADVISED OF THE POSSIBILITY THEREOF.
+5. MDT SHALL NOT BE LIABLE TO LICENSEE OR ANY OTHER USERS OF MATPLOTLIB 2.2.2 FOR ANY INCIDENTAL, SPECIAL, OR CONSEQUENTIAL DAMAGES OR LOSS AS A RESULT OF MODIFYING, DISTRIBUTING, OR OTHERWISE USING MATPLOTLIB 2.2.2, OR ANY DERIVATIVE THEREOF, EVEN IF ADVISED OF THE POSSIBILITY THEREOF.
 
 6. This License Agreement will automatically terminate upon a material breach of its terms and conditions.
 
 7. Nothing in this License Agreement shall be deemed to create any relationship of agency, partnership, or joint venture between MDT and Licensee. This License Agreement does not grant permission to use MDT trademarks or trade name in a trademark sense to endorse or promote products or services of Licensee, or any third party.
 
-8. By copying, installing or otherwise using matplotlib 2.0.2, Licensee agrees to be bound by the terms and conditions of this License Agreement.
+8. By copying, installing or otherwise using matplotlib 2.2.2, Licensee agrees to be bound by the terms and conditions of this License Agreement.
 
 
 numpy License
@@ -291,7 +276,7 @@ The Python Imaging Library (PIL) is
 
 Pillow is the friendly PIL fork. It is
 
-    Copyright © 2010-2017 by Alex Clark and contributors
+    Copyright © 2010-2018 by Alex Clark and contributors
 
 Like PIL, Pillow is licensed under the open source PIL Software License:
 
@@ -304,14 +289,11 @@ SECRET LABS AB AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTW
 
 PyInstaller License
 -------------------------------------------------------------------------------
-Copyright (c) 2010-2017, PyInstaller Development Team
-Copyright (c) 2005-2009, Giovanni Bajo
-Based on previous work under copyright (c) 2002 McMillan Enterprises, Inc.
+PyInstaller is distributed under the GPL License but with an exception that allows you to use it to build commercial products:
 
-
-PyInstaller is licensed under the terms of the GNU General Public License
-as published by the Free Software Foundation; either version 2 of the License,
-or (at your option) any later version.
+You may use PyInstaller to bundle commercial applications out of your source code.
+The executable bundles generated by PyInstaller from your source code can be shipped with whatever license you want.
+You may modify PyInstaller for your own needs but changes to the PyInstaller source code fall under the terms of the GPL license. That is, if you distribute your modifications you must distribute them under GPL terms.
 
 
 Bootloader Exception
@@ -730,12 +712,32 @@ Python License
 
 python-dateutil License
 -------------------------------------------------------------------------------
+Copyright 2017- Paul Ganssle <paul@ganssle.io>
+Copyright 2017- dateutil contributors (see AUTHORS file)
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+The above license applies to all contributions after 2017-12-01, as well as
+all contributions that have been re-licensed (see AUTHORS file for the list of
+contributors who have re-licensed their code).
+--------------------------------------------------------------------------------
 dateutil - Extensions to the standard Python datetime module.
 
 Copyright (c) 2003-2011 - Gustavo Niemeyer <gustavo@niemeyer.net>
 Copyright (c) 2012-2014 - Tomi Pieviläinen <tomi.pievilainen@iki.fi>
 Copyright (c) 2014-2016 - Yaron de Leeuw <me@jarondl.net>
 Copyright (c) 2015-     - Paul Ganssle <paul@ganssle.io>
+Copyright (c) 2015-     - dateutil contributors (see AUTHORS file)
 
 All rights reserved.
 
@@ -763,6 +765,7 @@ LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+The above BSD License Applies to all code, even that also covered by Apache 2.0.
 
 pytz License
 -------------------------------------------------------------------------------
@@ -785,21 +788,6 @@ THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
-
-
-SciPy License
--------------------------------------------------------------------------------
-Copyright © 2001, 2002 Enthought, Inc.
-All rights reserved.
-
-Copyright © 2003-2013 SciPy Developers.
-All rights reserved.
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
-
-Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
-Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
-Neither the name of Enthought nor the names of the SciPy Developers may be used to endorse or promote products derived from this software without specific prior written permission.
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 GNU LESSER GENERAL PUBLIC LICENSE

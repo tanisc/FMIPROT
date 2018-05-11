@@ -103,6 +103,7 @@ class monimet_gui(Tkinter.Tk):
 		self.LogNew(self)
 		self.MessagePrev= {}
 		self.Message.set("Initializing...|busy:True")
+		print "\nBy running this program, you agree to the terms of the license, described in the file 'LICENSE'. Use argument --license to see the license.\n"
 		self.Message.set("Initializing GUI...")
 		self.ActiveMenu = Tkinter.StringVar()
 		self.MenuEnablerFunc = Tkinter.StringVar()
@@ -245,6 +246,9 @@ class monimet_gui(Tkinter.Tk):
 			self.imagesdownload.set(True)
 
 		if not sysargv['gui']:
+			if sysargv['license']:
+				self.License()
+				os._exit(1)
 			if sysargv['config_settings']:
 				self.configSettings()
 				os._exit(1)
@@ -488,7 +492,7 @@ class monimet_gui(Tkinter.Tk):
 		setupmenu.add_command(label="Load..", command=self.setupFileLoad)
 		setupmenu.add_command(label="Save", command=self.setupFileSave)
 		setupmenu.add_command(label="Save As...", command=self.setupFileSaveas)
-		setupmenu.add_command(label="Save a copy with modified sources...", command=self.setupFileSaveasModified)
+		#setupmenu.add_command(label="Save a copy with modified sources...", command=self.setupFileSaveasModified)
 		setupmenu.add_separator()
 		setupmenu.add_command(label="Generate report", command=self.setupFileReport)
 		setupmenu.add_separator()
@@ -2016,20 +2020,7 @@ class monimet_gui(Tkinter.Tk):
 							self.Message.set("Testing failed.|busy:False")
 							return False
 					self.Message.set("Testing complete.|busy:False")
-					name = ''
-					while name is '':
-						name = tkSimpleDialog.askstring('Plugin name', 'Enter a name for the plugin: \n(Characters which are not allowed will be replaced automatically to \'_\'. Only ASCII letters,\ndigits, \'-\',\'_\',\'(\',\')\' are allowed. Uppercase letters will be converted to lowercase.)')
-						if name is None:
-							self.Message.set("Choose plugin binary file is cancelled.")
-							return False
-						name = parsers.validateName(name,fill='_',filterspace=False).lower()
-						name = name.replace('Plug-in: ','')
-						if 'Plug-in: '+name in calcnames:
-							tkMessageBox.showwarning('Error','Another plugin with a similar name already exists. Enter a different name or remove the other one ('+name+') from plugins.')
-							name = ''
-						if name is None:
-							self.Message.set("Choose plugin binary file is cancelled.")
-							return False
+					name = os.path.splitext(os.path.split(ans)[1])[0]
 					try:
 						if os.path.exists(os.path.join(PluginsDir,name)):
 							shutil.rmtree(os.path.join(PluginsDir,name))
@@ -2040,6 +2031,7 @@ class monimet_gui(Tkinter.Tk):
 								self.Message.set("Plugin is copied to the plugin directory.")
 						else:
 							shutil.copytree(os.path.split(ans)[0],os.path.join(PluginsDir,name))
+
 							self.Message.set("Plugin is copied to the plugin directory.")
 						calculations.AddPlugin(name)
 						if self.ActiveMenu.get() == "Analyses":
@@ -4809,7 +4801,15 @@ class monimet_gui(Tkinter.Tk):
 							if analysis['id'] == 'TEMPO01':
 								mask = None
 							else:
-								mask = maskers.polymask(imglist[0],scenario['polygonicmask'],self.Message)
+								mask = maskers.polymask(imglist,scenario['polygonicmask'],self.Message)
+								if isinstance(mask,bool) and mask == False:
+									outputValid = False
+									if analysis['id'] != 'TEMPO01' and scenario['multiplerois'] and isinstance(scenario['polygonicmask'][0],list):
+										self.Message.set("No valid images found. ROI is skipped.")
+										self.Message.set('ROI: |progress:6|queue:'+str(0)+'|total:'+str(len(scenario['polygonicmask'])+1))
+									else:
+										self.Message.set("No valid images found. Scenario is skipped.")
+										self.Message.set('Scenario: |progress:10|queue:'+str(s+1)+'|total:'+str(len(self.setup)))
 								mask = (mask,scenario['polygonicmask'],scenario['thresholds'])
 								(imglist,datetimelist) = calculations.filterThresholds(imglist,datetimelist, mask,logger)
 						if imglist == []:
@@ -4885,7 +4885,11 @@ class monimet_gui(Tkinter.Tk):
 									self.Message.set("No pictures are valid after filtering with thresholds. ROI is skipped.")
 									self.Message.set('ROI: |progress:6|queue:'+str(r+2)+'|total:'+str(len(scenario['polygonicmask'])+1))
 								if outputValid:
-									mask = maskers.polymask(imglist[0],[roi],self.Message)
+									mask = maskers.polymask(imglist,[roi],self.Message)
+									if mask == False:
+										outputValid = False
+										self.Message.set("No valid images found. ROI is skipped.")
+										self.Message.set('ROI: |progress:6|queue:'+str(r+2)+'|total:'+str(len(scenario['polygonicmask'])+1))
 									mask = (mask,[roi],scenario['thresholds'])
 									(imglist,datetimelist) = calculations.filterThresholds(imglist,datetimelist, mask,logger)
 								if imglist == []:
@@ -5516,29 +5520,32 @@ class monimet_gui(Tkinter.Tk):
 		lf.close()
 
 	def License(self):
-		LicenseWindow = Tkinter.Toplevel(self,padx=10,pady=10)
-		LicenseWindow.wm_title('License agreement')
-		scrollbar = Tkinter.Scrollbar(LicenseWindow,width=20)
-		scrollbar.grid(sticky='w'+'e'+'n'+'s',row=2,column=3,columnspan=1)
-		lictext = Tkinter.Text(LicenseWindow, yscrollcommand=scrollbar.set,wrap='word')
-		lic_f = open(os.path.join(BinDir,'doc','license.txt'))
-		lictext.insert('end', lic_f.read())
-		lic_f.close()
-		lictext.config(state='disabled')
-		lictext.grid(sticky='w'+'e',row=2,column=1,columnspan=2)
-		scrollbar.config(command=lictext.yview)
+		if sysargv['gui']:
+			LicenseWindow = Tkinter.Toplevel(self,padx=10,pady=10)
+			LicenseWindow.wm_title('License agreement')
+			scrollbar = Tkinter.Scrollbar(LicenseWindow,width=20)
+			scrollbar.grid(sticky='w'+'e'+'n'+'s',row=2,column=3,columnspan=1)
+			lictext = Tkinter.Text(LicenseWindow, yscrollcommand=scrollbar.set,wrap='word')
+			lic_f = open(os.path.join(BinDir,'LICENSE'))
+			lictext.insert('end', lic_f.read())
+			lic_f.close()
+			lictext.config(state='disabled')
+			lictext.grid(sticky='w'+'e',row=2,column=1,columnspan=2)
+			scrollbar.config(command=lictext.yview)
 
-		Tkinter.Button(LicenseWindow,text="Close",anchor="c",command=LicenseWindow.destroy).grid(sticky='w'+'e',row=3,column=1,columnspan=3)
-		self.centerWindow(LicenseWindow)
-		LicenseWindow.grab_set()
-		LicenseWindow.wait_window()
-		self.grab_set()
+			Tkinter.Button(LicenseWindow,text="Close",anchor="c",command=LicenseWindow.destroy).grid(sticky='w'+'e',row=3,column=1,columnspan=3)
+			self.centerWindow(LicenseWindow)
+			LicenseWindow.grab_set()
+			LicenseWindow.wait_window()
+			self.grab_set()
+		else:
+			print open(os.path.join(BinDir,'LICENSE')).read()
 
 	def LogFileOpen(self):
 		webbrowser.open(os.path.join(LogDir,self.LogFileName[0]),new=2)
 
 	def ManualFileOpen(self):
-		webbrowser.open(os.path.join(BinDir,'doc','usermanual.pdf'),new=2)
+		webbrowser.open(os.path.join(BinDir,'usermanual.pdf'),new=2)
 
 	def About(self):
 		tkMessageBox.showinfo("About...", "FMIPROT (Finnish Meteorological Institute Image Processing Tool) is a toolbox to analyze the images from multiple camera networks and developed under the project MONIMET, funded by EU Life Programme.\nCurrent version is " + sysargv['version'] + ".\nFor more information, contact Cemal.Melih.Tanis@fmi.fi.")

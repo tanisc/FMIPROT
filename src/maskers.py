@@ -6,6 +6,19 @@ from copy import deepcopy
 def polymask(imgf,aoic,logger): #aoic list like [[x1,y1,x2,y2,x3,y3...],[x1,y1,x2,y2,x3,y3...]] or [x1,y1,x2,y2,x3,y3...]
 		logger.set('Producing polygonic image mask...')
 		ql = []
+		if isinstance(imgf,list):
+			for i,imgfn in enumerate(imgf):
+				try:
+					img = mahotas.imread(imgfn)
+					if len(img.shape) != 3:
+						fail
+					imgf = deepcopy(imgfn)
+					break
+				except:
+					logger.set('Invalid image file: '+imgfn)
+					if i == len(imgf)-1:
+						logger.set('Invalid image file(s). Polygonic image mask can not be created.')
+						return False
 		if isinstance(imgf,str):
 			img = mahotas.imread(imgf)
 		else:
