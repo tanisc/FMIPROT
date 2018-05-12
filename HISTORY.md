@@ -1,3 +1,14 @@
+Version 0.20.0 (Beta)
+Major and minor bugs are fixed.
+Command line interface options are introduced.
+Images downloaded for cameras that are not added to the toolbox but stored in setup files are now stored under "tmp" directory. (i.e. setup files created in any instance/platform can be run in another instance/platform directly)
+Camera network proxies are introduced.
+File extentions are added. Most of old extentions are still supported, but not tested. CNIF extention, output .ini file extention are now ".tsvx". output .dat file extention is now .tsv.
+Preview image times are now stored in setup files, used in later runs for preview in GUI and reports.
+Documentation is moved from "doc" directory to the main directory.
+"Update preview images" option for all cameras is added to the menu.
+"Generate setup report with analysis results" is moved to "Processing settings" menu from "Results" menu and the option is now stored as a setting.
+
 Version 0.15.3 (Beta)
 A major bug in the functions for listing images is fixed.
 
