@@ -1,3 +1,6 @@
+Version 0.20.1 (Beta)
+A bug in checking image file if valid when creating masks for separate ROIs fixed.
+
 Version 0.20.0 (Beta)
 Major and minor bugs are fixed.
 Command line interface options are introduced.
