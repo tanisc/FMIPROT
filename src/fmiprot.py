@@ -4886,7 +4886,7 @@ class monimet_gui(Tkinter.Tk):
 									self.Message.set('ROI: |progress:6|queue:'+str(r+2)+'|total:'+str(len(scenario['polygonicmask'])+1))
 								if outputValid:
 									mask = maskers.polymask(imglist,[roi],self.Message)
-									if mask == False:
+									if isinstance(mask,bool) and mask == False:
 										outputValid = False
 										self.Message.set("No valid images found. ROI is skipped.")
 										self.Message.set('ROI: |progress:6|queue:'+str(r+2)+'|total:'+str(len(scenario['polygonicmask'])+1))
