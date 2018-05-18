@@ -20,4 +20,5 @@ xcopy dist\fmiprot\* bin\%VER%\win\ /q /s
 rmdir dist /s /q
 rmdir build /s /q
 del fmiprot.spec
-#zip
+#remove zip
+#make zip

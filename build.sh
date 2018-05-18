@@ -12,13 +12,18 @@ cp src/resources/* bin/$VER/lin/resources/
 mkdir bin/$VER/lin/previews
 cp src/previews/0-MONIMET* bin/$VER/lin/previews/
 cp README.md bin/$VER/lin/README.md
+cp README.md bin/$VER/README.md
 cp usermanual.pdf bin/$VER/lin/usermanual.pdf
+cp usermanual.pdf bin/$VER/usermanual.pdf
 cp LICENSE bin/$VER/lin/LICENSE
+cp LICENSE bin/$VER/LICENSE
 cp HISTORY.md bin/$VER/lin/HISTORY.md
+cp HISTORY.md bin/$VER/HISTORY.md
 pyinstaller src/fmiprot.py
 cp -R dist/fmiprot/* bin/$VER/lin/
 rm -R dist
 rm -R build
 rm fmiprot.spec
 cd bin/$VER/lin
-tar -cvf ../fmiprot_0.20.0.tar.gz *
+rm ../fmiprot_$VER.tar.gz
+tar -cvf ../fmiprot_$VER.tar.gz *
