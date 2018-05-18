@@ -20,5 +20,6 @@ xcopy dist\fmiprot\* bin\%VER%\win\ /q /s
 rmdir dist /s /q
 rmdir build /s /q
 del fmiprot.spec
-#remove zip
-#make zip
+del bin\%VER%\fmiprot_%VER%.zip
+cd bin\%VER%\win
+"%PROGRAMFILES%\7-Zip\7z.exe" a ..\fmiprot_%VER%.zip
