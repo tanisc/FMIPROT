@@ -8,9 +8,10 @@ from string import ascii_letters, digits
 def strptime2(text,conv="%Y-%m-%dT%H:%M:%S"):
 	if isinstance(text,str):
 		if '%3' in conv:
+			conv = conv.replace('%3','%%3')
 			ms = int(text[len(datetime.datetime.now().strftime(conv).split('%3')[0]):len(datetime.datetime.now().strftime(conv).split('%3')[0])+3])
 			text = text[0:len(datetime.datetime.now().strftime(conv).split('%3')[0])] + text[len(datetime.datetime.now().strftime(conv).split('%3')[0])+3:]
-			conv = conv.replace('%3','')
+			conv = conv.replace('%%3','')
 		if '%L' in conv:
 			us = int(text[len(datetime.datetime.now().strftime(conv).split('%L')[0]):len(datetime.datetime.now().strftime(conv).split('%L')[0])+6])
 			text = text[0:len(datetime.datetime.now().strftime(conv).split('%L')[0])] + text[len(datetime.datetime.now().strftime(conv).split('%L')[0])+6:]
