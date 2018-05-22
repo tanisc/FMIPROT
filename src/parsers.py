@@ -31,9 +31,11 @@ def strftime2(dTime,conv="%Y-%m-%dT%H:%M:%S",divider_index=10):
 	if isinstance(dTime,str):
 		dt = dTime
 	else:
+		if '%3' in conv:
+			conv = conv.replace('%3','%%3')
 		dt = dTime.strftime(conv)
 		if '%3' in conv:
-			dt = dt.replace(' %3',str(dTime.microsecond/100).zfill(3))
+			dt = dt.replace('%3',str(dTime.microsecond/1000).zfill(3))
 		if '%L' in conv:
 			dt = dt.replace('%L',str(dTime.microsecond).zfill(6))
 	d = dt[:divider_index]
