@@ -7,7 +7,19 @@ from os import path, listdir
 from string import ascii_letters, digits
 def strptime2(text,conv="%Y-%m-%dT%H:%M:%S"):
 	if isinstance(text,str):
+		if '%3' in conv:
+			ms = int(text[len(datetime.datetime.now().strftime(conv).split('%3')[0]):len(datetime.datetime.now().strftime(conv).split('%3')[0])+3])
+			text = text[0:len(datetime.datetime.now().strftime(conv).split('%3')[0])] + text[len(datetime.datetime.now().strftime(conv).split('%3')[0])+3:]
+			conv = conv.replace('%3','')
+		if '%L' in conv:
+			us = int(text[len(datetime.datetime.now().strftime(conv).split('%L')[0]):len(datetime.datetime.now().strftime(conv).split('%L')[0])+6])
+			text = text[0:len(datetime.datetime.now().strftime(conv).split('%L')[0])] + text[len(datetime.datetime.now().strftime(conv).split('%L')[0])+6:]
+			conv = conv.replace('%L','')
 		dt = datetime.datetime.strptime(text,conv)
+		if '%3' in conv:
+			dt = dt.replace(microseconds=ms*1000)
+		if '%L' in conv:
+			dt = dt.replace(microseconds=us)
 	else:
 		dt = text
 	t = datetime.time(hour=dt.hour,minute=dt.minute,second=dt.second,microsecond=dt.microsecond)
@@ -19,6 +31,10 @@ def strftime2(dTime,conv="%Y-%m-%dT%H:%M:%S",divider_index=10):
 		dt = dTime
 	else:
 		dt = dTime.strftime(conv)
+		if '%3' in conv:
+			dt = dt.replace(' %3',str(dTime.microsecond/100).zfill(3))
+		if '%L' in conv:
+			dt = dt.replace('%L',str(dTime.microsecond).zfill(6))
 	d = dt[:divider_index]
 	t = dt[divider_index+1:]
 	return [dt,d,t]
