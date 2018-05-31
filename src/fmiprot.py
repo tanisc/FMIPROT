@@ -230,6 +230,7 @@ class monimet_gui(Tkinter.Tk):
 		temporal_modes = ['All','Date and time intervals','Earliest date and time intervals','Latest date and time intervals','Yesterday only','Today only','Latest 1 hour','Latest image only','Latest one year','Latest one month','Latest one week','Latest 48 hours','Latest 24 hours','Last one year','Last one month','Last one week','Last 48 hours','Last 24 hours']
 		output_modes = ['New directory in results directory','Existing empty directory','Merge with existing results']
 		if sysargv['resultdir'] is not None:
+			sysargv['resultdir'] = os.path.realpath(sysargv['resultdir'])
 			if not os.path.exists(sysargv['resultdir']):
 				os.makedirs(sysargv['resultdir'])
 			if not os.path.exists(sysargv['resultdir']) or len(os.listdir(sysargv['resultdir'])) == 0:
@@ -269,6 +270,7 @@ class monimet_gui(Tkinter.Tk):
 			self.Menu_Menu()
 
 			if sysargv['setupfile'] is not None:
+				sysargv['setupfile'] = os.path.realpath(sysargv['setupfile'])
 				self.setupFileClear()
 				self.ExceptionSwitches_ComingFromStartupSetupFileSetupReset.set(False)
 				self.setupFileLoad()
