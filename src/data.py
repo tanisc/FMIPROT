@@ -84,10 +84,10 @@ def readResultsData(fname,logger):
 					data_captions[r][1][1] = convertTZ(data_captions[r][1][1],data_captions[r][1][1][0][-6:],'+00:00')
 			for i in range(len(data_captions[r][1])/2):
 				if data_captions[r][1][i*2] != 'Time':
-					if '.' in data_captions[r][1][i*2+1][0]:
-						data_captions[r][1][i*2+1] = np.array(data_captions[r][1][i*2+1],dtype='float64')
-					else:
+					try:
 						data_captions[r][1][i*2+1] = np.array(data_captions[r][1][i*2+1],dtype='int64')
+					except:
+						data_captions[r][1][i*2+1] = np.array(data_captions[r][1][i*2+1],dtype='float64')
 
 	return (analysis_captions, data_captions)
 
