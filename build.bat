@@ -1,4 +1,4 @@
-SET VER=0.20.2
+SET VER=0.20.3
 rmdir dist /s /q
 rmdir build /s /q
 del fmiprot.spec

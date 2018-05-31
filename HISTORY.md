@@ -1,5 +1,9 @@
+Version 0.20.3 (Beta)
+Bug fix: Reading integers, nan and inf in old results in merge results mode fixed.
+Bug fix: Setup file and result directory from CLI is converted to realpath, which was causing crash in results viewer.
+
 Version 0.20.2 (Beta)
-Millissecond support is added for filename conventions. ('%3' for 3 digits and '%L' for 6 digits milliseconds)
+Millisecond support is added for filename conventions. ('%3' for 3 digits and '%L' for 6 digits milliseconds)
 
 Version 0.20.1 (Beta)
 A bug in checking image file if valid when creating masks for separate ROIs fixed.
