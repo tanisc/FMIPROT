@@ -302,6 +302,8 @@ class monimet_gui(Tkinter.Tk):
 		self.ftp_passive.set(bool(float(settingv[settings.index('ftp_passive')])))
 		self.ftp_numberofconnections = Tkinter.IntVar()
 		self.ftp_numberofconnections.set(int(settingv[settings.index('ftp_numberofconnections')]))
+		if sys.platform == 'win32':
+			self.ftp_numberofconnections.set(1)
 
 		self.imagespath = Tkinter.StringVar()
 		self.resultspath = Tkinter.StringVar()
@@ -1845,12 +1847,13 @@ class monimet_gui(Tkinter.Tk):
 		Item = 4
 		self.MenuItem10 = Tkinter.Checkbutton(self,variable=self.ftp_passive,wraplength=self.MenuX*0.7,text="Use passive mode for FTP connections")
 		self.MenuItem10.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
-		Item = 5
-		self.MenuItem1 = Tkinter.Label(self,wraplength=self.MenuX*0.7,text="Number of FTP connections for download (1-10)",anchor="c",bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor)
-		self.MenuItem1.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.7,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
-		Item = 5
-		self.MenuItem2 = Tkinter.Entry(self,textvariable=self.ftp_numberofconnections,justify="center")
-		self.MenuItem2.place(x=self.MenuOSX+self.MenuX*0.8,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.1,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+		if sys.platform != 'win32':
+			Item = 5
+			self.MenuItem1 = Tkinter.Label(self,wraplength=self.MenuX*0.7,text="Number of FTP connections for download (1-10)",anchor="c",bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor)
+			self.MenuItem1.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.7,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+			Item = 5
+			self.MenuItem2 = Tkinter.Entry(self,textvariable=self.ftp_numberofconnections,justify="center")
+			self.MenuItem2.place(x=self.MenuOSX+self.MenuX*0.8,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.1,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 6
 		self.MenuItem7 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="Save",anchor="c",command=self.saveConnection)
 		self.MenuItem7.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
@@ -1865,7 +1868,7 @@ class monimet_gui(Tkinter.Tk):
 		if int(self.ftp_numberofconnections.get()) == 0:
 			self.ftp_numberofconnections.set(1)
 			self.Message.set('Number of FTP connections for download can not be less than 1. It is set to 1.')
-		if int(self.ftp_numberofconnections.get()) < 1:
+		if int(self.ftp_numberofconnections.get()) > 10:
 			self.ftp_numberofconnections.set(10)
 			self.Message.set('Number of FTP connections for download can not be more than 10. It is set to 10.')
 		self.connection = {'ftp_passive': str(int(self.ftp_passive.get())), 'ftp_numberofconnections': str(int(self.ftp_numberofconnections.get())),'images_download':  str(int(self.imagesdownload.get()))}
