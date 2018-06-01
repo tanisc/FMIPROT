@@ -1,7 +1,7 @@
 Version 0.20.3 (Beta)
 Bug fix: Reading integers, nan and inf in old results in merge results mode fixed.
 Bug fix: Setup file and result directory from CLI is converted to realpath, which was causing crash in results viewer.
-Bug fix/postpone: Number of connection for FTP downloads disabled for instances running in Windows platforms until fixed.
+Bug fix/postpone: Number of connection for FTP downloads disabled until it is fixed.
 
 Version 0.20.2 (Beta)
 Millisecond support is added for filename conventions. ('%3' for 3 digits and '%L' for 6 digits milliseconds)
