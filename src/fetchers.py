@@ -324,7 +324,7 @@ def filterImageListTemporal(logger,imglistv,pathlistv,fnameconv,timec,count):
 				pathlistv.append(pathlist[i])
 		return (imglistv, datetimelistv, pathlistv)
 
-	if timec[4] == ['Latest 1 hour']:
+	if timec[4] == 'Latest 1 hour':
 		datetime1 = lastimagetime - datetime.timedelta(hours=1)
 		datetime2 = lastimagetime
 
@@ -343,8 +343,6 @@ def filterImageListTemporal(logger,imglistv,pathlistv,fnameconv,timec,count):
 	if timec[4] == 'Last 48 hours':
 		datetime1 = now - datetime.timedelta(hours=48)
 		datetime2 = now
-
-
 
 	if count == 0:
 		logger.set('Listing images between ' + str(datetime1)[:19] + ' and ' + str(datetime2)[:19] + '...')

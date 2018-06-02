@@ -1,3 +1,6 @@
+Version 0.20.4 (Beta)
+Bug fix: Filtering images for "Latest 1 hour" temporal selection is fixed.
+
 Version 0.20.3 (Beta)
 Bug fix: Reading integers, nan and inf in old results in merge results mode fixed.
 Bug fix: Setup file and result directory from CLI is converted to realpath, which was causing crash in results viewer.
