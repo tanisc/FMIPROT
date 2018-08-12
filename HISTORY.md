@@ -1,3 +1,6 @@
+Version 0.20.5 (Beta)
+Bug fix (Major): Removing old values in the merging mode fixed. The problem was that the dates were removed correctly but values were not, resulting a shift in the new results instead of adding new results.
+
 Version 0.20.4 (Beta)
 Bug fix: Filtering images for "Latest 1 hour" temporal selection is fixed.
 
