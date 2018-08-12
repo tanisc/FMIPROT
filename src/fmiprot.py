@@ -4780,7 +4780,7 @@ class monimet_gui(Tkinter.Tk):
 										for j in outputtvd[::-1]:
 											del outputtv[0][1][2*i+1][j]
 									else:
-										np.delete(outputtv[0][1][2*i+1],outputtvd)
+										outputtv[0][1][2*i+1] = np.delete(outputtv[0][1][2*i+1],outputtvd)
 							imglist = [] #missing
 							datetimelist = []
 							pathlist = []
@@ -4872,7 +4872,7 @@ class monimet_gui(Tkinter.Tk):
 												for j in outputtvd[::-1]:
 													del outputtv[r+1][1][2*i+1][j]
 											else:
-												np.delete(outputtv[r+1][1][2*i+1],outputtvd)
+												outputtv[r+1][1][2*i+1] = np.delete(outputtv[r+1][1][2*i+1],outputtvd)
 									imglist = [] #missing
 									datetimelist = []
 									pathlist = []
