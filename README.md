@@ -15,12 +15,14 @@ Current functions of the software are,
 (11) Customizable Plotting/Mapping of results
 (12) Windows and Linux support.
 (13) Configuring settings and running analysis from command line interface
-The software has three processing algorithms:
+The software has the processing algorithms:
 (1) Color Fraction Extraction: Calculates red fraction index, green fraction index, blue fraction index, brightness, luminance, red channel mean, red channel median, red channel standard deviation, green channel mean, green channel median, green channel standard deviation, blue channel mean, blue channel median, and blue channel standard deviation.
 (2) Vegetation Indices: Calculates red fraction index, green fraction index, green-red vegetation index, green excess index.
 (3) Custom Color Index: Calculates an index from a mathematical formula entered by the user using average values of red, green and blue channels in ROIs. The formula supports sums, differences, multiplication, and division and operation priority by using parentheses.
 (4) Snow cover fraction: Calculates the fraction of snow covered pixels using georectification of the image and classification of pixels into snow and no-snow. Also provides the fraction without the georectification.
-(5) Timelapse animation: Creates a timelase video file out of available images from the cameras.
+(5) Snow depth: Calculates snow depth from the objects in the field by finding the intersection with the snow surface.
+(6) Timelapse animation: Creates a timelase video file out of available images from the cameras.
+(7) Georectification: Creates orthoimages and weightmasks by orthorectifying camera images. (Not applicable for too many images, only for testing purposes.)
 ***************************************************************
 AUTHORS
 Cemal Melih Tanis Cemal.Melih.Tanis at fmi.fi
@@ -35,7 +37,10 @@ The product is currently a beta version, thus it may crash unexpectedly. User sh
 On unexpected crashes, please send the log file and output from the terminal/console to cemal.melih.tanis@fmi.fi.
 ***************************************************************
 INSTALLATION
+Compiled version:
 Extract the archive ("fmiprot_#.#.#.zip" for Windows systems or "fmiprot_#.#.#.tar.gz" for Linux systems) to any directory. Run "fmiprot" in Linux systems and "fmiprot.exe" on Windows systems to start the program. Program can be run directly from file browser interface, i.e. using command line is not necessary, but it is advised.
+Source code version:
+Install Python 2.7, libraries in requirements.txt and python gdal libraries. Run fmiprot.py with python.
 ***************************************************************
 For detailed documentation, refer to usermanual.pdf
 ***************************************************************
