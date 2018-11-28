@@ -7,10 +7,10 @@ class Tk(object):
         return False
 
     def winfo_screenwidth(self,*args):
-        return False
+        return 1920
 
     def winfo_screenheight(self,*args):
-        return False
+        return 1080
 
     def winfo_x(self,*args):
         return False
@@ -23,6 +23,21 @@ class Tk(object):
 
     def update(self,*args):
         return False
+
+    def font(self,*args):
+        return 12
+
+    def resizable(self, *args):
+        return False
+
+    def option_add(self, *args):
+        return None
+
+class nametofont(object):
+    def __init__(self,parent,yscrollcommand=0,wrap=0):
+        return None
+    def configure(self,size=0):
+        return None
 
 class Text(object):
     def __init__(self,parent,yscrollcommand=0,wrap=0):

@@ -147,7 +147,7 @@ def fetchFile(tkobj,logger,localdir, localfile, protocol,host, username, passwor
 				authhandler = urllib2.HTTPBasicAuthHandler(passman)
 				opener = urllib2.build_opener(authhandler)
 				urllib2.install_opener(opener)
-			cfg = urllib2.urlopen(inifile,timeout = 5)
+			cfg = urllib2.urlopen(inifile,timeout = 100)
 			cfg_loc = open(os.path.join(localdir,localfile),'wb')
 			cfg_loc.write(cfg.read())
 			cfg_loc.close()
@@ -556,8 +556,12 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 
 	timelimc = [0,0,0,0]
 	if 'firstimagetime' in source:
-		timelimc[0] = parsers.strptime2(source['firstimagetime'])[1]
-		timelimc[2] = parsers.strptime2(source['firstimagetime'])[2]
+		try:
+			parsers.strptime2(source['firstimagetime'])
+			timelimc[0] = parsers.strptime2(source['firstimagetime'])[1]
+			timelimc[2] = parsers.strptime2(source['firstimagetime'])[2]
+		except:
+			pass
 
 	if 'lastimagetime' in source:
 		timelimc[1] = parsers.strptime2(source['lastimagetime'])[1]
@@ -640,11 +644,9 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 					logger.set('Disconnected from FTP.')
 				except:
 					logger.set('Connection failed.')
-					logger.set('Checking local directory for images...')
 					online = False
 
-
-			else:
+			if not online:
 				imglistv = os.listdir(local_path)
 				for i,v in enumerate(imglistv):
 					pathlistv.append(local_path)
@@ -715,6 +717,7 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 
 
 	if protocol == 'HTTP' or protocol == 'HTTPS':
+		import urllib2
 		if timec[4] == 'List':
 			datetimelist = deepcopy(timec[6])
 			pathlist = deepcopy(timec[7])
@@ -724,7 +727,6 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 
 		else:
 			if online:
-				import urllib2
 				import re
 				urllib2 = reload(urllib2)
 				if 'http_proxy' in proxy:
@@ -763,7 +765,7 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 						url = 'https://'+host+'/'+p
 
 					try:
-						response = urllib2.urlopen(url).read()
+						response = urllib2.urlopen(url,timeout = 100).read()
 					except:
 						#logger.set('Connection failed.')
 						continue
@@ -776,8 +778,10 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 					if count != 0:
 						if len(filterImageListTemporal(logger,imglistv,pathlistv,filenameformat,timec,count)[0]) >= count:
 							break
-
-			else:
+				if imglistv == []:
+					logger.set('No files found. Connection may be offline.')
+					online = False
+			if not online:
 				imglistv = os.listdir(local_path)
 				for i,v in enumerate(imglistv):
 					pathlistv.append(local_path)
@@ -791,22 +795,30 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 		if online and download:
 			fail = []
 			success = 0
-			logger.set('Downloading/updating images...' )
+			logger.set("Checking existing images...")
+			dllist = []
+			local_list = os.listdir(local_path)
 			for i,f in enumerate(imglist):
-				r = pathlist[i]
+				if f not in local_list:
+					dllist.append(i)
+			logger.set(str(len(dllist))+" images to be downloaded.")
+			if not len(dllist) == 0:
+				logger.set('Downloading/updating images...' )
+				for i in dllist:
+					f = imglist[i]
+					r = pathlist[i]
 
-				if r[0][0] == '/':
-					if protocol == 'HTTP':
-						p = 'http://'+host+r[0]
-					if protocol == 'HTTPS':
-						p = 'https://'+host+r[0]
-				else:
-					if protocol == 'HTTP':
-						p = 'http://'+host+'/'*(r[1][0]!='/')+r[1]+'/'*(r[1][-1]!='/')+r[0]
-					if protocol == 'HTTPS':
-						p = 'https://'+host+'/'*(r[1][0]!='/')+r[1]+'/'*(r[1][-1]!='/')+r[0]
+					if r[0][0] == '/':
+						if protocol == 'HTTP':
+							p = 'http://'+host+r[0]
+						if protocol == 'HTTPS':
+							p = 'https://'+host+r[0]
+					else:
+						if protocol == 'HTTP':
+							p = 'http://'+host+'/'*(r[1][0]!='/')+r[1]+'/'*(r[1][-1]!='/')+r[0]
+						if protocol == 'HTTPS':
+							p = 'https://'+host+'/'*(r[1][0]!='/')+r[1]+'/'*(r[1][-1]!='/')+r[0]
 
-				if f not in os.listdir(local_path):
 					try:
 						imgfile = open(os.path.join(local_path, f),'wb')
 						imgfile.write(urllib2.urlopen(p).read())
@@ -823,21 +835,20 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 							os.remove(os.path.join(local_path, f))
 						except:
 							pass
-			if success != 0:
-				logger.set(str(success) + ' images were downloaded.')
-			if len(fail) != 0:
-				logger.set(str(len(fail)) + ' images could not be downloaded.')
-			if len(imglist)-success-len(fail) != 0:
-				logger.set(str(len(imglist)-success-len(fail)) + ' images were already downloaded before.')
-			#delete failed ones from the lists
-			offset = 0
-			for i in fail:
-				del imglist[i-offset]
-				del datetimelist[i-offset]
-				del pathlist[i-offset]
-				offset += 1
-
-		logger.set(str(len(imglist)) + ' images found.')
+					logger.set('Image: |progress:4|queue:'+str(i+1)+'|total:'+str(len(imglist)))
+				if success != 0:
+					logger.set(str(success) + ' images were downloaded.')
+				if len(fail) != 0:
+					logger.set(str(len(fail)) + ' images could not be downloaded.')
+				if len(imglist)-success-len(fail) != 0:
+					logger.set(str(len(imglist)-success-len(fail)) + ' images were already downloaded before.')
+				#delete failed ones from the lists
+				offset = 0
+				for i in fail:
+					del imglist[i-offset]
+					del datetimelist[i-offset]
+					del pathlist[i-offset]
+					offset += 1
 
 		#merge paths with filenames
 		for i in range(len(imglist)):

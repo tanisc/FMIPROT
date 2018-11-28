@@ -38,7 +38,7 @@ def AddPlugin(plugin):
 		paramopts.append(["Checkbox"])
 		paramdefs.append([0])
 		paramhelps.append(["Exclude burned pixels. A pixel is burned if at least value of one channel is 255."])
-		calccommands.append("RunPlugin('"+binfilename+"',imglist,datetimelist,mask,logger,params)")
+		calccommands.append("RunPlugin('"+binfilename+"',imglist,datetimelist,mask,settings,logger,params)")
 
 def RemovePlugin(plugin):
 	calcids.index('Plug-in: '+plugin)
@@ -245,8 +245,11 @@ def filterThresholds(imglist, datetimelist, mask, logger):
 		else:
 			return False
 
+def gaussian_filter(img,sigma):
+	return np.dstack((mahotas.gaussian_filter(img.transpose(2,0,1)[0],sigma).astype(np.uint8),mahotas.gaussian_filter(img.transpose(2,0,1)[1],sigma).astype(np.uint8),mahotas.gaussian_filter(img.transpose(2,0,1)[2],sigma).astype(np.uint8)))
+
 #COMPLETE
-def histogram(img_imglist, datetimelist,mask,logger,red,green,blue):
+def histogram(img_imglist, datetimelist,mask,settings,logger,red,green,blue):
 	try:
 		mask, pgs, th = mask
 	except:
@@ -286,15 +289,21 @@ def histogram(img_imglist, datetimelist,mask,logger,red,green,blue):
 			data_b=fillHistogram(hists)
 
 			result = [title,["DN",np.arange(256)]]
-			if bool(float(blue)):
-				result[1].append("Blue Channel")
-				result[1].append(data_b)
-			if bool(float(green)):
-				result[1].append("Green Channel")
-				result[1].append(data_g)
+			result[1].append("Red Channel")
 			if bool(float(red)):
-				result[1].append("Red Channel")
 				result[1].append(data_r)
+			else:
+				result[1].append(np.zeros(256))
+			result[1].append("Green Channel")
+			if bool(float(green)):
+				result[1].append(data_g)
+			else:
+				result[1].append(np.zeros(256))
+			result[1].append("Blue Channel")
+			if bool(float(blue)):
+				result[1].append(data_b)
+			else:
+				result[1].append(np.zeros(256))
 			returntuple.append(result)
 		return returntuple
 	else:
@@ -322,8 +331,7 @@ def fullhistogram(img,maxsize=256):
 		hist = np.concatenate((hist,fill))
 	return hist
 
-#FLAT ONLY (Dummy)
-def getDEM(x1,y1,x2,y2,xres,yres,dem='NLS-DEM2',flat=False,interpolate=True):
+def getDEM(x1,y1,x2,y2,xres,yres,dem='NLS-DEM2',flat=False,interpolate=True,maxmem=4096):
 	from definitions import DEMDir
 	from data import tileData, writeData
 	grid = False
@@ -349,7 +357,7 @@ def getDEM(x1,y1,x2,y2,xres,yres,dem='NLS-DEM2',flat=False,interpolate=True):
 		if xs*ys > 10:
 			print "\tObtaining DEM Data for custom coordinates on a grid sized ", xs,ys, " (Interpolation: ", bool(float(interpolate)), ")..."
 
-	tiles = tileData((xs,ys),100)
+	tiles = tileData((xs,ys),60, maxmem-300)
 	tilen = str(uuid4())
 	for tile in tiles:
 		if len(tiles) > 1:
@@ -383,7 +391,7 @@ def getDEM(x1,y1,x2,y2,xres,yres,dem='NLS-DEM2',flat=False,interpolate=True):
 			d = TM35FIN.tile_of_xy(x.reshape((x.size,)),y.reshape((y.size,)),8)
 		except:
 			print "\tCoordinates out of TM35FIN Grid. Switching to flat terrain..."
-			return getDEM(x1,y1,x2,y2,xres,yres,dem,True,interpolate)
+			return getDEM(x1,y1,x2,y2,xres,yres,dem,True,interpolate,maxmem)
 		import urllib
 		import zipfile
 		if xs*ys > 10:
@@ -401,18 +409,19 @@ def getDEM(x1,y1,x2,y2,xres,yres,dem='NLS-DEM2',flat=False,interpolate=True):
 					try:
 						if not os.path.exists(zfile):
 							print "Nonparsed DEM Data not found in local drive, downloading from dataset ", dem, "..."
+							print 'http://kartat.kapsi.fi/files/korkeusmalli_2m/kaikki/etrs89/ascii_grid/'+m[0:2]+'/'+m[0:3]+'/'+m+'.zip',zfile
 							urllib.urlretrieve('http://kartat.kapsi.fi/files/korkeusmalli_2m/kaikki/etrs89/ascii_grid/'+m[0:2]+'/'+m[0:3]+'/'+m+'.zip',zfile)
 						try:
 							with zipfile.ZipFile(zfile, "r") as fz:
 								fz.extractall(DEMDir)
 						except:
-							print "Unexpected error:", os.sys.exc_info()[0]
+							print "Unexpected error:", os.sys.exc_info()
 							print "DEM file is not found. Switching to flat terrain..."
-							return getDEM(x1,y1,x2,y2,xres,yres,dem,True,interpolate)
+							return getDEM(x1,y1,x2,y2,xres,yres,dem,True,interpolate,maxmem)
 					except:
-						print "Unexpected error:", os.sys.exc_info()[0]
+						print "Unexpected error:", os.sys.exc_info()
 						print "DEM file is not found. Switching to flat terrain..."
-						return getDEM(x1,y1,x2,y2,xres,yres,dem,True,interpolate)
+						return getDEM(x1,y1,x2,y2,xres,yres,dem,True,interpolate,maxmem)
 					if os.path.exists(afile):
 						print "Parsing DEM tile..."
 						f = open(afile,'r')
@@ -437,7 +446,7 @@ def getDEM(x1,y1,x2,y2,xres,yres,dem='NLS-DEM2',flat=False,interpolate=True):
 							os.remove(afile)
 					else:
 						print "DEM file problem. Switching to flat terrain..."
-						return getDEM(x1,y1,x2,y2,xres,yres,dem,True,interpolate)
+						return getDEM(x1,y1,x2,y2,xres,yres,dem,True,interpolate,maxmem)
 
 				elif dem=='NLS-DEM10':
 					try:
@@ -450,11 +459,11 @@ def getDEM(x1,y1,x2,y2,xres,yres,dem='NLS-DEM2',flat=False,interpolate=True):
 						except:
 							print "Unexpected error:", os.sys.exc_info()[0]
 							print "DEM file is not found. Switching to flat terrain..."
-							return getDEM(x1,y1,x2,y2,xres,yres,dem,True,interpolate)
+							return getDEM(x1,y1,x2,y2,xres,yres,dem,True,interpolate,maxmem)
 					except:
 						print "Unexpected error:", os.sys.exc_info()[0]
 						print "DEM file is not found. Switching to flat terrain..."
-						return getDEM(x1,y1,x2,y2,xres,yres,dem,True,interpolate)
+						return getDEM(x1,y1,x2,y2,xres,yres,dem,True,interpolate,maxmem)
 
 					if os.path.exists(xfile):
 						print "Parsing DEM tile..."
@@ -475,7 +484,7 @@ def getDEM(x1,y1,x2,y2,xres,yres,dem='NLS-DEM2',flat=False,interpolate=True):
 						f.close()
 						datax = None
 						datay = None
-						dataz = dataz.reshape((header[0],header[1]))[::-1]
+						dataz = dataz.reshape(map(int,(header[0],header[1])))[::-1]
 						hdf_f = h5py.File(hfile,'w')
 						hdf_dset = hdf_f.create_dataset('header',header.shape,header.dtype,data=header)
 						hdf_dset = hdf_f.create_dataset('data',dataz.shape,dataz.dtype,data=dataz)
@@ -488,9 +497,9 @@ def getDEM(x1,y1,x2,y2,xres,yres,dem='NLS-DEM2',flat=False,interpolate=True):
 							os.remove(lfile)
 					else:
 						print "DEM file problem. Switching to flat terrain..."
-						return getDEM(x1,y1,x2,y2,xres,yres,dem,True,interpolate)
+						return getDEM(x1,y1,x2,y2,xres,yres,dem,True,interpolate,maxmem)
 				else:
-					return getDEM(x1,y1,x2,y2,xres,yres,dem,True,interpolate)
+					return getDEM(x1,y1,x2,y2,xres,yres,dem,True,interpolate,maxmem)
 
 			hdf_f = h5py.File(hfile,'r')
 			header = np.copy(hdf_f['header'])
@@ -687,7 +696,7 @@ def RadDistTrans(Pp,origin,ax,ay,inverse=False):	#PP is normalized  and pp[0] = 
 	else:
 		return Pp
 
-def temporalAnalysis(imglist,datetimelist,mask,logger, daily):#, latency, average):	#only daily num of images correct. others need discarding invlaid times from temporal selection
+def temporalAnalysis(imglist,datetimelist,mask,settings,logger, daily):#, latency, average):	#only daily num of images correct. others need discarding invlaid times from temporal selection
 	latency = False
 	average = False
 	[daily, latency, average] = map(bool,[daily,latency,average])
@@ -741,7 +750,7 @@ def temporalAnalysis(imglist,datetimelist,mask,logger, daily):#, latency, averag
 calcids.append("DUMMY")
 calcsw.append(False)
 calcnames.append("Dummy Results")
-calccommands.append("dummyFunc(imglist,datetimelist,mask,logger)")
+calccommands.append("dummyFunc(imglist,datetimelist,mask,settings,logger)")
 paramnames.append([])
 paramopts.append([])
 paramdefs.append([])
@@ -770,7 +779,7 @@ def dummyFunc(imglist):
 calcids.append("0")
 calcsw.append(True)
 calcnames.append("Color Fraction Extraction")
-calccommands.append("getAoiFracs(imglist,datetimelist,mask,logger,params)")
+calccommands.append("getAoiFracs(imglist,datetimelist,mask,settings,logger,params)")
 paramnames.append(["Green Fraction","Red Fraction","Blue Fraction","Brightness","Luminance","Exclude burned pixels","Red channel statistics","Green channel statistics","Blue channel statistics"])
 #,"Mask out snow/cloud/sky","Polygon no for snow/cloud/sky mask"	#options disabled
 paramopts.append(["Checkbox","Checkbox","Checkbox","Checkbox","Checkbox","Checkbox","Checkbox","Checkbox","Checkbox"])
@@ -781,23 +790,32 @@ calcdescs.append("Extracts the fractions of colors (mean channel value over mean
 calcids.append("TEMPO01")
 calcsw.append(False)#dev
 calcnames.append("Temporal analysis")
-calccommands.append("temporalAnalysis(imglist,datetimelist,mask,logger,params)")
+calccommands.append("temporalAnalysis(imglist,datetimelist,mask,settings,logger,params)")
 paramnames.append(["Daily number of images"])#,"Temporal resolution (latency)","Average number of images per hour"])
 paramopts.append(["Checkbox"])#,"Checkbox","Checkbox"])
 paramdefs.append([1])#,1,1])
 paramhelps.append(["Calculate number of images for each day"])#,"Calculate latency from the previous image","Calculate average number of images per hour using next and previous image"])
 calcdescs.append("Temporal analysis of the images. This analysis does not download images.")# Temporal selection is also applied when calculating.")
 
-calcids.append("HIST001")
-calcsw.append(False)#dev
-calcnames.append("Histograms")
-calccommands.append("histogram(imglist,datetimelist,mask,logger,params)")
-paramnames.append(["Red Channel","Green Channel","Blue Channel"])
-paramopts.append(["Checkbox","Checkbox","Checkbox"])
-paramdefs.append([1,1,1])
-paramhelps.append(["Red Channel","Green Channel","Blue Channel"])
-calcdescs.append("Histograms of each color channel for each image")
+calcids.append("PHENO000")
+calcsw.append(True)
+calcnames.append("Vegetation Indices")
+calccommands.append("vegInd(imglist,datetimelist,mask,settings,logger,params)")
+paramnames.append(["Exclude burned pixels","Green Fraction","Red Fraction","Green Excess Index","Green-Red Vegetation Index"])
+paramopts.append(["Checkbox","Checkbox","Checkbox","Checkbox","Checkbox"])
+paramdefs.append([1,1,1,1,1])
+paramhelps.append(["Exclude burned pixels. A pixel is burned if at least value of one channel is 255.","Calculate Green Fraction","Calculate Red Fraction","Calculate Green Excess Index","Calculate Green-Red Vegetation Index"])
+calcdescs.append("Vegetation indices: Green Fraction, Red Fraction, Green-Red Vegetation Index, Green Excess Index (2G-RB)")
 
+calcids.append("PHENO001")
+calcsw.append(True)
+calcnames.append("Custom Color Index")
+calccommands.append("getCustomIndices(imglist,datetimelist,mask,settings,logger,params)")
+paramnames.append(["Formula","Exclude burned pixels"])
+paramopts.append(["","Checkbox"])
+paramdefs.append(["(G-R)/(G+R)",1])
+paramhelps.append(["Mathematical formula to be calculated with average values of R, G, B in ROIs. Use only numbers, . for decimal numbers, letters R, G, B for colors and characters (,),+,-,*,/ for operations. Warning: If values go too high during midsteps, incorrect results will occur. 64-bit integer data types are used if there is no division in the operation and 64 bit floating point data types are used if there is a division. Color averages are taken by summing all the pixels. (Unless you multiply two or more colors with each other, there should not be a problem.)","Exclude burned pixels. A pixel is burned if at least value of one channel is 255."])
+calcdescs.append("Custom Color Index: Build your own color index")
 
 calcids.append("IMGCORR01")
 calcsw.append(False)#dev
@@ -809,41 +827,30 @@ paramdefs.append(['0.0;0.0','0.0','0.0',0])
 paramhelps.append(["Radial Center (x;y (>-1, <1))","Horizontal coefficient (ax)","Vertical Coefficient (ay)","Inverse Transform"])
 calcdescs.append("Optical correction for radial lenses")
 
-
-calcids.append("PHENO000")
+calcids.append("GEOREC001")	#PARAMS USED BELOW
 calcsw.append(True)
-calcnames.append("Vegetation Indices")
-calccommands.append("vegInd(imglist,datetimelist,mask,logger,params)")
-paramnames.append(["Exclude burned pixels","Green Fraction","Red Fraction","Green Excess Index","Green-Red Vegetation Index"])
-paramopts.append(["Checkbox","Checkbox","Checkbox","Checkbox","Checkbox"])
-paramdefs.append([1,1,1,1,1])
-paramhelps.append(["Exclude burned pixels. A pixel is burned if at least value of one channel is 255.","Calculate Green Fraction","Calculate Red Fraction","Calculate Green Excess Index","Calculate Green-Red Vegetation Index"])
-calcdescs.append("Vegetation indices: Green Fraction, Red Fraction, Green-Red Vegetation Index, Green Excess Index (2G-RB)")
-
-calcids.append("PHENO001")
-calcsw.append(True)
-calcnames.append("Custom Color Index")
-calccommands.append("getCustomIndices(imglist,datetimelist,mask,logger,params)")
-paramnames.append(["Formula","Exclude burned pixels"])
-paramopts.append(["","Checkbox"])
-paramdefs.append(["(G-R)/(G+R)",1])
-paramhelps.append(["Mathematical formula to be calculated with average values of R, G, B in ROIs. Use only numbers, . for decimal numbers, letters R, G, B for colors and characters (,),+,-,*,/ for operations. Warning: If values go too high during midsteps, incorrect results will occur. 64-bit integer data types are used if there is no division in the operation and 64 bit floating point data types are used if there is a division. Color averages are taken by summing all the pixels. (Unless you multiply two or more colors with each other, there should not be a problem.)","Exclude burned pixels. A pixel is burned if at least value of one channel is 255."])
-calcdescs.append("Custom Color Index: Build your own color index")
-
-calcids.append("GEOREC001")	#PARAMS USED IN SNOWCOV002 SNOWDET002
-calcsw.append(False)#dev
-calcnames.append("Georeferenced orthoimage")
-calccommands.append("orthoimageCorripio(imglist,datetimelist,mask,logger,params)")
-paramnames.append(["Spatial extent","Spatial Extent Coordinate System","Spatial resolution","DEM Dataset","Camera coordinates","Camera coordinate system","Camera Height","Horizontal position","Rectification by","Target Coordinates","Target Coordinate System","Target height","Target Direction","Vertical position","Focal length","Scaling factor","Interpolate DEM Data","Flat terrain","Optimization by Control Point","CP coordinates","CP coordinate system","CP picture coordinates","Camera coordinates accuracy","Camera height accuracy","Horizontal position accuracy","Target coordinates accuracy","Target direction accuracy","Vertical position accuracy","Height sensitivity","Angle sensitivity"]+paramnames[calcids.index('IMGCORR01')][:3])
-paramopts.append(["",["WGS84(EPSG:4326)","ETRS-TM35FIN(EPSG:3067)","KKJ / Finland Uniform Coordinate System(EPSG:2393)","ETRS-TM35FIN(EPSG:3067) GEOID with Camera at Origin"],"",["NLS-DEM2","NLS-DEM10"],"",["WGS84(EPSG:4326)","ETRS-TM35FIN(EPSG:3067)","KKJ / Finland Uniform Coordinate System(EPSG:2393)"],"","",["Target Coordinates","Camera alignment"],"",["WGS84(EPSG:4326)","ETRS-TM35FIN(EPSG:3067)","KKJ / Finland Uniform Coordinate System(EPSG:2393)"],"","","","","","Checkbox","Checkbox","Checkbox","",["WGS84(EPSG:4326)","ETRS-TM35FIN(EPSG:3067)","KKJ / Finland Uniform Coordinate System(EPSG:2393)","On ground polar coordinates as camera at origin"],"","","","","","","","",""]+paramopts[calcids.index('IMGCORR01')][:3])
-paramdefs.append(["0;0;0;0","WGS84(EPSG:4326)","1","NLS-DEM2",'0;0',"WGS84(EPSG:4326)",'10',"0.0",'Target Coordinates','0.5;0.5',"WGS84(EPSG:4326)","0","0.0","0.0",'24','1',1,0,0,"0;0","WGS84(EPSG:4326)","0;0","0","0","0","0","0","0","0.1","1"]+paramdefs[calcids.index('IMGCORR01')][:3])
-paramhelps.append(["Spatial extent (lat1,lon1,lat2,lon2)","Spatial Extent Coordinate System","Spatial resolution (m)","DEM Dataset","Camera coordinates (lat;lon)","Camera coordinate system","Camera Height (m)","Horizontal position (CW) (deg)","Rectification by","Target Coordinates (lat;lon)","Target Coordinate System","Target height (m)","Target Direction (NESW) (deg)","Vertical position (CW) (deg)","Focal length (mm)","Scaling factor","Interpolate DEM Data","Flat terrain","Optimization by Control Point","CP coordinates","CP coordinate system","CP picture coordinates","Camera coordinates accuracy","Camera height accuracy","Horizontal position accuracy","Target coordinates accuracy","Target direction accuracy","Vertical position accuracy","Height sensitivity","Angle sensitivity"]+paramnames[calcids.index('IMGCORR01')][:3])
+calcnames.append("Georectification - GEOREC001")
+calccommands.append("Georectify1(imglist,datetimelist,mask,settings,logger,params)")
+paramnames.append(["Spatial extent","Spatial Extent Coordinate System","Spatial resolution","DEM Dataset","Camera coordinates","Camera coordinate system","Camera Height","Horizontal position","Target Direction","Vertical position","Focal length","Scaling factor","Interpolate DEM Data","Flat terrain"]+paramnames[calcids.index('IMGCORR01')][:3])
+paramopts.append(["",["WGS84(EPSG:4326)","ETRS-TM35FIN(EPSG:3067)","KKJ / Finland Uniform Coordinate System(EPSG:2393)","ETRS-TM35FIN(EPSG:3067) GEOID with Camera at Origin"],"",["NLS-DEM2","NLS-DEM10"],"",["WGS84(EPSG:4326)","ETRS-TM35FIN(EPSG:3067)","KKJ / Finland Uniform Coordinate System(EPSG:2393)"],"","","","","","","Checkbox","Checkbox"]+paramopts[calcids.index('IMGCORR01')][:3])
+paramdefs.append(["0;0;0;0","WGS84(EPSG:4326)","1","NLS-DEM2",'0;0',"WGS84(EPSG:4326)",'10',"0.0","0.0","0.0",'24','1',1,0]+paramdefs[calcids.index('IMGCORR01')][:3])
+paramhelps.append(["Spatial extent (lat1,lon1,lat2,lon2)","Spatial Extent Coordinate System","Spatial resolution (m)","DEM Dataset","Camera coordinates (lat;lon)","Camera coordinate system","Camera Height (m)","Horizontal position (CW) (deg)","Target Direction (NESW) (deg)","Vertical position (CW) (deg)","Focal length (mm)","Scaling factor","Interpolate DEM Data","Flat terrain"]+paramnames[calcids.index('IMGCORR01')][:3])
 calcdescs.append("Transformation of an image to X/Y gridded map by georectification. More than few images may cause memory error for this algorithm.")
 
-calcids.append("SNOWDET001")
+calcids.append("HIST001")
 calcsw.append(False)#dev
-calcnames.append("Salvatori Snow Mask")
-calccommands.append("salvatoriCore(imglist,datetimelist,mask,logger,params)")
+calcnames.append("Histograms")
+calccommands.append("histogram(imglist,datetimelist,mask,settings,logger,params)")
+paramnames.append(["Red Channel","Green Channel","Blue Channel"])
+paramopts.append(["Checkbox","Checkbox","Checkbox"])
+paramdefs.append([1,1,1])
+paramhelps.append(["Red Channel","Green Channel","Blue Channel"])
+calcdescs.append("Histograms of each color channel for each image")
+
+calcids.append("SNOWDET001")
+calcsw.append(True)
+calcnames.append("Snow Mask - SNOWDET001")
+calccommands.append("salvatoriSnowMask(imglist,datetimelist,mask,settings,logger,params)")
 paramnames.append(["Include Red Channel","Include Green Channel","Include Blue Channel"])
 paramopts.append(["Checkbox","Checkbox","Checkbox"])
 paramdefs.append([0,0,1])
@@ -851,35 +858,44 @@ paramhelps.append(["Include Red Channel","Include Green Channel","Include Blue C
 calcdescs.append("Pixel-wise snow coverage information (snow-mask). More than few images may cause memory error for this algorithm.")
 
 calcids.append("SNOWCOV001")
-calcsw.append(False)#dev
-calcnames.append("Salvatori Snow Cover")
-calccommands.append("salvatori(imglist,datetimelist,mask,logger,params)")
-paramnames.append(paramnames[calcids.index("SNOWDET001")])
-paramopts.append(paramopts[calcids.index("SNOWDET001")])
-paramdefs.append(paramdefs[calcids.index("SNOWDET001")])
-paramhelps.append(paramhelps[calcids.index("SNOWDET001")])
-calcdescs.append("Snow cover analysis without rectification.",)
+calcsw.append(True)
+calcnames.append("Snow Cover Fraction - SNOWCOV001")
+calccommands.append("salvatoriSnowCover(imglist,datetimelist,mask,settings,logger,params)")
+paramnames.append(paramnames[calcids.index("SNOWDET001")]+["Store mid-step and extra output data","Use georectification"]+paramnames[calcids.index('GEOREC001')])
+paramopts.append(paramopts[calcids.index("SNOWDET001")]+["Checkbox","Checkbox"]+paramopts[calcids.index('GEOREC001')])
+paramdefs.append(paramdefs[calcids.index("SNOWDET001")]+[0,1]+paramdefs[calcids.index('GEOREC001')])
+paramhelps.append(paramhelps[calcids.index("SNOWDET001")]+["Store mid-step and extra output data like thresholds, number of pixels with snow etc.","Use georectification"]+paramhelps[calcids.index('GEOREC001')])
+calcdescs.append("Snow cover fraction analysis.")
 
-calcids.append("SNOWCOV002")
+calcids.append("SNOWMAP001")
 calcsw.append(False)#dev
-calcnames.append("Snow Cover Fraction")
-calccommands.append("salvatoriRectified(imglist,datetimelist,mask,logger,params)")
+calcnames.append("Snow Cover Map - SNOWMAP001")
+calccommands.append("salvatoriSnowMap(imglist,datetimelist,mask,settings,logger,params)")
 paramnames.append(paramnames[calcids.index("SNOWDET001")]+paramnames[calcids.index('GEOREC001')])
 paramopts.append(paramopts[calcids.index("SNOWDET001")]+paramopts[calcids.index('GEOREC001')])
 paramdefs.append(paramdefs[calcids.index("SNOWDET001")]+paramdefs[calcids.index('GEOREC001')])
 paramhelps.append(paramhelps[calcids.index("SNOWDET001")]+paramhelps[calcids.index('GEOREC001')])
-calcdescs.append("Snow cover analysis with orthorectification or rectification.")
+calcdescs.append("Pixel-wise snow coverage information (snow-mask) on gridded map.")
 
-calcids.append("SNOWDET002")
-calcsw.append(False)#dev
-calcnames.append("Georeferenced Salvatori Snow Mask")
-calccommands.append("salvatoriOrthoimageCorripio(imglist,datetimelist,mask,logger,params)")
-paramnames.append(paramnames[calcids.index("SNOWDET001")]+paramnames[calcids.index('GEOREC001')])
-paramopts.append(paramopts[calcids.index("SNOWDET001")]+paramopts[calcids.index('GEOREC001')])
-paramdefs.append(paramdefs[calcids.index("SNOWDET001")]+paramdefs[calcids.index('GEOREC001')])
-paramhelps.append(paramhelps[calcids.index("SNOWDET001")]+paramhelps[calcids.index('GEOREC001')])
-calcdescs.append("Pixel-wise snow coverage information (snow-mask) on X/Y gridded map.")
+calcids.append("SNOWDEP001")
+calcsw.append(True)
+calcnames.append("Snow Depth - SNOWDEP001")
+calccommands.append("lowestCountourSnowDepth(imglist,datetimelist,mask,settings,logger,params)")
+paramnames.append(["Height of the object","Threshold Value","Gaussian filter sigma","Bias"])
+paramopts.append(["","","",""])
+paramdefs.append([100,127,1,0])
+paramhelps.append(["Height of the object inside ROI, e.g. snow stick height","Global threshold value for detection.","Gaussian filter sigma. Number of neighbouring pixels to include in the filter.","Bias for the depth"])
+calcdescs.append("Snow depth information from detecting closest contour to the ground.")
 
+calcids.append("ANIM001")
+calcsw.append(True)
+calcnames.append("Create animation")
+calccommands.append("animateImages(imglist,datetimelist,mask,settings,logger,params)")
+paramnames.append(["Duration","Frames per second","Resolution","Format"])
+paramopts.append(["","",["1080p","720p","480p","360p","240p","Original"],["MP4","GIF"]])
+paramdefs.append([5,25,"720p","MP4"])
+paramhelps.append(["Duration of the animation in seconds","Number of frames per second. Enter 0 for automatic selection of FPS to use all the images available in the temporal range. Use the automatic selection only if you can estimate the size/bitrate of the animated video. If it is too high, it will not be practical to play it.","Image height of the animation. For example, VGA resolution is 480p. \"Original\" is the resolution of the camera images.","Output format of the file. GIF production is much slower."])
+calcdescs.append("Creates animations from images.")
 
 #disabled calcs
 for i,id  in enumerate(calcsw):

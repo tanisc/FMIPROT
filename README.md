@@ -1,4 +1,4 @@
-FMIPROT 0.20 (Beta)
+FMIPROT 0.21 (Beta)
 ***************************************************************
 FMI Image Processing Toolbox (FMIPROT) is a software designed to process digital image series from cameras and camera networks. It can acquire and process images from multiple camera networks on a single platform by adding connection information of the image repositories. It provides a graphical user interface to set up configurations and parameters to be used in the acquisition and processing of the images. The analysis can be run either using the GUI or via CLI with a single action that triggers a processing chain. The toolbox performs necessary tasks to acquire images from image repositories of the camera networks, process them and generate HTML reports with interactive plots along for visualization of the output data. The design allows using the toolbox with a job scheduler to run analysis for creating operational monitoring systems. Detailed information about the toolbox can be found in FMIPROT website (http://fmiprot.fmi.fi). The software is developed under the MONIMET Project, funded by EU Life+ Programme (2013-2017) (http://monimet.fmi.fi).
 Current functions of the software are,
@@ -19,6 +19,8 @@ The software has three processing algorithms:
 (1) Color Fraction Extraction: Calculates red fraction index, green fraction index, blue fraction index, brightness, luminance, red channel mean, red channel median, red channel standard deviation, green channel mean, green channel median, green channel standard deviation, blue channel mean, blue channel median, and blue channel standard deviation.
 (2) Vegetation Indices: Calculates red fraction index, green fraction index, green-red vegetation index, green excess index.
 (3) Custom Color Index: Calculates an index from a mathematical formula entered by the user using average values of red, green and blue channels in ROIs. The formula supports sums, differences, multiplication, and division and operation priority by using parentheses.
+(4) Snow cover fraction: Calculates the fraction of snow covered pixels using georectification of the image and classification of pixels into snow and no-snow. Also provides the fraction without the georectification.
+(5) Timelapse animation: Creates a timelase video file out of available images from the cameras.
 ***************************************************************
 AUTHORS
 Cemal Melih Tanis Cemal.Melih.Tanis at fmi.fi

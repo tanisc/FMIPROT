@@ -83,7 +83,7 @@ def readResultsData(fname,logger):
 				if data_captions[r][1][1][0][-6] in '+-':	#convert to utc if TimeZone
 					data_captions[r][1][1] = convertTZ(data_captions[r][1][1],data_captions[r][1][1][0][-6:],'+00:00')
 			for i in range(len(data_captions[r][1])/2):
-				if data_captions[r][1][i*2] != 'Time':
+				if data_captions[r][1][i*2] != 'Time' and data_captions[r][1][i*2] != 'Date':
 					try:
 						data_captions[r][1][i*2+1] = np.array(data_captions[r][1][i*2+1],dtype='int64')
 					except:
@@ -92,9 +92,9 @@ def readResultsData(fname,logger):
 	return (analysis_captions, data_captions)
 
 
-def storeData(fname, analysis_captions, data_captions,logger,csvout=False):
+def storeData(fname, analysis_captions, data_captions,logger,visout=False):
 	logger.set('Storing results...')
-	csvlist = []
+	vislist = []
 	for r,data_caption in enumerate(data_captions):
 		data_caption_title = data_caption[0]
 		data_caption = data_caption[1]
@@ -105,24 +105,46 @@ def storeData(fname, analysis_captions, data_captions,logger,csvout=False):
 				captions.append(data_caption[i])
 			else:
 				data.append(data_caption[i])
-		if isinstance(data[0],str):
-			if '[' in data[0]:
-				query = data[0][data[0].index('['):]
-				data[0] = data[0][:data[0].index('[')]
-			else:
-				query = ''
-			d = readData(data[0])[0].shape
-		else:
-			d = data[0].shape
-		if len(d) == 1:
+		if captions[0] == 'filename':
 			datatype = 0
-		if len(d) == 2 and captions[0] == "R-Channel" and len(captions) == 3:
-			datatype = 1
-		if len(d) >= 2:
-			datatype = 2
+		else:
+			if isinstance(data[0],str):
+				if '[' in data[0]:
+					query = data[0][data[0].index('['):]
+					data[0] = data[0][:data[0].index('[')]
+				else:
+					query = ''
+				d = readData(data[0])[0].shape
+			else:
+				d = data[0].shape
+			if len(d) == 1:
+				datatype = 1
+			if len(d) >= 2:
+				datatype = 3
+			if len(d) == 2 and captions[0] == "R-Channel" and len(captions) == 3:
+				datatype = 2
+
+		#File results (e.g. animations)
+ 		if datatype == 0:
+			metadata = deepcopy(analysis_captions)
+			metadata.update({'result':data_caption_title})
+			for c,caption in enumerate(captions):
+				metadata.update({'var' + str(c):caption})
+			writeTSVx(fname + 'R' + str(r).zfill(3) + '.tsvx', [metadata])
+			fnames = data[0]
+			fnamet = fname + 'R' + str(r).zfill(3) + os.path.splitext(fnames)[1]
+			if os.path.isfile(fnamet):
+				os.remove(fnamet)
+			shutil.copy(fnames,fnamet)
+			if os.path.isfile(fnames):
+				os.remove(fnames)
+			if visout:
+				vislist.append(fnamet)
+			else:
+				vislist.append(False)
 
 		#1D Results as text file
-		if datatype == 0:
+		if datatype == 1:
 			metadata = deepcopy(analysis_captions)
 			metadata.update({'result':data_caption_title})
 			for c,caption in enumerate(captions):
@@ -135,13 +157,13 @@ def storeData(fname, analysis_captions, data_captions,logger,csvout=False):
 					f.write('\t')
 			f.write('\n')
 			for d in zip(*data):
-				for v in d:
+				for i,v in enumerate(d):
 					f.write(str(v).replace(' ','T'))
 					f.write('\t')
 				f.write('\n')
 			f.close()
 			logger.set('Results are stored in ' + fname + 'R' + str(r).zfill(3) + '.tsv, ' + fname + 'R' + str(r).zfill(3) + '.tsvx.')
-			if csvout:
+			if visout:
 				g = open(fname + 'R' + str(r).zfill(3) + '.csv','w')
 				for c,caption in enumerate(captions):
 						g.write(caption)
@@ -149,19 +171,24 @@ def storeData(fname, analysis_captions, data_captions,logger,csvout=False):
 							g.write(',')
 				for d in zip(*data):
 					g.write('\n')
-					for v in d:
+					for i,v in enumerate(d):
 						g.write(str(v).replace(' ','T'))
-						if v != d[-1]:
+						if i != len(d) -1:
 							g.write(',')
 				g.close()
 				logger.set('Results are stored in ' + fname + 'R' + str(r).zfill(3) + '.csv.')
-				csvlist.append(fname + 'R' + str(r).zfill(3) + '.csv')
+				vislist.append(fname + 'R' + str(r).zfill(3) + '.csv')
 			else:
-				csvlist.append(False)
+				vislist.append(False)
 
 		#Picture Results
-		if datatype == 1:
+		if datatype == 2:
 			#save as PNG - 3 Chan Picture
+			metadata = deepcopy(analysis_captions)
+			metadata.update({'result':data_caption_title})
+			for c,caption in enumerate(captions):
+				metadata.update({'var' + str(c):caption})
+			writeTSVx(fname + 'R' + str(r).zfill(3) + '.tsvx', [metadata])
 			if isinstance(data[0],str):	#others also str
 				if '[' in data[0]:
 					query = data[0][data[0].index('['):]
@@ -198,11 +225,17 @@ def storeData(fname, analysis_captions, data_captions,logger,csvout=False):
 				for i in range(3):
 					img[i] = data[i]
 				img = img.transpose(1,2,0)
-				mahotas.imsave(fname + 'R' + str(r).zfill(3) + validateName(data_caption_title) + str_ext + '.png', img)
-				logger.set('Results are stored in '+ fname + 'R' + str(r).zfill(3) + validateName(data_caption_title) + '.png, ' + fname + 'R' + str(r).zfill(3) + '.ini.')
-		if datatype == 2:
-			#save as Multi layer HDF
-			hdf_f = h5py.File(fname + 'R' + str(r).zfill(3) + validateName(data_caption_title) + '.h5','w')
+				mahotas.imsave(fname + 'R' + str(r).zfill(3) + '.png', img)
+				logger.set('Results are stored in '+ fname + 'R' + str(r).zfill(3) + '.png, ' + fname + 'R' + str(r).zfill(3) + '.tsvx.')
+
+		#Raster/map results
+		if datatype == 3:
+			metadata = deepcopy(analysis_captions)
+			metadata.update({'result':data_caption_title})
+			for c,caption in enumerate(captions):
+				metadata.update({'var' + str(c):caption})
+			writeTSVx(fname + 'R' + str(r).zfill(3) + '.tsvx', [metadata])
+			hdf_f = h5py.File(fname + 'R' + str(r).zfill(3) + '.h5','w')
 			for i in range(len(captions)):
 				filllevel = False
 				if isinstance(data[i],str):
@@ -233,10 +266,10 @@ def storeData(fname, analysis_captions, data_captions,logger,csvout=False):
 					else:
 						hdf_dset = hdf_f.create_dataset(captions[i],data = data[i])
 			hdf_f.close()
-			logger.set('Results are stored in '+ fname + 'R' + str(r).zfill(3) + validateName(data_caption_title) + '.h5, ' + fname + 'R' + str(r).zfill(3) + '.ini.')
+			logger.set('Results are stored in '+ fname + 'R' + str(r).zfill(3) + '.h5, ' + fname + 'R' + str(r).zfill(3) + '.tsvx.')
 
-	if csvout:
-		return csvlist
+	if visout:
+		return vislist
 
 def tileData(dshape,numarrays = 1, maxsize = 4096, dtype='float'):	#dtype string
 		#MBytes
@@ -304,7 +337,7 @@ def readData(name,extent=False):
 		datafile.close()
 		return  [data,name,extentlist[0],[extentlist[0]]]
 	else:
-		if not extent:
+		if not isinstance(extent,list):
 			data = np.copy(datafile[dsetnamelist[0]])
 			datafile.close()
 			return [data,name,extentlist[0],extentlist]
@@ -319,7 +352,7 @@ def writeData(data,name=False,extent=False):
 
 	datafilename = os.path.join(TmpDir,name + '.h5')
 
-	if (not extent):
+	if not isinstance(extent,list):
 		extent = [0,0,data.shape[0],data.shape[1]]
 
 	datafile  = h5py.File(datafilename,'a')
@@ -341,7 +374,6 @@ def writeData(data,name=False,extent=False):
 			break
 	if newdset:
 		datafile.create_dataset(dsetnamelist[extentlist.index(extent)],data=data)
-
 	datafile.close()
 	return [name,extent,extentlist]
 

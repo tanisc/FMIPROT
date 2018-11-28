@@ -5,7 +5,7 @@ import datetime
 import numpy as np
 
 
-def getAoiFracs(imglist, datetimelist, mask, logger, green, red, blue, white, lum, ebp, red_stat, green_stat, blue_stat):
+def getAoiFracs(imglist, datetimelist, mask, settings,logger, green, red, blue, white, lum, ebp, red_stat, green_stat, blue_stat):
 	escs = 0		#option disabled
 	escs_pg = 0		#option disabled
 	if len(imglist) == 0:
@@ -178,7 +178,7 @@ def getAoiFracs(imglist, datetimelist, mask, logger, green, red, blue, white, lu
 	output = [["Color Fractions",output]]
 	return output
 
-def getCustomIndices(imglist, datetimelist, mask, logger, calcstring, ebp):
+def getCustomIndices(imglist, datetimelist, mask, settings, logger, calcstring, ebp):
 	if len(imglist) == 0:
 		return False
 	#check calcstring
@@ -238,7 +238,7 @@ def getCustomIndices(imglist, datetimelist, mask, logger, calcstring, ebp):
 	output = [["Custom Color Index",output]]
 	return output
 
-def vegInd(imglist,datetimelist,mask,logger, ebp,gf,rf,gei,grvi):
+def vegInd(imglist,datetimelist,mask,settings,logger, ebp,gf,rf,gei,grvi):
 	escs = 0	#option disabled
 	if len(imglist) == 0:
 		return False

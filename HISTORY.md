@@ -1,3 +1,12 @@
+Version 0.21.0 (Beta)
+Snow cover detection algorithm is added.
+Snow cover fraction algorithm is added.
+Snow depth algorithm is added.
+Georectification algorithm is added.
+Animation creation is added.
+Auto GUI scaling is added for 4K screens. (Doesn't work with multiple screens)
+Memory usage limit option is added. (Only for some processes.)
+
 Version 0.20.5 (Beta)
 Bug fix (Major): Removing old values in the merging mode fixed. The problem was that the dates were removed correctly but values were not, resulting a shift in the new results instead of adding new results.
 

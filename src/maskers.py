@@ -53,12 +53,12 @@ def thmask(img,th):
 	img = img.transpose(2,0,1)
 	mask = np.zeros(img.shape,'uint8')
 	mask2 = (img[0]>=th[8])*(img[0]<=th[9])*(img[1]>=th[10])*(img[1]<=th[11])*(img[2]>=th[12])*(img[2]<=th[13])
+	mask2 *= (img[0]>=th[16])*(img[1]>=th[16])*(img[2]>=th[16])*(img[0]<=th[17])*(img[1]<=th[17])*(img[2]<=th[17])
+	img = None
 	mask[0] = mask2
 	mask[1] = mask2
 	mask[2] = mask2
 	mask = mask.transpose(1,2,0)
-	img = None
-	mask2 = None
 	return mask
 
 def exmask(img,th=255.0):	#burned pixels
@@ -77,7 +77,7 @@ def scsmask(img,mask,logger,enabled=True):
 	from snow import salvatoriCoreSingle
 	maskout = np.ones(img.shape,'uint8')
 	if enabled:
-		(mask2,th) = salvatoriCoreSingle(img,mask,logger,0,0,1)
+		(mask2,th) = salvatoriSnowDetect(img,mask,logger,0,0,1)
 		mask2 = mask2 == 1
 		mask2 = mask2 == False
 		maskout = maskout.transpose(2,0,1)

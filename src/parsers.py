@@ -23,8 +23,15 @@ def strptime2(text,conv="%Y-%m-%dT%H:%M:%S"):
 			dt = dt.replace(microseconds=us)
 	else:
 		dt = text
-	t = datetime.time(hour=dt.hour,minute=dt.minute,second=dt.second,microsecond=dt.microsecond)
-	d = datetime.date(year=dt.year,month=dt.month,day=dt.day)
+	try:
+		t = datetime.time(hour=dt.hour,minute=dt.minute,second=dt.second,microsecond=dt.microsecond)
+	except:
+		t = datetime.time(hour=12)
+	try:
+		d = datetime.date(year=dt.year,month=dt.month,day=dt.day)
+	except:
+		d = datetime.date(year=1970)
+	dt = datetime.datetime(year=d.year,month=d.month,day=d.day,hour=t.hour,minute=t.minute,second=t.second,microsecond=t.microsecond)
 	return [dt,d,t]
 
 def strftime2(dTime,conv="%Y-%m-%dT%H:%M:%S",divider_index=10):
@@ -92,7 +99,7 @@ def validateName(name,fill='_',filterspace=True):
 	if not filterspace:
 		valid_chars += ' '
 	validname = ''
-	for c in name:
+	for c in str(name):
 		if c in valid_chars:
 			validname += c
 		else:
@@ -183,21 +190,21 @@ def readConfig(filename,logger):
 
 def readSetup(filename,sourcelist,logger):
 	logger.set('Reading setup file...')
-	#try:
-	f = open(filename,'rb')
-	line = f.readline()
-	f.close()
+	try:
+		f = open(filename,'rb')
+		line = f.readline()
+		f.close()
 
-	if '!CAMERA NAME	ROI#	SD,ED,ST,ET	POLYGONIC MASK' in line:
-		config = readConfig(filename,logger)
-		setup = config2Setup(logger,config,sourcelist)
-	else:
-		setup = readTSVx(filename)
-		logger.set( 'Read.')
-		logger.set( 'Number of scenarios: ' + str(len(setup)))
-#except:
-	#	logger.set( 'Error: Problem at reading setup file.')
-		#return False
+		if '!CAMERA NAME	ROI#	SD,ED,ST,ET	POLYGONIC MASK' in line:
+			config = readConfig(filename,logger)
+			setup = config2Setup(logger,config,sourcelist)
+		else:
+			setup = readTSVx(filename)
+			logger.set( 'Read.')
+			logger.set( 'Number of scenarios: ' + str(len(setup)))
+	except:
+			logger.set( 'Error: Problem at reading setup file.')
+			return False
 	return setup
 
 def config2Setup(logger,config,sourcelist):
@@ -445,6 +452,7 @@ def writeSetupReport(filename,setup,logger):
 					for k,csvr in enumerate(csva):
 						for l,csvf in enumerate(csvr):
 							if csvf is not False:
+								antf = path.splitext(csvf)[0] + '.ant'
 								to_write_substr += "<table class='hdr2'><tbody>\n"
 								to_write_substr += "<tr>\n<td>"
 
@@ -466,33 +474,33 @@ def writeSetupReport(filename,setup,logger):
 								if l > 0:
 									csvt += ' - ROI'+str(l).zfill(3)
 								plt_f.write("\n\
-								<div id=\"graphdiv"+str(i)+str(j)+str(k)+str(l)+"\" style=\"position: absolute; left: 0px;  right: 21%; top: 20px; bottom: 8px;\"></div>\n\
-								<script type=\"text/javascript\" src=\"http://code.jquery.com/jquery-1.10.0.min.js\"></script>\n\
-								<script type=\"text/javascript\">\n\
-								function vischange"+str(i)+str(j)+str(k)+str(l)+" (el) {g"+str(i)+str(j)+str(k)+str(l)+".setVisibility(el.id.substr((\""+str(i)+str(j)+str(k)+str(l)+"\".length),el.id.length-1), el.checked);}\n\
-								function legendFormatter(data) {\n\
-								  if (data.x == null) {\n\
-								    // This happens when there's no selection and {legend: 'always'} is set.\n\
-								    return '<br>' + data.series.map(function(series) { return series.dashHTML + ' ' + series.labelHTML }).join('<br>');\n\
-								  }\n\
-								  var html = this.getLabels()[0] + ': ' + data.xHTML;\n\
-								  data.series.forEach(function(series) {\n\
-								    if (!series.isVisible) return;\n\
-								    var labeledData = series.labelHTML + ': ' + series.yHTML;\n\
-								    if (series.isHighlighted) {\n\
-								      labeledData = '<b>' + labeledData + '</b>';\n\
-								    }\n\
-								    html += '<br>' + series.dashHTML + ' ' + labeledData;\n\
-								  });\n\
-								  return html;\n\
-								}\n\
-								$(document).ready(function () {var lastClickedGraph;\n\
-								document.addEventListener(\"mousewheel\", function() { lastClickedGraph = null; });\n\
-								document.addEventListener(\"click\", function() { lastClickedGraph = null; });\n\
-								if(window.location.href.indexOf(\"file:///\") > -1) {\n\
-									g"+str(i)+str(j)+str(k)+str(l)+" = new Dygraph(\n\
-								  	document.getElementById(\"graphdiv"+str(i)+str(j)+str(k)+str(l)+"\"),\n\
-								  \"")
+	<div id=\"graphdiv"+str(i)+str(j)+str(k)+str(l)+"\" style=\"position: absolute; left: 0px;  right: 21%; top: 20px; bottom: 8px;\"></div>\n\
+	<script type=\"text/javascript\" src=\"http://code.jquery.com/jquery-3.3.1.min.js\"></script>\n\
+	<script type=\"text/javascript\">\n\
+	function vischange"+str(i)+str(j)+str(k)+str(l)+" (el) {g"+str(i)+str(j)+str(k)+str(l)+".setVisibility(el.id.substr((\""+str(i)+str(j)+str(k)+str(l)+"\".length),el.id.length-1), el.checked);}\n\
+	function legendFormatter(data) {\n\
+	  if (data.x == null) {\n\
+	    // This happens when there's no selection and {legend: 'always'} is set.\n\
+	    return '<br>' + data.series.map(function(series) { return series.dashHTML + ' ' + series.labelHTML }).join('<br>');\n\
+	  }\n\
+	  var html = this.getLabels()[0] + ': ' + data.xHTML;\n\
+	  data.series.forEach(function(series) {\n\
+	    if (!series.isVisible) return;\n\
+	    var labeledData = series.labelHTML + ': ' + series.yHTML;\n\
+	    if (series.isHighlighted) {\n\
+	      labeledData = '<b>' + labeledData + '</b>';\n\
+	    }\n\
+	    html += '<br>' + series.dashHTML + ' ' + labeledData;\n\
+	  });\n\
+	  return html;\n\
+	}\n\
+	$(document).ready(function () {var lastClickedGraph;\n\
+	document.addEventListener(\"mousewheel\", function() { lastClickedGraph = null; });\n\
+	document.addEventListener(\"click\", function() { lastClickedGraph = null; });\n\
+	if(window.location.href.indexOf(\"file:///\") > -1) {\n\
+		g"+str(i)+str(j)+str(k)+str(l)+" = new Dygraph(\n\
+	  		document.getElementById(\"graphdiv"+str(i)+str(j)+str(k)+str(l)+"\"),\n\
+	  		\"")
 								csv_f = open(csvf,'r')
 								plt_f.write(csv_f.read().replace('\n','\\n'))
 								csv_f.close()
@@ -505,29 +513,56 @@ def writeSetupReport(filename,setup,logger):
 									tzoffset = ''
 								csv_f.close()
 								plt_f.write("\",\n\
-										{\n\
-											title: '"+csvt+"', xlabel:'Time"+tzoffset+"',legend: 'onmouseover',legendFormatter: legendFormatter, labelsUTC:false, digitsAfterDecimal:3, showRangeSelector: true,rollPeriod: 1,showRoller: true,highlightCircleSize: 3,drawPoints:false,pointSize: 1,strokeWidth: 1,strokeBorderWidth:1,highlightSeriesOpts: {drawPoints:true,pointSize:2,strokeWidth: 2,strokeBorderWidth: 1,highlightCircleSize: 5},\n\
-											interactionModel : {'mousedown' : downV3,'mousemove' : moveV3,'mouseup' : upV3,'click' : clickV3,'dblclick' : dblClickV3,'mousewheel' : scrollV3}\n\
-										});\n\
-									document.getElementById(\"restore"+str(i)+str(j)+str(k)+str(l)+"\").onclick = function() {restorePositioning(g"+str(i)+str(j)+str(k)+str(l)+");};\n\
-									} else {\n\
-									g"+str(i)+str(j)+str(k)+str(l)+" = new Dygraph(\n\
-									document.getElementById(\"graphdiv"+str(i)+str(j)+str(k)+str(l)+"\"),\n\
-  								  \"")
+			{title: '"+csvt+"', xlabel:'Time"+tzoffset+"',legend: 'onmouseover',legendFormatter: legendFormatter, labelsUTC:false, digitsAfterDecimal:3, showRangeSelector: true,rollPeriod: 1,showRoller: true,highlightCircleSize: 3,drawPoints:false,pointSize: 1,strokeWidth: 1,strokeBorderWidth:1,highlightSeriesOpts: {drawPoints:true,pointSize:2,strokeWidth: 2,strokeBorderWidth: 1,highlightCircleSize: 5},\n\
+			interactionModel : {'mousedown' : downV3,'mousemove' : moveV3,'mouseup' : upV3,'click' : clickV3,'dblclick' : dblClickV3,'mousewheel' : scrollV3}\n\
+		});\n\
+		g"+str(i)+str(j)+str(k)+str(l)+".ready(function(){\n\
+			document.getElementById(\"restore"+str(i)+str(j)+str(k)+str(l)+"\").onclick = function() {restorePositioning(g"+str(i)+str(j)+str(k)+str(l)+");};\n\
+		});\n\
+	} else {\n\
+		g"+str(i)+str(j)+str(k)+str(l)+" = new Dygraph(\n\
+			document.getElementById(\"graphdiv"+str(i)+str(j)+str(k)+str(l)+"\"),\n\
+	  		\"")
   								plt_f.write(path.split(csvf)[1])
   								plt_f.write("\",\n\
-	  									{\n\
-	  										title: '"+csvt+"', xlabel:'Time"+tzoffset+"',legend: 'onmouseover',legendFormatter: legendFormatter, labelsUTC:false, digitsAfterDecimal:3, showRangeSelector: true,rollPeriod: 1,showRoller: true,highlightCircleSize: 3,drawPoints:false,pointSize: 1,strokeWidth: 1,strokeBorderWidth:1,highlightSeriesOpts: {drawPoints:true,pointSize:2,strokeWidth: 2,strokeBorderWidth: 1,highlightCircleSize: 5},\n\
-	  										interactionModel : {'mousedown' : downV3,'mousemove' : moveV3,'mouseup' : upV3,'click' : clickV3,'dblclick' : dblClickV3,'mousewheel' : scrollV3}\n\
-	  									});\n\
-									document.getElementById(\"restore"+str(i)+str(j)+str(k)+str(l)+"\").onclick = function() {restorePositioning(g"+str(i)+str(j)+str(k)+str(l)+");};\n\
-									window.intervalId = setInterval(function() {\n\
-										var rndquery = Math.ceil(Math.random() * 1000000000);\n\
-								        g"+str(i)+str(j)+str(k)+str(l)+".updateOptions( { 'file': '"+path.split(csvf)[1]+"?'+rndquery } );\n\
-								      	}, 60000);\n\
-									}\n\
-								});\n\
-								</script>\
+			{title: '"+csvt+"', xlabel:'Time"+tzoffset+"',legend: 'onmouseover',legendFormatter: legendFormatter, labelsUTC:false, digitsAfterDecimal:3, showRangeSelector: true,rollPeriod: 1,showRoller: true,highlightCircleSize: 3,drawPoints:false,pointSize: 1,strokeWidth: 1,strokeBorderWidth:1,highlightSeriesOpts: {drawPoints:true,pointSize:2,strokeWidth: 2,strokeBorderWidth: 1,highlightCircleSize: 5},\n\
+			interactionModel : {'mousedown' : downV3,'mousemove' : moveV3,'mouseup' : upV3,'click' : clickV3,'dblclick' : dblClickV3,'mousewheel' : scrollV3}\n\
+		});\n\
+		g"+str(i)+str(j)+str(k)+str(l)+".ready(function(){\n\
+			document.getElementById(\"restore"+str(i)+str(j)+str(k)+str(l)+"\").onclick = function() {restorePositioning(g"+str(i)+str(j)+str(k)+str(l)+");};\n\
+			redraw();\n\
+			function redraw(){\n\
+				annotations = [];\n\
+				var xborders = g"+str(i)+str(j)+str(k)+str(l)+".xAxisRange()\n\
+				$.getJSON('S000A000R000.ant?'+Math.ceil(Math.random() * 1000000000)).done(function(result){\n\
+					$.each(result,function(i_ant,v_ant){\n\
+						var myDate = new Date(v_ant['x']);\n\
+						var myDate = myDate.getTime();\n\
+						if ( myDate <= xborders[1] && myDate >= xborders[0] ) {\n\
+							annotations.push(v_ant);\n\
+						}\n\
+					});\n\
+					g"+str(i)+str(j)+str(k)+str(l)+".setAnnotations(annotations);\n\
+				});\n\
+				$.getJSON('"+path.split(antf)[1]+"?'+Math.ceil(Math.random() * 1000000000)).done(function(result){\n\
+					$.each(result,function(i_ant,v_ant){\n\
+						var myDate = new Date(v_ant['x']);\n\
+						var myDate = myDate.getTime();\n\
+						if ( myDate <= xborders[1] && myDate >= xborders[0] ) {\n\
+							annotations.push(v_ant);\n\
+						}\n\
+					});\n\
+					g"+str(i)+str(j)+str(k)+str(l)+".setAnnotations(annotations);\n\
+				});\n\
+			}\n\
+			window.intervalId = setInterval(function() {\n\
+		        g"+str(i)+str(j)+str(k)+str(l)+".updateOptions( { 'file': '"+path.split(csvf)[1]+"?'+Math.ceil(Math.random() * 1000000000) } );\n\
+				redraw();\n\
+	      	}, 60000);\n\
+		});\n\
+	}\n\
+	});\n\
+	</script>\
 								")
 								plt_f.write("\n<img style=\"position: relative; left: 82%;width:18%;\" src=\""+path.join(path.splitext(path.split(filename)[1])[0]+'_files',"Scenario_"+str(i+1)+"_Mask_Preview_"+("ROI"+str(l).zfill(3))*(l!=0)+"0"*(l==0)+".jpg")+"\"><br>")
 								plt_f.write("\n<p style=\"position: absolute; left: 82%;\"><b><a href=\""+path.split(filename)[1]+"\" target=\"_blank\" style=\"color:black;\">>Setup report page</a><br><a href=\""+path.split(csvf)[1]+"\" target=\"_blank\" style=\"color:black;\">>Download/Open data file</a></b><br>")

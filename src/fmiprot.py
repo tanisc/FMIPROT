@@ -16,13 +16,14 @@ import maskers
 import parsers
 import sources
 from data import *
+import readers
 import calcfuncs
 import matplotlib, sys
 import numpy as np
 if sysargv['gui']:
 	matplotlib.use('TkAgg')
 	from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-	import Tkinter, Tkconstants, tkFileDialog, tkMessageBox, tkSimpleDialog
+	import Tkinter, Tkconstants, tkFileDialog, tkMessageBox, tkSimpleDialog, tkFont
 	import Tkinter as tk
 	import ttk
 import matplotlib.dates as mdate
@@ -35,6 +36,9 @@ if sysargv['gui']:
 import mahotas
 from copy import deepcopy
 import subprocess
+from auxdata import auxlist, auxnamelist
+import auxdata
+import comparators
 
 import webbrowser
 import h5py
@@ -50,42 +54,52 @@ if not sysargv['gui']:
 	import noTk as tkMessageBox
 	import noTk as tkSimpleDialog
 	import noTk as webbrowser
+	import noTk as tkFont
 
 class monimet_gui(Tkinter.Tk):
 	def __init__(self,parent):
 		Tkinter.Tk.__init__(self,parent)
 		self.parent = parent
+		self.resizable(False, False)
+
+		self.UnitSize = self.winfo_screenwidth() / 640
+		self.FontSize = int(3.2*self.UnitSize/(self.UnitSize/3))
+		self.DefFont = tkFont.nametofont("TkDefaultFont")
+		self.DefFont.configure(size=self.FontSize)
+		self.option_add("*Font", self.DefFont)
+		self.PasAnaY = 2*self.UnitSize
+		self.TableX = 3*self.UnitSize
+		self.TableY = 3*self.UnitSize
+		self.FolderX = 3*self.UnitSize
+		self.FolderY = 3*self.UnitSize
+		self.BannerY = 16*self.UnitSize
+		self.BannerX = 10*self.UnitSize
+		self.PasParchX = 10*self.UnitSize
+		self.PasParchIn = 3*self.UnitSize
+		self.MenuHeaderX = 10*self.UnitSize
+		self.LogY = 16*self.UnitSize
+		self.MenuY = 203*self.UnitSize
+		self.MenuX = 118*self.UnitSize
+		self.WindowX = self.TableX+self.FolderX+self.PasParchX+self.MenuHeaderX+self.MenuX+self.TableX+self.FolderX
+		self.WindowY = 2*self.TableY+3*self.FolderY+self.BannerY+self.MenuY+self.LogY
+		self.SensVariableDef = 10
+		self.SensVariable = Tkinter.IntVar()
+		self.SensVariable.set(self.SensVariableDef)
+
+		self.geometry(str(self.WindowX)+"x"+str(self.WindowY))
 		self.centerWindow()
+
+		self.CheckButtonX = 5*self.UnitSize
+		self.CheckButtonY = 5*self.UnitSize
+		self.ScrollbarX = 5*self.UnitSize
+		self.MenuItemMax = 16	#even number
+
+		#self.centerWindow()
 		self.LogWindowOn()
 		self.initialize()
 		self.centerWindow(self.LogWindow,ontheside=True)
 
 	def initialize(self):
-
-		ResX=1366
-		ResY=720
-		self.PasAnaY = 9
-		self.TableX = 12
-		self.TableY = 12
-		self.FolderX = 12
-		self.FolderY = 12
-		self.BannerY = 40
-		self.BannerX = 24
-		self.PasParchX = 30
-		self.PasParchIn = 10
-		self.MenuHeaderX = 30
-		self.CheckbuttonX = 10
-		self.MenuItemMax = 16	#even number
-		self.LogY = 50
-		self.MenuY = ResY - (2*self.TableY+3*self.FolderY+self.BannerY+self.LogY)
-		self.MenuX = 300
-		self.PlotX = ResX-440
-		self.WindowX = self.TableX+self.FolderX+self.PasParchX+self.MenuHeaderX+self.MenuX+self.TableX+self.FolderX
-		self.WindowY = 2*self.TableY+3*self.FolderY+self.BannerY+self.MenuY+self.LogY
-		self.ScrollbarX = 20
-		self.geometry(str(self.WindowX)+"x"+str(self.WindowY))
-		self.centerWindow()
-
 		self.MenuTitleBgColor = 'RoyalBlue4'
 		self.MenuTitleTextColor = 'white'
 
@@ -132,6 +146,8 @@ class monimet_gui(Tkinter.Tk):
 		self.GreenUTVariable = Tkinter.DoubleVar()
 		self.BlueLTVariable = Tkinter.DoubleVar()
 		self.BlueUTVariable = Tkinter.DoubleVar()
+		self.GreyLTVariable = Tkinter.DoubleVar()
+		self.GreyUTVariable = Tkinter.DoubleVar()
 		self.RedFLTVariable = Tkinter.DoubleVar()
 		self.RedFUTVariable = Tkinter.DoubleVar()
 		self.GreenFLTVariable = Tkinter.DoubleVar()
@@ -149,8 +165,6 @@ class monimet_gui(Tkinter.Tk):
 		self.TimeEndVariable = Tkinter.StringVar()
 		self.TemporalModeVariable = Tkinter.StringVar()
 		self.TemporalModeVariable.trace_variable('w',self.callbackTemporalMode)
-		self.SensVariable = Tkinter.IntVar()
-		self.SensVariable.set(24)
 		self.PolygonCoordinatesVariable = Tkinter.StringVar()
 		self.PolygonMultiRoiVariable = Tkinter.BooleanVar()
 		self.PolygonMultiRoiVariable.set(True)
@@ -222,7 +236,7 @@ class monimet_gui(Tkinter.Tk):
 		(self.networklist,self.sourcelist,self.proxylist) = sources.readSources(self, self.proxy, self.connection, self.Message)
 		self.makeDirStorage()
 
-		scenario_def = {'source':self.sourcelist[0],'name':'Scenario-1','previewimagetime':'','temporal':['01.01.1970','31.12.2026','00:00','23:59','All'],'polygonicmask':[0,0,0,0,0,0,0,0],'multiplerois':1,'thresholds':[0.0,1.0,0.0,1.0,0.0,1.0,0.0,1.0,0.0,255.0,0.0,255.0,0.0,255.0,0.0,1.0],'analyses':['analysis-1'],'analysis-1':{'id':calcids[calcids.index("0")],'name':calcnames[calcids.index("0")]}}
+		scenario_def = {'source':self.sourcelist[0],'name':'Scenario-1','previewimagetime':'','temporal':['01.01.1970','31.12.2026','00:00','23:59','All'],'polygonicmask':[0,0,0,0,0,0,0,0],'multiplerois':1,'thresholds':[0.0,1.0,0.0,1.0,0.0,1.0,0.0,1.0,0.0,255.0,0.0,255.0,0.0,255.0,0.0,1.0,0.0,255.0],'analyses':['analysis-1'],'analysis-1':{'id':calcids[calcids.index("0")],'name':calcnames[calcids.index("0")]}}
 		for i,v in enumerate(paramnames[calcids.index("0")]):
 			scenario_def['analysis-1'].update({paramnames[calcids.index("0")][i]:paramdefs[calcids.index("0")][i]})
 		setup_def = [scenario_def]
@@ -318,12 +332,18 @@ class monimet_gui(Tkinter.Tk):
 		self.TimeZoneConversion.set(bool(float(settingv[settings.index('convert_timezone')])))
 		self.outputreportvariable = Tkinter.BooleanVar()
 		self.outputreportvariable.set(bool(float(settingv[settings.index('generate_report')])))
+		self.memorylimit = Tkinter.IntVar()
+		self.memorylimit.set(int(settingv[settings.index('memory_limit')]))
 
 		self.updateProxy()
 		self.updateStorage()
 		self.updateConnection()
 		self.updateProxy()
 		self.updateProcessing()
+
+		for source in auxnamelist:
+			for setk in auxlist[source]["settings"]:
+				auxlist[source]["settings"].update({setk:settingv[settings.index(source+'-'+setk)]})
 
 		parsers.writeSettings(parsers.dictSettings(settingv),settingsFile,self.Message)
 
@@ -335,6 +355,8 @@ class monimet_gui(Tkinter.Tk):
 			settingv = parsers.readSettings(settingsFile,self.Message)
 			print 'ID','\t', 'Parameter',' : ', 'Value'
 			for s,setting in enumerate(settings):
+				if s == len(settingsn):
+					break
 				print str(s+1),'\t', settingsn[settings.index(setting)],' : ', settingv[settings.index(setting)]
 			ans = raw_input('Enter ID to modify the parameter or 0 to exit\n')
 			try:
@@ -461,7 +483,7 @@ class monimet_gui(Tkinter.Tk):
 
 	def ClearMenu(self):
 		self.MenuEnablerFunc.set('')
-		for i in range(self.MenuItemMax*4):
+		for i in range(self.MenuItemMax*100):
 			try:
 				exec("self.MenuItem"+str(i)+".destroy()")
 			except:
@@ -528,7 +550,8 @@ class monimet_gui(Tkinter.Tk):
 		ToolsMenu = Tkinter.Menu(menubar, tearoff=0)
 		ToolsMenu.add_command(label="Add Plugin...",command=self.Plugins_Add)
 		ToolsMenu.add_command(label="Remove Plugin...",command=self.Plugins_Remove)
-		ToolsMenu.add_separator()
+		#ToolsMenu.add_command(label="Comparison tool...",command=self.Tools_Comparison)
+		#ToolsMenu.add_command(label="Georectification tool...",command=self.Tools_Georectification)
 		menubar.add_cascade(label="Tools", menu=ToolsMenu)
 		self.config(menu=menubar)
 
@@ -537,6 +560,7 @@ class monimet_gui(Tkinter.Tk):
 		SetMenu.add_command(label="Proxy Settings...",command=self.Settings_Proxy)
 		SetMenu.add_command(label="Connection Settings...",command=self.Settings_Connection)
 		SetMenu.add_command(label="Processing Settings...",command=self.Settings_Processing)
+		SetMenu.add_command(label="Auxiliary data sources...",command=self.Settings_Aux_Sources)
 		SetMenu.add_separator()
 		SetMenu.add_command(label="Export Settings...",command=self.Settings_Export)
 		SetMenu.add_command(label="Import Settings...",command=self.Settings_Import)
@@ -1841,10 +1865,10 @@ class monimet_gui(Tkinter.Tk):
 		NItems = 9
 		space = 0.02
 		Item = 3
-		self.MenuItem3 = Tkinter.Checkbutton(self,variable=self.imagesdownload,wraplength=self.MenuX*0.7,text="Check and Download new images from the camera network server")
+		self.MenuItem3 = Tkinter.Checkbutton(self,variable=self.imagesdownload,wraplength=self.MenuX*0.7,height=self.CheckButtonY,width=self.CheckButtonX, text="Check and download new images from the camera network server")
 		self.MenuItem3.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 4
-		self.MenuItem10 = Tkinter.Checkbutton(self,variable=self.ftp_passive,wraplength=self.MenuX*0.7,text="Use passive mode for FTP connections")
+		self.MenuItem10 = Tkinter.Checkbutton(self,variable=self.ftp_passive,wraplength=self.MenuX*0.7,height=self.CheckButtonY,width=self.CheckButtonX,text="Use passive mode for FTP connections")
 		self.MenuItem10.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		if False:	#temp until fix
 			Item = 5
@@ -1899,47 +1923,136 @@ class monimet_gui(Tkinter.Tk):
 		self.Menu_Prev("Main Menu","self.cancelProcessing")
 		NItems = 10
 		space = 0.02
-		Item = 3
+		Item = 2
 		self.MenuItem1 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Time zone (UTC Offset):",anchor="c",bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor)
 		self.MenuItem1.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
-		Item = 4
+		Item = 3
 		self.MenuItem3 = Tkinter.Entry(self,textvariable=self.TimeZone,justify="center")
 		self.MenuItem3.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
-		Item = 5
-		self.MenuItem7 = Tkinter.Checkbutton(self,variable=self.TimeZoneConversion,wraplength=self.MenuX*0.7,text="Convert time zone of timestamps")
+		Item = 4
+		self.MenuItem7 = Tkinter.Checkbutton(self,variable=self.TimeZoneConversion,wraplength=self.MenuX*0.7,height=self.CheckButtonY,width=self.CheckButtonX,text="Convert time zone of timestamps")
 		self.MenuItem7.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
-		Item = 6
-		self.MenuItem4 = Tkinter.Checkbutton(self,variable=self.outputreportvariable,wraplength=self.MenuX*0.7,text="Generate setup report with analysis results")
+		Item = 5
+		self.MenuItem4 = Tkinter.Checkbutton(self,variable=self.outputreportvariable,wraplength=self.MenuX*0.7,height=self.CheckButtonY,width=self.CheckButtonX,text="Generate setup report with analysis results")
 		self.MenuItem4.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+		Item = 6
+		self.MenuItem12 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Memory usage limit [MB]",anchor="c",bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor)
+		self.MenuItem12.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 7
+		self.MenuItem13 = Tkinter.Entry(self,textvariable=self.memorylimit,justify="center")
+		self.MenuItem13.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+		Item = 8
 		self.MenuItem11 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="Save",anchor="c",command=self.saveProcessing)
 		self.MenuItem11.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
-		Item = 8
+		Item = 9
 		self.MenuItem8 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="Cancel",anchor="c",command=self.cancelProcessing)
 		self.MenuItem8.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.4,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
-		Item = 8
+		Item = 9
 		self.MenuItem9 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="Defaults",anchor="c",command=self.defaultsProcessing)
 		self.MenuItem9.place(x=self.MenuOSX+self.MenuX*0.5,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.4,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 
 	def updateProcessing(self):
-		self.processing = {'timezone': self.TimeZone.get(),'convert_timezone': str(int(self.TimeZoneConversion.get())),'generate_report': str(int(self.outputreportvariable.get()))}
+		self.processing = {'timezone': self.TimeZone.get(),'convert_timezone': str(int(self.TimeZoneConversion.get())),'generate_report': str(int(self.outputreportvariable.get())),'memory_limit': str(int(self.memorylimit.get()))}
 
 	def cancelProcessing(self):
 		self.TimeZone.set(self.processing['timezone'])
 		self.TimeZoneConversion.set(bool(int(self.processing['convert_timezone'])))
 		self.outputreportvariable.set(bool(int(self.processing['generate_report'])))
+		self.memorylimit.set(int(self.processing['memory_limit']))
 		self.Menu_Main()
 
 	def defaultsProcessing(self):
 		self.TimeZone.set('+0000')
 		self.TimeZoneConversion.set(False)
 		self.outputreportvariable.set(True)
+		self.memorylimit.set(4000)
 
 	def saveProcessing(self):
 		self.updateProcessing()
 		processing = deepcopy(self.processing)
 		parsers.writeSettings(processing,settingsFile,self.Message)
 		self.Menu_Main()
+
+	def Settings_Aux_Sources(self):
+	    self.Win1 = Tkinter.Toplevel(self,padx=10,pady=10)
+	    self.Win1.grab_set()
+	    self.Win1.wm_title('Auxiliary data sources')
+	    self.Win1.columnconfigure(1, minsize=150*self.UnitSize)
+	    Tkinter.Label(self.Win1,text="Data sources",anchor='c').grid(sticky='w'+'e',row=1,column=1,columnspan=3)
+	    self.Win1.columnconfigure(2, minsize=150*self.UnitSize)
+	    listlen=11
+	    scrollbar1 = Tkinter.Scrollbar(self.Win1)
+	    self.AuxSourcesList = Tkinter.Listbox(self.Win1,yscrollcommand=scrollbar1.set)
+	    scrollbar1.config(command=self.AuxSourcesList.yview)
+	    scrollbar1.grid(sticky='n'+'s',row=2,column=3,columnspan=1,rowspan=listlen)
+	    self.AuxSourcesList.grid(sticky='n'+'s'+'w'+'e',row=2,column=1,columnspan=2,rowspan=listlen)
+
+	    Tkinter.Button(self.Win1 ,text='Close Window',command=self.CloseWin_1).grid(sticky='w'+'e',row=6+listlen,column=1,columnspan=1)
+	    Tkinter.Button(self.Win1 ,text='Settings...',command=self.SetupSource).grid(sticky='w'+'e',row=6+listlen,column=2,columnspan=1)
+
+	    self.AuxSourcesList.delete(0,"end")
+	    for name in auxnamelist:
+	        self.AuxSourcesList.insert("end",name)
+
+	    self.centerWindow(self.Win1)
+	    self.Win1.wait_window()
+
+	def CloseWin_1(self):
+		self.Win1.destroy()
+		self.grab_set()
+		self.lift()
+
+	def CloseWin_2(self):
+		self.Win2.destroy()
+		self.Win1.grab_set()
+		self.Win1.lift()
+
+	def CloseWin_3(self):
+		self.Win3.destroy()
+		self.Win2.grab_set()
+		self.Win2.lift()
+
+	def SetupSource(self):
+		sname = self.AuxSourcesList.get(self.AuxSourcesList.curselection())
+		if len(auxlist[sname]["settings"]) == 1 and "datadir" in auxlist[sname]["settings"]:
+			self.Win2 = Tkinter.Toplevel(self,padx=10,pady=10)
+			self.Win2.grab_set()
+			self.Win2.lift()
+			self.Win2.wm_title('Reference data')
+			self.Win2.columnconfigure(1, minsize=100*self.UnitSize)
+			self.Win2.columnconfigure(2, minsize=100*self.UnitSize)
+			self.Win2.columnconfigure(3, minsize=100*self.UnitSize)
+			self.Win2.sdir = Tkinter.StringVar()
+			self.Win2.sdir.set(auxlist[sname]["settings"]["datadir"])
+			self.Win2.sname = Tkinter.StringVar()
+			self.Win2.sname.set(sname)
+			Tkinter.Label(self.Win2,anchor='w',text='Data directory:').grid(sticky='w'+'e',row=1,column=1,columnspan=1)
+			Tkinter.Label(self.Win2,textvariable=self.Win2.sdir,wraplength=100*self.UnitSize).grid(sticky='w',row=1,column=2,columnspan=2)
+			Tkinter.Button(self.Win2 ,text='Cancel',command=self.CloseWin_2).grid(sticky='w'+'e',row=3,column=1,columnspan=1)
+			Tkinter.Button(self.Win2,text='Browse...',command=self.BrowseSourceDataDir).grid(sticky='w'+'e',row=3,column=2)
+			Tkinter.Button(self.Win2 ,text='Save',command=self.SaveSourceDataDir).grid(sticky='w'+'e',row=3,column=3,columnspan=1)
+
+			self.centerWindow(self.Win2)
+			self.Win2.wait_window()
+
+	def BrowseSourceDataDir(self):
+		self.file_opt = options = {}
+		options['title'] = 'Select data directory...'
+		ans = str(os.path.normpath(tkFileDialog.askdirectory(**self.file_opt)))
+		if ans != '' and ans != '.':
+			self.Win2.sdir.set(ans)
+		self.Win2.grab_set()
+		self.Win2.lift()
+		self.Win2.geometry("")
+
+	def SaveSourceDataDir(self):
+		auxlist[self.Win2.sname.get()]["settings"]["datadir"] = self.Win2.sdir.get()
+		settingv = {}
+		for source in auxnamelist:
+			for setk in auxlist[source]:
+				settingv.update({self.Win2.sname.get()+'-datadir':self.Win2.sdir.get()})
+		parsers.writeSettings(settingv,settingsFile,self.Message)
+		self.CloseWin_2()
 
 	def Settings_Export(self):
 		self.Message.set("Choosing file to export settings to...")
@@ -2086,9 +2199,468 @@ class monimet_gui(Tkinter.Tk):
 		self.removeplugindialog.destroy()
 		self.grab_set()
 
+	def Tools_Comparison(self):
+		self.Win1 = Tkinter.Toplevel(self,padx=10,pady=10)
+		self.Win1.grab_set()
+		self.Win1.wm_title('Comparison tool')
+		self.Win1.columnconfigure(2, minsize=150)
+		self.Win1.columnconfigure(3, minsize=450)
+
+		self.Win1.ProdName = Tkinter.StringVar()
+		self.Win1.ProdName.set("MONIMET Visual observations - Snow Cover Fraction")
+		Tkinter.Label(self.Win1,text="Product data",anchor='w').grid(sticky='w'+'e',row=1,column=2,columnspan=1)
+		Tkinter.OptionMenu(self.Win1,self.Win1.ProdName,*auxnamelist).grid(sticky='w'+'e',row=1,column=3,columnspan=1)
+		self.Win1.RefrName = Tkinter.StringVar()
+		self.Win1.RefrName.set("SENTINEL-2 L2A Scene Classification - Snow")
+		Tkinter.Label(self.Win1,text="Reference data",anchor='w').grid(sticky='w'+'e',row=2,column=2,columnspan=1)
+		Tkinter.OptionMenu(self.Win1,self.Win1.RefrName,*auxnamelist).grid(sticky='w'+'e',row=2,column=3,columnspan=1)
+		self.Win1.ClsdName = Tkinter.StringVar()
+		self.Win1.ClsdName.set("None")
+		Tkinter.Label(self.Win1,text="Classification data",anchor='w').grid(sticky='w'+'e',row=3,column=2,columnspan=1)
+		Tkinter.OptionMenu(self.Win1,self.Win1.ClsdName,*(["None"]+auxnamelist)).grid(sticky='w'+'e',row=3,column=3,columnspan=1)
+
+		self.AuxSourcesComparisonType = Tkinter.StringVar()
+		self.AuxSourcesComparisonType.set('Continuous statistics')
+		Tkinter.Label(self.Win1,text="Comparison type:",anchor='w').grid(sticky='w'+'e',row=6,column=2,columnspan=1)
+		Tkinter.OptionMenu(self.Win1,self.AuxSourcesComparisonType,'Binary statistics','Continuous statistics').grid(sticky='w'+'e',row=6,column=3,columnspan=1)
+		#,'Multi-class statistics'
+		Tkinter.Button(self.Win1 ,text='Cancel',command=self.CloseWin_1).grid(sticky='w'+'e',row=7,column=2,columnspan=1)
+		Tkinter.Button(self.Win1 ,text='Next>',command=self.SetupComparison).grid(sticky='w'+'e',row=7,column=3,columnspan=1)
+
+		self.centerWindow(self.Win1)
+		self.Win1.wait_window()
+
+	def SetupComparison(self):
+		if auxlist[self.Win1.ProdName.get()]["metadata"]["temporal"] == "static" or auxlist[self.Win1.RefrName.get()]["metadata"]["temporal"] == "static":
+			tkMessageBox.showerror('Comparison not applicable','Product and reference data should not be a static map.')
+			return False
+		if self.Win1.ClsdName.get() != "None" and auxlist[self.Win1.ClsdName.get()]["metadata"]["temporal"] != "static":
+			tkMessageBox.showerror('Comparison not applicable','Classification data should be a static map.')
+			return False
+		if self.AuxSourcesComparisonType.get() == 'Binary statistics':
+			if auxlist[self.Win1.ProdName.get()]["metadata"]["valuetype"] == "continuous" or auxlist[self.Win1.RefrName.get()]["metadata"]["valuetype"] == "continuous":
+				tkMessageBox.showerror('Comparison not applicable','Selected data sources are not applicable for binary statistics. At least one of product and reference data should be binary.')
+				self.Win1.lift()
+				self.Win1.grab_set()
+				return False
+		if self.AuxSourcesComparisonType.get() == 'Continuous statistics':
+			if auxlist[self.Win1.ProdName.get()]["metadata"]["valuetype"] == "binary":
+				tkMessageBox.showerror('Comparison not applicable','Selected data sources are not applicable for continous statistics. Product data should be continous.')
+				self.Win1.lift()
+				self.Win1.grab_set()
+				return False
+		self.Win2 = Tkinter.Toplevel(self,padx=10,pady=10)
+		self.Win2.grab_set()
+		self.Win2.wm_title('Comparison setup')
+		self.Win2.columnconfigure(1, minsize=100)
+		self.Win2.columnconfigure(2, minsize=100)
+		self.Win2.columnconfigure(3, minsize=100)
+		self.Win2.columnconfigure(4, minsize=100)
+		r = 1
+		Tkinter.Label(self.Win2,text="Choose the directory of the datasets. Default values for each data source can be set up in settings menu.",anchor='w',bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor).grid(sticky='w'+'e',row=r,column=1,columnspan=4)
+		self.Win2.ProdDir = Tkinter.StringVar()
+		self.Win2.RefrDir = Tkinter.StringVar()
+		self.Win2.ClsdDir = Tkinter.StringVar()
+		self.Win2.ProdDir.set(auxlist[self.Win1.ProdName.get()]["settings"]["datadir"])
+		self.Win2.RefrDir.set(auxlist[self.Win1.RefrName.get()]["settings"]["datadir"])
+		r += 1
+		Tkinter.Label(self.Win2,text="Product data",anchor='w').grid(sticky='w'+'e',row=r,column=1,columnspan=1)
+		Tkinter.Entry(self.Win2,textvariable=self.Win2.ProdDir,justify="left").grid(sticky='w'+'e',row=r,column=2,columnspan=2)
+		Tkinter.Button(self.Win2,text='Browse...',command=self.BrowseProdDir).grid(sticky='w'+'e',row=r,column=4)
+		r += 1
+		Tkinter.Label(self.Win2,text="Reference data",anchor='w').grid(sticky='w'+'e',row=r,column=1,columnspan=1)
+		Tkinter.Entry(self.Win2,textvariable=self.Win2.RefrDir,justify="left").grid(sticky='w'+'e',row=r,column=2,columnspan=2)
+		Tkinter.Button(self.Win2,text='Browse...',command=self.BrowseRefrDir).grid(sticky='w'+'e',row=r,column=4)
+		if self.Win1.ClsdName.get() == "None":
+			self.Win2.ClsdDir.set("")
+		else:
+			self.Win2.ClsdDir.set(auxlist[self.Win1.ClsdName.get()]["settings"]["datadir"])
+			r += 1
+			Tkinter.Label(self.Win2,text="Classification data",anchor='w').grid(sticky='w'+'e',row=r,column=1,columnspan=1)
+			Tkinter.Entry(self.Win2,textvariable=self.Win2.ClsdDir,justify="left").grid(sticky='w'+'e',row=r,column=2,columnspan=2)
+			Tkinter.Button(self.Win2,text='Browse...',command=self.BrowseClsdDir).grid(sticky='w'+'e',row=r,column=4)
+		r += 1
+		Tkinter.Label(self.Win2,text="Choose values for comparison in the table. Use comma between multiple values and slash for value ranges as in the example.",anchor='w',bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor).grid(sticky='w'+'e',row=r,column=1,columnspan=4)
+		r += 1
+		row_sep = deepcopy(r)
+		Tkinter.Label(self.Win2,text="Product data",anchor='c').grid(sticky='w'+'e',row=r,column=1,columnspan=2)
+		if auxlist[self.Win1.ProdName.get()]["metadata"]["valuetype"] == "binary":
+			self.Win2.ValsProdTrue = Tkinter.StringVar()
+			self.Win2.ValsProdFalse = Tkinter.StringVar()
+			self.Win2.ValsProdTrue.set(auxlist[self.Win1.ProdName.get()]["metadata"]["truevalue"])
+			self.Win2.ValsProdFalse.set(auxlist[self.Win1.ProdName.get()]["metadata"]["falsevalue"])
+			r += 1
+			Tkinter.Label(self.Win2,text="True values",anchor='w').grid(sticky='w'+'e',row=r,column=1,columnspan=1)
+			Tkinter.Entry(self.Win2,textvariable=self.Win2.ValsProdTrue,justify="center").grid(sticky='w'+'e',row=r,column=2,columnspan=1)
+			r += 1
+			Tkinter.Label(self.Win2,text="False values",anchor='w').grid(sticky='w'+'e',row=r,column=1,columnspan=1)
+			Tkinter.Entry(self.Win2,textvariable=self.Win2.ValsProdFalse,justify="center").grid(sticky='w'+'e',row=r,column=2,columnspan=1)
+		if auxlist[self.Win1.ProdName.get()]["metadata"]["valuetype"] == "continuous":
+			self.Win2.ValsProdRange = Tkinter.StringVar()
+			self.Win2.ValsProdRange.set(auxlist[self.Win1.ProdName.get()]["metadata"]["valuerange"])
+			r += 1
+			Tkinter.Label(self.Win2,text="Value range",anchor='w').grid(sticky='w'+'e',row=r,column=1,columnspan=1)
+			Tkinter.Entry(self.Win2,textvariable=self.Win2.ValsProdRange,justify="center").grid(sticky='w'+'e',row=r,column=2,columnspan=1)
+			if self.AuxSourcesComparisonType.get() == 'Binary statistics':
+				self.Win2.ValsProdTrueMin = Tkinter.StringVar()
+				self.Win2.ValsProdTrueMin.set((float(auxlist[self.Win1.ProdName.get()]["metadata"]["valuerange"].split('-')[1])-float(auxlist[self.Win1.ProdName.get()]["metadata"]["valuerange"].split('-')[0]))/2)
+				self.Win2.ValsProdFalseMax = Tkinter.StringVar()
+				self.Win2.ValsProdFalseMax.set((float(auxlist[self.Win1.ProdName.get()]["metadata"]["valuerange"].split('-')[1])-float(auxlist[self.Win1.ProdName.get()]["metadata"]["valuerange"].split('-')[0]))/2)
+				r += 1
+				Tkinter.Label(self.Win2,text="True value threshold (>=)",anchor='w').grid(sticky='w'+'e',row=r,column=1,columnspan=1)
+				Tkinter.Entry(self.Win2,textvariable=self.Win2.ValsProdTrueMin,justify="center").grid(sticky='w'+'e',row=r,column=2,columnspan=1)
+				r += 1
+				Tkinter.Label(self.Win2,text="False value threshold (>)",anchor='w').grid(sticky='w'+'e',row=r,column=1,columnspan=1)
+				Tkinter.Entry(self.Win2,textvariable=self.Win2.ValsProdFalseMax,justify="center").grid(sticky='w'+'e',row=r,column=2,columnspan=1)
+			if self.AuxSourcesComparisonType.get() == 'Continuous statistics':
+				self.Win2.ValsProdScale = Tkinter.StringVar()
+				self.Win2.ValsProdScale.set(auxlist[self.Win1.ProdName.get()]["metadata"]["valuescale"])
+				self.Win2.ValsProdBias = Tkinter.StringVar()
+				self.Win2.ValsProdBias.set(auxlist[self.Win1.ProdName.get()]["metadata"]["valuebias"])
+				r += 1
+				Tkinter.Label(self.Win2,text="Correction scale",anchor='w').grid(sticky='w'+'e',row=r,column=1,columnspan=1)
+				Tkinter.Entry(self.Win2,textvariable=self.Win2.ValsProdScale,justify="center").grid(sticky='w'+'e',row=r,column=2,columnspan=1)
+				r += 1
+				Tkinter.Label(self.Win2,text="Correction bias",anchor='w').grid(sticky='w'+'e',row=r,column=1,columnspan=1)
+				Tkinter.Entry(self.Win2,textvariable=self.Win2.ValsProdBias,justify="center").grid(sticky='w'+'e',row=r,column=2,columnspan=1)
+
+		r = row_sep
+		Tkinter.Label(self.Win2,text="Reference data",anchor='c').grid(sticky='w'+'e',row=r,column=3,columnspan=2)
+		if auxlist[self.Win1.RefrName.get()]["metadata"]["valuetype"] == "binary":
+			self.Win2.ValsRefrTrue = Tkinter.StringVar()
+			self.Win2.ValsRefrFalse = Tkinter.StringVar()
+			self.Win2.ValsRefrTrue.set(auxlist[self.Win1.RefrName.get()]["metadata"]["truevalue"])
+			self.Win2.ValsRefrFalse.set(auxlist[self.Win1.RefrName.get()]["metadata"]["falsevalue"])
+			r += 1
+			Tkinter.Label(self.Win2,text="True values",anchor='w').grid(sticky='w'+'e',row=r,column=3,columnspan=1)
+			Tkinter.Entry(self.Win2,textvariable=self.Win2.ValsRefrTrue,justify="center").grid(sticky='w'+'e',row=r,column=4,columnspan=1)
+			r += 1
+			Tkinter.Label(self.Win2,text="False values",anchor='w').grid(sticky='w'+'e',row=r,column=3,columnspan=1)
+			Tkinter.Entry(self.Win2,textvariable=self.Win2.ValsRefrFalse,justify="center").grid(sticky='w'+'e',row=r,column=4,columnspan=1)
+		if auxlist[self.Win1.RefrName.get()]["metadata"]["valuetype"] == "continuous":
+			self.Win2.ValsRefrRange = Tkinter.StringVar()
+			self.Win2.ValsRefrRange.set(auxlist[self.Win1.RefrName.get()]["metadata"]["valuerange"])
+			r += 1
+			Tkinter.Label(self.Win2,text="Value range",anchor='w').grid(sticky='w'+'e',row=r,column=3,columnspan=1)
+			Tkinter.Entry(self.Win2,textvariable=self.Win2.ValsRefrRange,justify="center").grid(sticky='w'+'e',row=r,column=4,columnspan=1)
+			if self.AuxSourcesComparisonType.get() == 'Binary statistics':
+				self.Win2.ValsRefrTrueMin = Tkinter.StringVar()
+				self.Win2.ValsRefrTrueMin.set((float(auxlist[self.Win1.RefrName.get()]["metadata"]["valuerange"].split('-')[1])-float(auxlist[self.Win1.RefrName.get()]["metadata"]["valuerange"].split('-')[0]))/2)
+				self.Win2.ValsRefrFalseMax = Tkinter.StringVar()
+				self.Win2.ValsRefrFalseMax.set((float(auxlist[self.Win1.RefrName.get()]["metadata"]["valuerange"].split('-')[1])-float(auxlist[self.Win1.RefrName.get()]["metadata"]["valuerange"].split('-')[0]))/2)
+				r += 1
+				Tkinter.Label(self.Win2,text="True value threshold (>=)",anchor='w').grid(sticky='w'+'e',row=r,column=3,columnspan=1)
+				Tkinter.Entry(self.Win2,textvariable=self.Win2.ValsRefrTrueMin,justify="center").grid(sticky='w'+'e',row=r,column=4,columnspan=1)
+				r += 1
+				Tkinter.Label(self.Win2,text="False value threshold (>)",anchor='w').grid(sticky='w'+'e',row=r,column=3,columnspan=1)
+				Tkinter.Entry(self.Win2,textvariable=self.Win2.ValsRefrFalseMax,justify="center").grid(sticky='w'+'e',row=r,column=4,columnspan=1)
+			if self.AuxSourcesComparisonType.get() == 'Continuous statistics':
+				self.Win2.ValsRefrScale = Tkinter.StringVar()
+				self.Win2.ValsRefrScale.set(auxlist[self.Win1.RefrName.get()]["metadata"]["valuescale"])
+				self.Win2.ValsRefrBias = Tkinter.StringVar()
+				self.Win2.ValsRefrBias.set(auxlist[self.Win1.RefrName.get()]["metadata"]["valuebias"])
+				r += 1
+				Tkinter.Label(self.Win2,text="Correction scale",anchor='w').grid(sticky='w'+'e',row=r,column=3,columnspan=1)
+				Tkinter.Entry(self.Win2,textvariable=self.Win2.ValsRefrScale,justify="center").grid(sticky='w'+'e',row=r,column=4,columnspan=1)
+				r += 1
+				Tkinter.Label(self.Win2,text="Correction bias",anchor='w').grid(sticky='w'+'e',row=r,column=3,columnspan=1)
+				Tkinter.Entry(self.Win2,textvariable=self.Win2.ValsRefrBias,justify="center").grid(sticky='w'+'e',row=r,column=4,columnspan=1)
+
+		self.Win2.ValsRefrInvs = Tkinter.StringVar()
+		self.Win2.ValsRefrThrs = Tkinter.StringVar()
+		self.Win2.ValsClsdThrs = Tkinter.StringVar()
+		self.Win2.ValsContMatr = Tkinter.StringVar()
+		self.Win2.ValsRefrInvs.set(auxlist[self.Win1.RefrName.get()]["metadata"]["invisvalue"])
+		self.Win2.ValsRefrThrs.set(auxlist[self.Win1.RefrName.get()]["metadata"]["invisthreshold"])
+		self.Win2.ValsContMatr.set('None')
+		if self.Win1.ClsdName.get() != "None":
+			self.Win2.ValsClsdThrs.set(auxlist[self.Win1.ClsdName.get()]["metadata"]["invisthreshold"])
+		r += 1
+		Tkinter.Label(self.Win2,text="Uncertain values",anchor='w').grid(sticky='w'+'e',row=r,column=3,columnspan=1)
+		Tkinter.Entry(self.Win2,textvariable=self.Win2.ValsRefrInvs,justify="center").grid(sticky='w'+'e',row=r,column=4,columnspan=1)
+		r += 1
+		Tkinter.Label(self.Win2,text="Uncertain value threshold (>=)",anchor='w').grid(sticky='w'+'e',row=r,column=3,columnspan=1)
+		Tkinter.Entry(self.Win2,textvariable=self.Win2.ValsRefrThrs,justify="center").grid(sticky='w'+'e',row=r,column=4,columnspan=1)
+		r += 1
+		Tkinter.Label(self.Win2,text="Choose values for the classes to be used in the contingency matrix (optional).",anchor='w',bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor).grid(sticky='w'+'e',row=r,column=1,columnspan=4)
+		r += 1
+		Tkinter.Label(self.Win2,textvariable=self.Win2.ValsContMatr,anchor='w').grid(sticky='w'+'e',row=r,column=1,columnspan=3)
+		Tkinter.Button(self.Win2 ,text='Edit...',command=self.ContMatrEdit).grid(sticky='w'+'e',row=r,column=4,columnspan=1)
+		if self.Win1.ClsdName.get() != "None":
+			self.Win2.ValsClsdVals = Tkinter.StringVar()
+			self.Win2.ValsClsdNams = Tkinter.StringVar()
+			self.Win2.ValsClsdVals.set(auxlist[self.Win1.ClsdName.get()]["metadata"]["classvalues"])
+			self.Win2.ValsClsdNams.set(auxlist[self.Win1.ClsdName.get()]["metadata"]["classnames"])
+			r += 1
+			Tkinter.Label(self.Win2,text="Choose values for the classes to be used from the classification data. Use semicolon between classes, comma between multiple values and slash for value ranges as in the example.",anchor='w',bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor).grid(sticky='w'+'e',row=r,column=1,columnspan=4)
+			r += 1
+			Tkinter.Label(self.Win2,text="Class names:",anchor='w').grid(sticky='w'+'e',row=r,column=1,columnspan=1)
+			Tkinter.Entry(self.Win2,textvariable=self.Win2.ValsClsdNams,justify="center").grid(sticky='w'+'e',row=r,column=2,columnspan=3)
+			r += 1
+			Tkinter.Label(self.Win2,text="Class values:",anchor='w').grid(sticky='w'+'e',row=r,column=1,columnspan=1)
+			Tkinter.Entry(self.Win2,textvariable=self.Win2.ValsClsdVals,justify="center").grid(sticky='w'+'e',row=r,column=2,columnspan=3)
+			r += 1
+			Tkinter.Label(self.Win2,text="Fraction threshold (>=)",anchor='w').grid(sticky='w'+'e',row=r,column=1,columnspan=1)
+			Tkinter.Entry(self.Win2,textvariable=self.Win2.ValsClsdThrs,justify="center").grid(sticky='w'+'e',row=r,column=2,columnspan=3)
+		r += 1
+		Tkinter.Label(self.Win2,text="Choose values for resampling parameters. Resampling is done using Gaussian distribution.",anchor='w',bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor).grid(sticky='w'+'e',row=r,column=1,columnspan=4)
+		self.Win2.ResampleRadiusRefr = Tkinter.StringVar()
+		self.Win2.ResampleSigmaRefr = Tkinter.StringVar()
+		self.Win2.ResampleRadiusRefr.set("Auto")
+		self.Win2.ResampleSigmaRefr.set("Auto")
+		self.Win2.ResampleRadiusClsd = Tkinter.StringVar()
+		self.Win2.ResampleSigmaClsd = Tkinter.StringVar()
+		self.Win2.ResampleRadiusClsd.set("Auto")
+		self.Win2.ResampleSigmaClsd.set("Auto")
+		self.Win2.ValsClsdOnto = Tkinter.StringVar()
+		self.Win2.ValsClsdOnto.set('Reference data')
+		if self.Win1.ClsdName.get() != "None":
+			r+= 1
+			Tkinter.Label(self.Win2,text="Reference Data",anchor='w',justify="center").grid(sticky='w'+'e',row=r,column=3,columnspan=1)
+			Tkinter.Label(self.Win2,text="Classification Data",anchor='w',justify="center").grid(sticky='w'+'e',row=r,column=4,columnspan=1)
+			r += 1
+			Tkinter.Label(self.Win2,text="Radius of influence (m)",anchor='w').grid(sticky='w'+'e',row=r,column=1,columnspan=2)
+			Tkinter.Entry(self.Win2,textvariable=self.Win2.ResampleRadiusRefr,justify="center").grid(sticky='w'+'e',row=r,column=3,columnspan=1)
+			Tkinter.Entry(self.Win2,textvariable=self.Win2.ResampleRadiusClsd,justify="center").grid(sticky='w'+'e',row=r,column=4,columnspan=1)
+			r += 1
+			Tkinter.Label(self.Win2,text="Sigma (See documentation) (m)",anchor='w').grid(sticky='w'+'e',row=r,column=1,columnspan=2)
+			Tkinter.Entry(self.Win2,textvariable=self.Win2.ResampleSigmaRefr,justify="center").grid(sticky='w'+'e',row=r,column=3,columnspan=1)
+			Tkinter.Entry(self.Win2,textvariable=self.Win2.ResampleSigmaClsd,justify="center").grid(sticky='w'+'e',row=r,column=4,columnspan=1)
+			r += 1
+			Tkinter.Label(self.Win2,text="Reproject onto",anchor='w').grid(sticky='w'+'e',row=r,column=1,columnspan=2)
+			Tkinter.OptionMenu(self.Win2,self.Win2.ValsClsdOnto,*['Product data','Reference data']).grid(sticky='w'+'e',row=r,column=4,columnspan=2)
+		else:
+			r += 1
+			Tkinter.Label(self.Win2,text="Radius of influence (m)",anchor='w').grid(sticky='w'+'e',row=r,column=1,columnspan=2)
+			Tkinter.Entry(self.Win2,textvariable=self.Win2.ResampleRadiusRefr,justify="center").grid(sticky='w'+'e',row=r,column=3,columnspan=2)
+			r += 1
+			Tkinter.Label(self.Win2,text="Sigma (See documentation) (m)",anchor='w').grid(sticky='w'+'e',row=r,column=1,columnspan=2)
+			Tkinter.Entry(self.Win2,textvariable=self.Win2.ResampleSigmaRefr,justify="center").grid(sticky='w'+'e',row=r,column=3,columnspan=2)
+		r = 40
+		Tkinter.Label(self.Win2,text="Enter the spatial extent for the validation to be done in. Use slash for value ranges as in the example.",anchor='w',bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor).grid(sticky='w'+'e',row=r,column=1,columnspan=4)
+		self.Win2.LatitudeRange = Tkinter.StringVar()
+		self.Win2.LatitudeRange.set("-90/90")
+		self.Win2.LongitudeRange = Tkinter.StringVar()
+		self.Win2.LongitudeRange.set("-180/180")
+		r += 1
+		Tkinter.Label(self.Win2,text="Latitude range (degrees)",anchor='w').grid(sticky='w'+'e',row=r,column=1,columnspan=2)
+		Tkinter.Entry(self.Win2,textvariable=self.Win2.LatitudeRange,justify="center").grid(sticky='w'+'e',row=r,column=3,columnspan=2)
+		r += 1
+		Tkinter.Label(self.Win2,text="Longitude range (degrees)",anchor='w').grid(sticky='w'+'e',row=r,column=1,columnspan=2)
+		Tkinter.Entry(self.Win2,textvariable=self.Win2.LongitudeRange,justify="center").grid(sticky='w'+'e',row=r,column=3,columnspan=2)
+		r += 1
+		self.Win2.TemporalRangeDays = Tkinter.IntVar()
+		self.Win2.TemporalRangeHours = Tkinter.IntVar()
+		self.Win2.TemporalRangeMinutes = Tkinter.IntVar()
+		self.Win2.TemporalRangeSeconds = Tkinter.IntVar()
+		self.Win2.TemporalRangeDays.set("0")
+		self.Win2.TemporalRangeHours.set("11")
+		self.Win2.TemporalRangeMinutes.set("59")
+		self.Win2.TemporalRangeSeconds.set("59")
+		Tkinter.Label(self.Win2,text="Enter maximum temporal difference for datasets to be compared.",anchor='w',bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor).grid(sticky='w'+'e',row=r,column=1,columnspan=4)
+		r += 1
+		Tkinter.Label(self.Win2,text="Days",anchor='w').grid(sticky='w'+'e',row=r,column=1,columnspan=1)
+		Tkinter.Entry(self.Win2,textvariable=self.Win2.TemporalRangeDays,justify="center").grid(sticky='w'+'e',row=r,column=2,columnspan=1)
+		Tkinter.Label(self.Win2,text="Hours",anchor='w').grid(sticky='w'+'e',row=r,column=3,columnspan=1)
+		Tkinter.Entry(self.Win2,textvariable=self.Win2.TemporalRangeHours,justify="center").grid(sticky='w'+'e',row=r,column=4,columnspan=1)
+		r += 1
+		Tkinter.Label(self.Win2,text="Minutes",anchor='w').grid(sticky='w'+'e',row=r,column=1,columnspan=1)
+		Tkinter.Entry(self.Win2,textvariable=self.Win2.TemporalRangeMinutes,justify="center").grid(sticky='w'+'e',row=r,column=2,columnspan=1)
+		Tkinter.Label(self.Win2,text="Seconds",anchor='w').grid(sticky='w'+'e',row=r,column=3,columnspan=1)
+		Tkinter.Entry(self.Win2,textvariable=self.Win2.TemporalRangeSeconds,justify="center").grid(sticky='w'+'e',row=r,column=4,columnspan=1)
+		r += 1
+		Tkinter.Button(self.Win2 ,text='Cancel',command=self.CloseWin_2).grid(sticky='w'+'e',row=r,column=1,columnspan=2)
+		if self.AuxSourcesComparisonType.get() == 'Binary statistics':
+			Tkinter.Button(self.Win2 ,text='Run comparison',command=self.CompareBinary).grid(sticky='w'+'e',row=r,column=3,columnspan=2)
+		if self.AuxSourcesComparisonType.get() == 'Continuous statistics':
+			Tkinter.Button(self.Win2 ,text='Run comparison',command=self.CompareContinuous).grid(sticky='w'+'e',row=r,column=3,columnspan=2)
+
+		self.centerWindow(self.Win2)
+		self.Win2.wait_window()
+
+	def BrowseProdDir(self):
+		self.file_opt = options = {}
+		options['title'] = 'Select data directory...'
+		ans = str(os.path.normpath(tkFileDialog.askdirectory(**self.file_opt)))
+		if ans != '' and ans != '.':
+			self.Win2.ProdDir.set(ans)
+		self.Win2.grab_set()
+		self.Win2.lift()
+		self.Win2.geometry("")
+
+	def BrowseRefrDir(self):
+		self.file_opt = options = {}
+		options['title'] = 'Select data directory...'
+		ans = str(os.path.normpath(tkFileDialog.askdirectory(**self.file_opt)))
+		if ans != '' and ans != '.':
+			self.Win2.RefrDir.set(ans)
+		self.Win2.grab_set()
+		self.Win2.lift()
+		self.Win2.geometry("")
+
+	def BrowseClsdDir(self):
+		self.file_opt = options = {}
+		options['title'] = 'Select data directory...'
+		ans = str(os.path.normpath(tkFileDialog.askdirectory(**self.file_opt)))
+		if ans != '' and ans != '.':
+			self.Win2.ClsdDir.set(ans)
+		self.Win2.grab_set()
+		self.Win2.lift()
+		self.Win2.geometry("")
+
+	def ContMatrEdit(self):
+		self.Win3 = Tkinter.Toplevel(self,padx=10,pady=10)
+		self.Win3.grid_propagate(1)
+		self.Win3.grab_set()
+		self.Win3.wm_title('Comparison setup')
+		self.Win3.columnconfigure(1, minsize=100)
+		self.Win3.columnconfigure(2, minsize=30)
+		self.Win3.columnconfigure(3, minsize=30)
+		self.Win3.columnconfigure(4, minsize=40)
+		self.Win3.columnconfigure(5, minsize=30)
+		self.Win3.columnconfigure(6, minsize=30)
+		self.Win3.columnconfigure(7, minsize=30)
+		if self.Win2.ValsContMatr.get() == 'None':
+			self.Win3.ValsMin = []
+			self.Win3.ValsMax = []
+			self.Win3.EqsMin = []
+			self.Win3.EqsMax = []
+		else:
+			for cond in self.Win2.ValsContMatr.get().split(','):
+				cond = cond.split()
+				self.Win3.ValsMin.append(cond[0])
+				self.Win3.EqsMin.append(cond[1])
+				self.Win3.ValsMax.append(cond[4])
+				self.Win3.EqsMax.append(cond[3])
+		r = 0
+		r += 1
+		Tkinter.Button(self.Win3,text='Add',command=self.ContMatrAdd).grid(sticky='w'+'e',row=r,column=3)
+		Tkinter.Button(self.Win3,text='OK',command=self.ContMatrOK).grid(sticky='w'+'e',row=r,column=4)
+		Tkinter.Button(self.Win3,text='Cancel',command=self.CloseWin_3).grid(sticky='w'+'e',row=r,column=5)
+		r += 1
+		Tkinter.Label(self.Win3,text="Class",anchor='c').grid(sticky='w'+'e',row=r,column=1,columnspan=1)
+		Tkinter.Label(self.Win3,text="Min",anchor='c').grid(sticky='w'+'e',row=r,column=2,columnspan=1)
+		Tkinter.Label(self.Win3,text="Eq.",anchor='c').grid(sticky='w'+'e',row=r,column=3,columnspan=1)
+		Tkinter.Label(self.Win3,text="Eq.",anchor='c').grid(sticky='w'+'e',row=r,column=5,columnspan=1)
+		Tkinter.Label(self.Win3,text="Max",anchor='c').grid(sticky='w'+'e',row=r,column=6,columnspan=1)
+		for i in range(len(self.Win3.ValsMin)):
+			r += 1
+			Tkinter.Label(self.Win3,text="Class "+str(i+1),anchor='c').grid(sticky='w'+'e',row=r,column=1,columnspan=1)
+			exec("self.Win3.ValMin"+str(i)+" = Tkinter.StringVar()")
+			exec("self.Win3.ValMin"+str(i)+".set(self.Win3.ValsMin["+str(i)+"])")
+			Tkinter.Entry(self.Win3,textvariable=eval("self.Win3.ValMin"+str(i)),justify="center").grid(sticky='w'+'e',row=r,column=2,columnspan=1)
+			exec("self.Win3.EqMin"+str(i)+" = Tkinter.StringVar()")
+			exec("self.Win3.EqMin"+str(i)+".set(self.Win3.EqsMin["+str(i)+"])")
+			Tkinter.OptionMenu(self.Win3,eval("self.Win3.EqMin"+str(i)),*['<','<=']).grid(sticky='w'+'e',row=r,column=3,columnspan=1)
+			Tkinter.Label(self.Win3,text="Value",anchor='c').grid(sticky='w'+'e',row=r,column=4,columnspan=1)
+			exec("self.Win3.EqMax"+str(i)+" = Tkinter.StringVar()")
+			exec("self.Win3.EqMax"+str(i)+".set(self.Win3.EqsMax["+str(i)+"])")
+			Tkinter.OptionMenu(self.Win3,eval("self.Win3.EqMax"+str(i)),*['>','>=']).grid(sticky='w'+'e',row=r,column=5,columnspan=1)
+			exec("self.Win3.ValMax"+str(i)+" = Tkinter.StringVar()")
+			exec("self.Win3.ValMax"+str(i)+".set(self.Win3.ValsMax["+str(i)+"])")
+			Tkinter.Entry(self.Win3,textvariable=eval("self.Win3.ValMax"+str(i)),justify="center").grid(sticky='w'+'e',row=r,column=6,columnspan=1)
+			Tkinter.Button(self.Win3,text='Del',command=self.BrowseProdDir).grid(sticky='w'+'e',row=r,column=7)
+		self.centerWindow(self.Win3)
+		self.Win3.wait_window()
+
+	def ContMatrAdd(self):
+		r = 3 + len(self.Win3.ValsMin)
+		i = len(self.Win3.ValsMin)
+		self.Win3.ValsMin.append('0')
+		self.Win3.EqsMin.append('<')
+		self.Win3.ValsMax.append('0')
+		self.Win3.EqsMax.append('>')
+		Tkinter.Label(self.Win3,text="Class "+str(i+1),anchor='c').grid(sticky='w'+'e',row=r,column=1,columnspan=1)
+		exec("self.Win3.ValMin"+str(i)+" = Tkinter.StringVar()")
+		exec("self.Win3.ValMin"+str(i)+".set(self.Win3.ValsMin["+str(i)+"])")
+		Tkinter.Entry(self.Win3,textvariable=eval("self.Win3.ValMin"+str(i)),justify="center").grid(sticky='w'+'e',row=r,column=2,columnspan=1)
+		exec("self.Win3.EqMin"+str(i)+" = Tkinter.StringVar()")
+		exec("self.Win3.EqMin"+str(i)+".set(self.Win3.EqsMin["+str(i)+"])")
+		Tkinter.OptionMenu(self.Win3,eval("self.Win3.EqMin"+str(i)),*['<','<=']).grid(sticky='w'+'e',row=r,column=3,columnspan=1)
+		Tkinter.Label(self.Win3,text="Value",anchor='c').grid(sticky='w'+'e',row=r,column=4,columnspan=1)
+		exec("self.Win3.EqMax"+str(i)+" = Tkinter.StringVar()")
+		exec("self.Win3.EqMax"+str(i)+".set(self.Win3.EqsMax["+str(i)+"])")
+		Tkinter.OptionMenu(self.Win3,eval("self.Win3.EqMax"+str(i)),*['>','>=']).grid(sticky='w'+'e',row=r,column=5,columnspan=1)
+		exec("self.Win3.ValMax"+str(i)+" = Tkinter.StringVar()")
+		exec("self.Win3.ValMax"+str(i)+".set(self.Win3.ValsMax["+str(i)+"])")
+		Tkinter.Entry(self.Win3,textvariable=eval("self.Win3.ValMax"+str(i)),justify="center").grid(sticky='w'+'e',row=r,column=6,columnspan=1)
+		Tkinter.Button(self.Win3,text='Del',command=self.BrowseProdDir).grid(sticky='w'+'e',row=r,column=7)
+
+
+	def ContMatrOK(self):
+		#update self.Win2.ValsContMatr
+		return False
+
+	def CompareBinary(self):
+		if tkMessageBox.askyesno("Binary comparison","Depending on the amout of the data, binary comparison can take a long time to be completed. Do you want to proceed?"):
+			resultspath = self.outputpath.get()
+			if not os.path.exists(resultspath):
+				os.makedirs(resultspath)
+			if auxlist[self.Win1.ProdName.get()]["metadata"]["valuetype"] == "binary":
+				ProdVals = (self.Win2.ValsProdTrue.get(),self.Win2.ValsProdFalse.get())
+			if auxlist[self.Win1.ProdName.get()]["metadata"]["valuetype"] == "continuous":
+				ProdVals = (self.Win2.ValsProdRange.get(),self.Win2.ValsProdTrueMin.get(),self.Win2.ValsProdFalseMax.get())
+			if auxlist[self.Win1.RefrName.get()]["metadata"]["valuetype"] == "binary":
+				RefrVals = (self.Win2.ValsRefrTrue.get(),self.Win2.ValsRefrFalse.get(),self.Win2.ValsRefrInvs.get(),self.Win2.ValsRefrThrs.get())
+			if auxlist[self.Win1.RefrName.get()]["metadata"]["valuetype"] == "continuous":
+				RefrVals = (self.Win2.ValsRefrRange.get(),self.Win2.ValsRefrTrueMin.get(),self.Win2.ValsRefrFalseMax.get(),self.Win2.ValsRefrInvs.get(),self.Win2.ValsRefrThrs.get())
+			if self.Win1.ClsdName.get() == "None":
+				self.Win2.ValsClsdVals = Tkinter.StringVar()
+				self.Win2.ValsClsdNams = Tkinter.StringVar()
+				self.Win2.ValsClsdVals.set("None")
+				self.Win2.ValsClsdNams.set("None")
+				ClsdVals = None
+			else:
+				ClsdVals = (self.Win2.ValsClsdVals.get(),self.Win2.ValsClsdThrs.get(),self.Win2.ValsClsdOnto.get())
+			extent = (self.Win2.LatitudeRange.get(),self.Win2.LongitudeRange.get(),self.Win2.TemporalRangeDays.get(),self.Win2.TemporalRangeHours.get(),self.Win2.TemporalRangeMinutes.get(),self.Win2.TemporalRangeSeconds.get())
+			output = comparators.compareBinary(self.Win1.ProdName.get(),self.Win2.ProdDir.get(),ProdVals,self.Win1.RefrName.get(),self.Win2.RefrDir.get(),RefrVals, self.Win1.ClsdName.get(),self.Win2.ClsdDir.get(),self.Win2.ValsClsdNams.get(), ClsdVals,self.Win2.ResampleRadiusRefr.get(),self.Win2.ResampleSigmaRefr.get(),self.Win2.ResampleRadiusClsd.get(),self.Win2.ResampleSigmaClsd.get(),extent,self.Message)
+			analysis_captions = {'source': '', 'analysis': 'Binary statistics', 'scenario': self.Win1.ProdName.get()+' vs '+self.Win1.RefrName.get(), 'network': ''}
+			if output:
+				filelabel = os.path.join(resultspath,'Comparison')
+				storeData(filelabel,analysis_captions,output,self.Message)
+			self.CloseWin_2()
+			self.CloseWin_1()
+			self.Menu_Main_Results()
+			self.ResultFolderNameVariable.set(resultspath)
+
+	def CompareContinuous(self):
+		if tkMessageBox.askyesno("Continuous comparison","Depending on the amout of the data, continuous comparison can take a long time to be completed. Do you want to proceed?"):
+			resultspath = self.outputpath.get()
+			if not os.path.exists(resultspath):
+				os.makedirs(resultspath)
+			if auxlist[self.Win1.ProdName.get()]["metadata"]["valuetype"] == "binary":
+				ProdVals = (self.Win2.ValsProdTrue.get(),self.Win2.ValsProdFalse.get())
+			if auxlist[self.Win1.ProdName.get()]["metadata"]["valuetype"] == "continuous":
+				ProdVals = (self.Win2.ValsProdRange.get(),self.Win2.ValsProdScale.get(),self.Win2.ValsProdBias.get())
+			if auxlist[self.Win1.RefrName.get()]["metadata"]["valuetype"] == "binary":
+				RefrVals =  (self.Win2.ValsRefrTrue.get(),self.Win2.ValsRefrFalse.get(),self.Win2.ValsRefrInvs.get(),self.Win2.ValsRefrThrs.get())
+			if auxlist[self.Win1.RefrName.get()]["metadata"]["valuetype"] == "continuous":
+				RefrVals = (self.Win2.ValsRefrRange.get(),self.Win2.ValsRefrScale.get(),self.Win2.ValsRefrBias.get(),self.Win2.ValsRefrInvs.get(),self.Win2.ValsRefrThrs.get())
+			if self.Win1.ClsdName.get() == "None":
+				self.Win2.ValsClsdVals = Tkinter.StringVar()
+				self.Win2.ValsClsdNams = Tkinter.StringVar()
+				self.Win2.ValsClsdVals.set("None")
+				self.Win2.ValsClsdNams.set("None")
+				ClsdVals = None
+			else:
+				ClsdVals = (self.Win2.ValsClsdVals.get(),self.Win2.ValsClsdThrs.get(),self.Win2.ValsClsdOnto.get())
+			extent = (self.Win2.LatitudeRange.get(),self.Win2.LongitudeRange.get(),self.Win2.TemporalRangeDays.get(),self.Win2.TemporalRangeHours.get(),self.Win2.TemporalRangeMinutes.get(),self.Win2.TemporalRangeSeconds.get())
+			output = comparators.compareContinuous(self.Win1.ProdName.get(),self.Win2.ProdDir.get(),ProdVals,self.Win1.RefrName.get(),self.Win2.RefrDir.get(),RefrVals,self.Win1.ClsdName.get(),self.Win2.ClsdDir.get(),self.Win2.ValsClsdNams.get(), ClsdVals ,self.Win2.ResampleRadiusRefr.get(),self.Win2.ResampleSigmaRefr.get(),self.Win2.ResampleRadiusClsd.get(),self.Win2.ResampleSigmaClsd.get(),extent,self.Message)
+			analysis_captions = {'source': '', 'analysis': 'Continuous statistics', 'scenario': self.Win1.ProdName.get()+' vs '+self.Win1.RefrName.get(), 'network': ''}
+			if output:
+				filelabel = os.path.join(resultspath,'Comparison')
+				storeData(filelabel,analysis_captions,output,self.Message)
+			self.CloseWin_2()
+			self.CloseWin_1()
+			self.Menu_Main_Results()
+			self.ResultFolderNameVariable.set(resultspath)
+
+	def Tools_Georectification(self):
+		from georectification import georectificationTool
+		georectificationTool(self.Message)
+
 	def Menu_Base(self):
 		greentexture = Tkinter.PhotoImage(file=os.path.join(ResourcesDir,'green_grad_inv.gif'))
-		browntexture = Tkinter.PhotoImage(file=os.path.join(ResourcesDir,'brown_grad.gif'))
 		bluetexture = Tkinter.PhotoImage(file=os.path.join(ResourcesDir,'blue_grad_vert.gif'))
 		#Previous and next analysis shadow
 		Label = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="",anchor='w',bg="RoyalBlue4",relief=Tkinter.GROOVE)
@@ -2097,8 +2669,9 @@ class monimet_gui(Tkinter.Tk):
 		Label = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="",anchor='w',bg="RoyalBlue4",relief=Tkinter.GROOVE)
 		Label.place(x=self.TableX+self.FolderX,y=2*self.TableY+3*self.FolderY+self.BannerY-self.PasAnaY+self.MenuY+self.LogY,height=self.PasAnaY,width=self.WindowX-2*self.TableX-2*self.FolderX)
 		#Folder
-		Label = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="",anchor='w',image=browntexture,relief=Tkinter.GROOVE)
-		Label.photo = browntexture
+		Label = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="",bg='DarkOrange4',anchor='w',relief=Tkinter.GROOVE)
+		#Label.photo = greentexture
+		#Label.place(width=1000,height=3000)
 		Label.place(x=self.TableX,y=self.TableY,width=self.WindowX-2*self.TableX,height=self.WindowY-2*self.TableY-self.LogY)
 		#Banner
 		Label = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="<",command=self.AnalysisNoMinus,relief=Tkinter.GROOVE)
@@ -2108,9 +2681,9 @@ class monimet_gui(Tkinter.Tk):
 		Label = Tkinter.Entry(self,textvariable=self.ScenarioNameVariable,fg="white",bg="RoyalBlue4",relief=Tkinter.GROOVE,justify='center')
 		Label.place(x=self.TableX+self.FolderX+self.BannerX,y=self.TableY+self.FolderY,width=self.WindowX-2*self.TableX-2*self.FolderX-2*self.BannerX,height=self.BannerY)		#Passive Parchment
 		#Passive Parchment
-		Label = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="",anchor='w',bg="white",image=greentexture,relief=Tkinter.GROOVE)
-		Label.photo = greentexture
-		Label.place(x=self.TableX+self.FolderX,y=self.TableY+2*self.FolderY+self.BannerY+self.PasParchIn,width=self.PasParchX,height=self.WindowY-2*self.TableY-3*self.FolderY-self.BannerY-2*self.PasParchIn-self.LogY)
+		#Label = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="",anchor='w',bg="white",image=greentexture,relief=Tkinter.GROOVE)
+		#Label.photo = greentexture
+		#Label.place(x=self.TableX+self.FolderX,y=self.TableY+2*self.FolderY+self.BannerY+self.PasParchIn,width=self.PasParchX,height=self.WindowY-2*self.TableY-3*self.FolderY-self.BannerY-2*self.PasParchIn-self.LogY)
 		#Active Parchment
 		Label = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="",anchor='w',bg="white",image=greentexture,relief=Tkinter.GROOVE)
 		Label.photo = greentexture
@@ -2177,7 +2750,7 @@ class monimet_gui(Tkinter.Tk):
 		self.MenuItem1 = Tkinter.OptionMenu(self,self.CameraNameVariable,*sources.listSources(self.Message,self.sourcelist,network=self.NetworkNameVariable.get()))
 		self.MenuItem1.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 6
-		self.MenuItem2 = Tkinter.Checkbutton(self,variable=self.MenuItem2Switch,wraplength=self.MenuX*0.7,text="Preview")
+		self.MenuItem2 = Tkinter.Checkbutton(self,variable=self.MenuItem2Switch,wraplength=self.MenuX*0.7,height=self.CheckButtonY,width=self.CheckButtonX,text="Preview")
 		self.MenuItem2.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 7
 		self.MenuItem3 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="Choose Picture for Preview",anchor="c",command=self.Menu_Main_Camera_Picture)
@@ -2395,7 +2968,7 @@ class monimet_gui(Tkinter.Tk):
 		self.ClearMenu()
 		self.ActiveMenu.set("Thresholds")
 		self.Menu_Prev("Main Menu","self.Menu_Main")
-		NItems = 11
+		NItems = 12
 		space = 0.02
 		Item = 1
 		self.MenuItem8 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Image thresholds",anchor='c',bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor)
@@ -2430,6 +3003,9 @@ class monimet_gui(Tkinter.Tk):
 		Item = 11
 		self.MenuItem7 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="Blue Channel",anchor="c",command=self.Menu_Main_Thresholds_Blue,activebackground='blue2',activeforeground='white')
 		self.MenuItem7.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+		Item = 12
+		self.MenuItem12 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="Grey Composite",anchor="c",command=self.Menu_Main_Thresholds_Grey,activebackground='seashell',activeforeground='black')
+		self.MenuItem12.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 
 	def Menu_Main_Thresholds_Brightness(self):
 		self.ClearMenu()
@@ -2441,13 +3017,13 @@ class monimet_gui(Tkinter.Tk):
 		self.MenuItem1 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Minimum:",anchor='c',bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor)
 		self.MenuItem1.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 4
-		self.MenuItem3 = Tkinter.Scale(self, from_=0, to=1,orient="horizontal",resolution=0.01, variable=self.BrightnessLTVariable)
+		self.MenuItem3 = Tkinter.Scale(self, from_=0, to=1,orient="horizontal",resolution=0.01, width=self.CheckButtonY,variable=self.BrightnessLTVariable)
 		self.MenuItem3.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 6
 		self.MenuItem4 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Maximum:",anchor='c',bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor)
 		self.MenuItem4.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 7
-		self.MenuItem6 = Tkinter.Scale(self, from_=0, to=1,orient="horizontal",resolution=0.01, variable=self.BrightnessUTVariable)
+		self.MenuItem6 = Tkinter.Scale(self, from_=0, to=1,orient="horizontal",resolution=0.01, width=self.CheckButtonY,variable=self.BrightnessUTVariable)
 		self.MenuItem6.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 
 	def Menu_Main_Thresholds_Luminance(self):
@@ -2460,13 +3036,13 @@ class monimet_gui(Tkinter.Tk):
 		self.MenuItem1 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Minimum:",anchor='c',bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor)
 		self.MenuItem1.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 4
-		self.MenuItem3 = Tkinter.Scale(self, from_=0, to=1,orient="horizontal",resolution=0.01, variable=self.LuminanceLTVariable)
+		self.MenuItem3 = Tkinter.Scale(self, from_=0, to=1,orient="horizontal",resolution=0.01, width=self.CheckButtonY,variable=self.LuminanceLTVariable)
 		self.MenuItem3.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 6
 		self.MenuItem4 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Maximum:",anchor='c',bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor)
 		self.MenuItem4.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 7
-		self.MenuItem6 = Tkinter.Scale(self, from_=0, to=1,orient="horizontal",resolution=0.01, variable=self.LuminanceUTVariable)
+		self.MenuItem6 = Tkinter.Scale(self, from_=0, to=1,orient="horizontal",resolution=0.01, width=self.CheckButtonY,variable=self.LuminanceUTVariable)
 		self.MenuItem6.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 
 	def Menu_Main_Thresholds_Red(self):
@@ -2479,13 +3055,13 @@ class monimet_gui(Tkinter.Tk):
 		self.MenuItem1 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Minimum:",anchor='c',bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor)
 		self.MenuItem1.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 4
-		self.MenuItem3 = Tkinter.Scale(self, from_=0, to=255,orient="horizontal",resolution=1, variable=self.RedLTVariable)
+		self.MenuItem3 = Tkinter.Scale(self, from_=0, to=255,orient="horizontal",resolution=1, width=self.CheckButtonY, variable=self.RedLTVariable)
 		self.MenuItem3.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 6
 		self.MenuItem4 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Maximum:",anchor='c',bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor)
 		self.MenuItem4.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 7
-		self.MenuItem6 = Tkinter.Scale(self, from_=0, to=255,orient="horizontal",resolution=1, variable=self.RedUTVariable)
+		self.MenuItem6 = Tkinter.Scale(self, from_=0, to=255,orient="horizontal",resolution=1, width=self.CheckButtonY, variable=self.RedUTVariable)
 		self.MenuItem6.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 
 	def Menu_Main_Thresholds_Green(self):
@@ -2498,13 +3074,13 @@ class monimet_gui(Tkinter.Tk):
 		self.MenuItem1 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Minimum:",anchor='c',bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor)
 		self.MenuItem1.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 4
-		self.MenuItem3 = Tkinter.Scale(self, from_=0, to=255,orient="horizontal",resolution=1, variable=self.GreenLTVariable)
+		self.MenuItem3 = Tkinter.Scale(self, from_=0, to=255,orient="horizontal",resolution=1, width=self.CheckButtonY, variable=self.GreenLTVariable)
 		self.MenuItem3.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 6
 		self.MenuItem4 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Maximum:",anchor='c',bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor)
 		self.MenuItem4.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 7
-		self.MenuItem6 = Tkinter.Scale(self, from_=0, to=255,orient="horizontal",resolution=1, variable=self.GreenUTVariable)
+		self.MenuItem6 = Tkinter.Scale(self, from_=0, to=255,orient="horizontal",resolution=1, width=self.CheckButtonY, variable=self.GreenUTVariable)
 		self.MenuItem6.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 
 	def Menu_Main_Thresholds_Blue(self):
@@ -2517,13 +3093,32 @@ class monimet_gui(Tkinter.Tk):
 		self.MenuItem1 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Minimum:",anchor='c',bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor)
 		self.MenuItem1.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 4
-		self.MenuItem3 = Tkinter.Scale(self, from_=0, to=255,orient="horizontal",resolution=1, variable=self.BlueLTVariable)
+		self.MenuItem3 = Tkinter.Scale(self, from_=0, to=255,orient="horizontal",resolution=1, width=self.CheckButtonY, variable=self.BlueLTVariable)
 		self.MenuItem3.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 6
 		self.MenuItem4 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Maximum:",anchor='c',bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor)
 		self.MenuItem4.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 7
-		self.MenuItem6 = Tkinter.Scale(self, from_=0, to=255,orient="horizontal",resolution=1, variable=self.BlueUTVariable)
+		self.MenuItem6 = Tkinter.Scale(self, from_=0, to=255,orient="horizontal",resolution=1, width=self.CheckButtonY, variable=self.BlueUTVariable)
+		self.MenuItem6.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+
+	def Menu_Main_Thresholds_Grey(self):
+		self.ClearMenu()
+		self.ActiveMenu.set("Grey Composite")
+		self.Menu_Prev("Thresholds","self.Menu_Main_Thresholds")
+		NItems = 10
+		space = 0.02
+		Item = 3
+		self.MenuItem1 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Minimum:",anchor='c',bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor)
+		self.MenuItem1.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+		Item = 4
+		self.MenuItem3 = Tkinter.Scale(self, from_=0, to=255,orient="horizontal",resolution=1, width=self.CheckButtonY, variable=self.GreyLTVariable)
+		self.MenuItem3.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+		Item = 6
+		self.MenuItem4 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Maximum:",anchor='c',bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor)
+		self.MenuItem4.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+		Item = 7
+		self.MenuItem6 = Tkinter.Scale(self, from_=0, to=255,orient="horizontal",resolution=1, width=self.CheckButtonY, variable=self.GreyUTVariable)
 		self.MenuItem6.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 
 	def Menu_Main_Thresholds_RedF(self):
@@ -2536,13 +3131,13 @@ class monimet_gui(Tkinter.Tk):
 		self.MenuItem1 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Minimum:",anchor='c',bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor)
 		self.MenuItem1.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 4
-		self.MenuItem3 = Tkinter.Scale(self, from_=0, to=1,orient="horizontal",resolution=0.01, variable=self.RedFLTVariable)
+		self.MenuItem3 = Tkinter.Scale(self, from_=0, to=1,orient="horizontal",resolution=0.01, width=self.CheckButtonY,variable=self.RedFLTVariable)
 		self.MenuItem3.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 6
 		self.MenuItem4 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Maximum:",anchor='c',bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor)
 		self.MenuItem4.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 7
-		self.MenuItem6 = Tkinter.Scale(self, from_=0, to=1,orient="horizontal",resolution=0.01, variable=self.RedFUTVariable)
+		self.MenuItem6 = Tkinter.Scale(self, from_=0, to=1,orient="horizontal",resolution=0.01, width=self.CheckButtonY,variable=self.RedFUTVariable)
 		self.MenuItem6.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 
 	def Menu_Main_Thresholds_GreenF(self):
@@ -2555,13 +3150,13 @@ class monimet_gui(Tkinter.Tk):
 		self.MenuItem1 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Minimum:",anchor='c',bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor)
 		self.MenuItem1.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 4
-		self.MenuItem3 = Tkinter.Scale(self, from_=0, to=1,orient="horizontal",resolution=0.01, variable=self.GreenFLTVariable)
+		self.MenuItem3 = Tkinter.Scale(self, from_=0, to=1,orient="horizontal",resolution=0.01, width=self.CheckButtonY,variable=self.GreenFLTVariable)
 		self.MenuItem3.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 6
 		self.MenuItem4 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Maximum:",anchor='c',bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor)
 		self.MenuItem4.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 7
-		self.MenuItem6 = Tkinter.Scale(self, from_=0, to=1,orient="horizontal",resolution=0.01, variable=self.GreenFUTVariable)
+		self.MenuItem6 = Tkinter.Scale(self, from_=0, to=1,orient="horizontal",resolution=0.01, width=self.CheckButtonY,variable=self.GreenFUTVariable)
 		self.MenuItem6.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 
 	def Menu_Main_Thresholds_BlueF(self):
@@ -2574,13 +3169,13 @@ class monimet_gui(Tkinter.Tk):
 		self.MenuItem1 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Minimum:",anchor='c',bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor)
 		self.MenuItem1.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 4
-		self.MenuItem3 = Tkinter.Scale(self, from_=0, to=1,orient="horizontal",resolution=0.01, variable=self.BlueFLTVariable)
+		self.MenuItem3 = Tkinter.Scale(self, from_=0, to=1,orient="horizontal",resolution=0.01, width=self.CheckButtonY,variable=self.BlueFLTVariable)
 		self.MenuItem3.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 6
 		self.MenuItem4 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Maximum:",anchor='c',bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor)
 		self.MenuItem4.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 7
-		self.MenuItem6 = Tkinter.Scale(self, from_=0, to=1,orient="horizontal",resolution=0.01, variable=self.BlueFUTVariable)
+		self.MenuItem6 = Tkinter.Scale(self, from_=0, to=1,orient="horizontal",resolution=0.01, width=self.CheckButtonY,variable=self.BlueFUTVariable)
 		self.MenuItem6.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 
 	def Menu_Main_Masking(self):
@@ -2601,7 +3196,7 @@ class monimet_gui(Tkinter.Tk):
 		space = 0.02
 		Item = 1
 		self.PreviewCanvasSwitch.set(self.PreviewCanvasSwitch.get())
-		self.MenuItem1 = Tkinter.Checkbutton(self,variable=self.MenuItem1Switch,wraplength=self.MenuX*0.7,text="Display preview with polygons")
+		self.MenuItem1 = Tkinter.Checkbutton(self,variable=self.MenuItem1Switch,wraplength=self.MenuX*0.7,height=self.CheckButtonY,width=self.CheckButtonX,text="Display preview with polygons")
 		self.MenuItem1.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 7
 		self.MenuItem2 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="Pick Points",command=self.PolygonPick,activebackground='green4',activeforeground='white')
@@ -2645,7 +3240,7 @@ class monimet_gui(Tkinter.Tk):
 		self.MenuItem26 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="Copy polygons from other scenarios...",command=self.Menu_Main_Masking_Polygonic_Copy,activebackground='gold',activeforeground='black')
 		self.MenuItem26.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 5
-		self.MenuItem24 = Tkinter.Checkbutton(self,variable=self.PolygonMultiRoiVariable,wraplength=self.MenuX*0.7,text="Run analyses also for each polygon (ROI) separately")
+		self.MenuItem24 = Tkinter.Checkbutton(self,variable=self.PolygonMultiRoiVariable,wraplength=self.MenuX*0.7,height=self.CheckButtonY,width=self.CheckButtonX,text="Run analyses also for each polygon (ROI) separately")
 		self.MenuItem24.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(0.5*NItems+1)*space)/(0.5*NItems))
 		Item = 12
 		self.MenuItem3 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="Choose Picture for Preview",command=self.Menu_Main_Masking_Polygonic_Picture)
@@ -2859,7 +3454,6 @@ class monimet_gui(Tkinter.Tk):
 				paramopt = paramopts[calcindex][i]
 				i = str(i)
 				exec("self.p"+i+"Var = Tkinter.StringVar()")
-
 				exec("self.p"+i+"Var.set(self.setup[self.AnalysisNoVariable.get()-1]['analysis-'+str(self.CalculationNoVariable.get())][paramname])")
 
 				if int(i) / (self.MenuItemMax/2 - 1)  + 1 != self.parampage:
@@ -2890,7 +3484,7 @@ class monimet_gui(Tkinter.Tk):
 						exec("self.MenuItem"+str(j)+".place(x=self.MenuOSX+self.MenuX*0.8,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.1,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)")
 						j += 1
 						Item += 1
-						exec("self.MenuItem"+str(j)+" = Tkinter.Checkbutton(self,wraplength=self.MenuX*0.7,text='Enable/Include/Calculate',variable=self.p"+i+"Var)")
+						exec("self.MenuItem"+str(j)+" = Tkinter.Checkbutton(self,wraplength=self.MenuX*0.7,height=self.CheckButtonY,width=self.CheckButtonX,text='Enable/Include/Calculate',variable=self.p"+i+"Var)")
 						exec("self.MenuItem"+str(j)+".place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)")
 					else:
 						j += 1
@@ -2942,15 +3536,17 @@ class monimet_gui(Tkinter.Tk):
 			self.MenuItem4 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="No results in the directory",anchor="c")
 			self.MenuItem8 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="No results in the directory",anchor="c")
 			self.MenuItem5Switch.set(False)
-			self.MenuItem5 = Tkinter.Checkbutton(self,variable=self.MenuItem5Switch,wraplength=self.MenuX*0.7,text="Plot",state="disabled")
+			self.MenuItem5 = Tkinter.Checkbutton(self,variable=self.MenuItem5Switch,wraplength=self.MenuX*0.7,height=self.CheckButtonY,width=self.CheckButtonX,text="Plot",state="disabled")
 			self.MenuItem7 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="Open File",anchor="c",command=self.Menu_Main_Results_Open,state="disabled")
+			#self.MenuItem11 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="Create Animation",anchor="c",command=self.Menu_Main_Results_Animate,state="disabled")
 		else:
 			self.MenuItem4 = Tkinter.OptionMenu(self,self.ResultNameVariable,1,2)
 			self.LoadResultNameVariable()
 			self.MenuItem8 = Tkinter.OptionMenu(self,self.ResultVariableNameVariable,1,2)
 			self.LoadResultVariableNameVariable()
-			self.MenuItem5 = Tkinter.Checkbutton(self,variable=self.MenuItem5Switch,wraplength=self.MenuX*0.7,text="Plot")
+			self.MenuItem5 = Tkinter.Checkbutton(self,variable=self.MenuItem5Switch,wraplength=self.MenuX*0.7,height=self.CheckButtonY,width=self.CheckButtonX,text="Plot")
 			self.MenuItem7 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="Open File",anchor="c",command=self.Menu_Main_Results_Open,state="normal")
+			#self.MenuItem11 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="Create Animation",anchor="c",command=self.Menu_Main_Results_Animate,state="normal")
 		if self.PlotCanvasSwitch.get() == False:
 			self.MenuItem6 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="Customize Graph",anchor="c",command=self.Menu_Main_Results_Customize,state="disabled")
 			self.MenuItem13 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="-",command=self.SensMinus,state="disabled")
@@ -2982,6 +3578,8 @@ class monimet_gui(Tkinter.Tk):
 		Item = 9
 		self.MenuItem7.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 10
+		#self.MenuItem11.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+		#Item = 11
 		self.MenuItem13.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.2,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		self.MenuItem14.place(x=self.MenuOSX+self.MenuX*0.7,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.2,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		self.MenuItem15 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Size")
@@ -3010,6 +3608,223 @@ class monimet_gui(Tkinter.Tk):
 	def Menu_Main_Results_Open(self):
 		webbrowser.open(self.ResultsFileNameVariable.get(),new=2)
 
+	def Menu_Main_Results_Animate(self):
+		self.ClearMenu()
+		self.ActiveMenu.set("Create Animation")
+		self.Menu_Prev('Result Viewer',"self.Menu_Main_Results")
+		NItems = 14
+		space = 0.02
+		Item = 1
+		self.ResultsAnimateTemporalMode = Tkinter.StringVar()
+		self.ResultsAnimateTemporalMode.set('Range in the data')
+		self.ResultsAnimateTemporalMode.trace_variable('w',self.callbackResultsAnimateTemporalMode)
+		self.ResultsAnimateTemporalRange = []
+		self.ResultsAnimateTemporalThreshold = Tkinter.StringVar()
+		self.ResultsAnimateTemporalThreshold.set('24.0')
+		self.ResultsAnimateReplaceImages = Tkinter.StringVar()
+		self.ResultsAnimateReplaceImages.set('Monochromatic Noise')
+		self.ResultsAnimateBarWidth = Tkinter.StringVar()
+		self.ResultsAnimateBarWidth.set('1.5')
+		self.ResultsAnimateBarLocation = Tkinter.StringVar()
+		self.ResultsAnimateBarLocation.set('Right')
+		self.ResultsAnimateDuration = Tkinter.StringVar()
+		self.ResultsAnimateDuration.set(paramdefs[calcids.index('ANIM001')][paramnames[calcids.index('ANIM001')].index('Duration')])
+		self.ResultsAnimateFPS = Tkinter.StringVar()
+		self.ResultsAnimateFPS.set(paramdefs[calcids.index('ANIM001')][paramnames[calcids.index('ANIM001')].index('Frames per second')])
+		self.ResultsAnimateResolution = Tkinter.StringVar()
+		self.ResultsAnimateResolution.set(paramopts[calcids.index('ANIM001')][paramnames[calcids.index('ANIM001')].index('Resolution')][int(paramdefs[calcids.index('ANIM001')][paramnames[calcids.index('ANIM001')].index('Resolution')])])
+		self.ResultsAnimateFormat = Tkinter.StringVar()
+		self.ResultsAnimateFormat.set(paramopts[calcids.index('ANIM001')][paramnames[calcids.index('ANIM001')].index('Format')][int(paramdefs[calcids.index('ANIM001')][paramnames[calcids.index('ANIM001')].index('Format')])])
+		self.ResultsAnimateVarsToPlot = []
+		[fname,metadata] = self.ResultsList[zip(*self.ResultsList)[0].index(self.ResultNameVariable.get())][1:]
+		if os.path.splitext(fname)[1] != '.dat':
+			tkMessageBox.showerror('Data inconsistent','Data format is inconsistent. Can not create animation.')
+			self.Menu_Main_Results()
+		try:
+			time_key_ok = False
+			metadata['network']
+			metadata['source']
+			deftoplot = ['Snow Cover - Rectified','Snow Cover','Red Fraction','Green Fraction','Brightness']
+			deftocolor = [['#000000','#FFFFFF'],['#000000','#FF0000'],['#000000','#00FF00'],['#000000','#FFFFFF'],['#000000','#FFFFFF']]
+			defminmax = [[0.0,1.0],[0.0,1.0],[0.0,1.0],[0.0,1.0],[0.0,1.0]]
+			for i in range(9999):
+				if 'var'+str(i) in metadata:
+					if metadata['var'+str(i)] == 'Time':
+						self.ResultsAnimateVarsToPlot.append([1,metadata['var'+str(i)],'#000000','#A37FFF','',''])
+						time_key_ok = True
+					else:
+						if metadata['var'+str(i)] in deftoplot:
+							self.ResultsAnimateVarsToPlot.append([1,metadata['var'+str(i)],deftocolor[deftoplot.index(metadata['var'+str(i)])][0],deftocolor[deftoplot.index(metadata['var'+str(i)])][1],defminmax[deftoplot.index(metadata['var'+str(i)])][0],defminmax[deftoplot.index(metadata['var'+str(i)])][1]])
+						else:
+							self.ResultsAnimateVarsToPlot.append([0,metadata['var'+str(i)],'#000000','#FFFFFF','',''])
+					del metadata['var'+str(i)]
+				else:
+					break
+			if not time_key_ok:
+				tkMessageBox.showerror('Metadata inconsistent','Time information for the images is not found in results file. Can not create animation.')
+				self.Menu_Main_Results()
+		except:
+			tkMessageBox.showerror('Metadata not found','Metadata is not complete or inconsistent in the results. Can not create animation.')
+			self.Menu_Main_Results()
+		try:
+			self.ResultsAnimateSource = sources.getSource(self.Message,sources.getSources(self.Message,self.sourcelist,metadata['network'],'network'),metadata['source'])
+			del metadata['network']
+			del metadata['source']
+		except:
+			tkMessageBox.showerror('Camera not found','The camera which the results are from can not be found in the camera list. Check the camera networks and camera. Camera network name: '+metadata['network']+', camera name: '+metadata['source']+'.')
+			self.Menu_Main_Results()
+
+		self.MenuItem1 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Temporal Selection",anchor='c')
+		self.MenuItem1.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+		Item += 1
+		self.MenuItem2 = Tkinter.OptionMenu(self,self.ResultsAnimateTemporalMode,'Date interval','Range in the data')
+		self.MenuItem2.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+		Item += 1
+		self.MenuItem21 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Maximum time difference (hours)",anchor='c')
+		self.MenuItem21.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.4,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+		self.MenuItem22 = Tkinter.Entry(self,justify="center",width=10,textvariable=self.ResultsAnimateTemporalThreshold)
+		self.MenuItem22.place(x=self.MenuOSX+self.MenuX*0.5,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.4,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+		Item += 1
+		self.MenuItem3 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Replace missing images with",anchor='c')
+		self.MenuItem3.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+		Item += 1
+		self.MenuItem4 = Tkinter.OptionMenu(self,self.ResultsAnimateReplaceImages,'Closest image','Blank (Black)','Blank (White)','Monochromatic Noise')
+		self.MenuItem4.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+		Item += 1
+		self.MenuItem6 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="Variables to plot as bars",command=self.Menu_Main_Results_Animate_Variables)
+		self.MenuItem6.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+		Item += 1
+		self.MenuItem7 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Bar thickness (% of image)",anchor='c')
+		self.MenuItem7.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+		Item += 1
+		self.MenuItem8 = Tkinter.Entry(self,justify="center",width=10,textvariable=self.ResultsAnimateBarWidth)
+		self.MenuItem8.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+		Item += 1
+		self.MenuItem9 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Bar location",anchor='c')
+		self.MenuItem9.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.4,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+		self.MenuItem10 = Tkinter.OptionMenu(self,self.ResultsAnimateBarLocation,'Right','Left','Top','Bottom')
+		self.MenuItem10.place(x=self.MenuOSX+self.MenuX*0.5,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.4,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+		Item += 1
+		self.MenuItem11 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Duration",anchor='c')
+		self.MenuItem11.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.4,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+		self.MenuItem12 = Tkinter.Entry(self,justify="center",width=10,textvariable=self.ResultsAnimateDuration)
+		self.MenuItem12.place(x=self.MenuOSX+self.MenuX*0.5,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.4,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+		Item += 1
+		self.MenuItem13 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Frame per second",anchor='c')
+		self.MenuItem13.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.4,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+		self.MenuItem14 = Tkinter.Entry(self,justify="center",width=10,textvariable=self.ResultsAnimateFPS)
+		self.MenuItem14.place(x=self.MenuOSX+self.MenuX*0.5,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.4,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+		Item += 1
+		self.MenuItem15 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Resolution",anchor='c')
+		self.MenuItem15.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.4,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+		self.MenuItem16 = Tkinter.OptionMenu(self,self.ResultsAnimateResolution,*paramopts[calcids.index('ANIM001')][paramnames[calcids.index('ANIM001')].index('Resolution')])
+		self.MenuItem16.place(x=self.MenuOSX+self.MenuX*0.5,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.4,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+		Item += 1
+		self.MenuItem17 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Format",anchor='c')
+		self.MenuItem17.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.4,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+		self.MenuItem18 = Tkinter.OptionMenu(self,self.ResultsAnimateFormat,*paramopts[calcids.index('ANIM001')][paramnames[calcids.index('ANIM001')].index('Format')])
+		self.MenuItem18.place(x=self.MenuOSX+self.MenuX*0.5,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.4,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+		Item += 1
+		self.MenuItem20 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="Create",command=self.Menu_Main_Results_Animate_Create)
+		self.MenuItem20.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+
+	def callbackResultsAnimateTemporalMode(self,*args):
+		if self.ResultsAnimateTemporalMode.get() == 'Range in the data':
+			self.ResultsAnimateTemporalRange = []
+		if self.ResultsAnimateTemporalMode.get() == 'Date interval':
+			d1 = Tkinter.StringVar()
+			d2 = Tkinter.StringVar()
+			if self.ResultsAnimateTemporalRange == []:
+				d1.set('01.01.2016')
+				d2.set('31.12.2016')
+			else:
+				d1.set(self.ResultsAnimateTemporalRange[0])
+				d2.set(self.ResultsAnimateTemporalRange[1])
+			self.Win1 = Tkinter.Toplevel(self,padx=10,pady=10)
+			self.Win1.grab_set()
+			self.Win1.wm_title('Date interval')
+			Tkinter.Label(self.Win1,text="Date interval:",anchor='c').grid(sticky='w'+'e',row=1,column=1,columnspan=3)
+			Tkinter.Entry(self.Win1,textvariable=d1,justify="center").grid(sticky='w'+'e',row=2,column=1,columnspan=1)
+			Tkinter.Label(self.Win1,text=" - ",anchor='c').grid(sticky='w'+'e',row=2,column=2,columnspan=1)
+			Tkinter.Entry(self.Win1,textvariable=d2,justify="center").grid(sticky='w'+'e',row=2,column=3,columnspan=1)
+			Tkinter.Button(self.Win1 ,text='Cancel',command=self.CloseWin_1).grid(sticky='w'+'e',row=3,column=1,columnspan=1)
+			Tkinter.Button(self.Win1 ,text='OK',command=self.Win1.destroy).grid(sticky='w'+'e',row=3,column=3,columnspan=1)
+			self.centerWindow(self.Win1)
+			self.Win1.wait_window()
+			self.ResultsAnimateTemporalRange = [d1.get(),d2.get()]
+			self.CloseWin_1()
+
+	def Menu_Main_Results_Animate_Variables(self):
+		self.Win1 = Tkinter.Toplevel(self,padx=10,pady=10)
+		self.Win1.grab_set()
+		self.Win1.wm_title('Choose Variables')
+		Tkinter.Label(self.Win1,text="Plot",anchor='w').grid(sticky='w'+'e',row=1,column=1,columnspan=1)
+		Tkinter.Label(self.Win1,text="Background Color",anchor='w').grid(sticky='w'+'e',row=1,column=2,columnspan=1)
+		Tkinter.Label(self.Win1,text="Foreground Color",anchor='w').grid(sticky='w'+'e',row=1,column=3,columnspan=1)
+		Tkinter.Label(self.Win1,text="Min. Value",anchor='w').grid(sticky='w'+'e',row=1,column=4,columnspan=1)
+		Tkinter.Label(self.Win1,text="Max. Value",anchor='w').grid(sticky='w'+'e',row=1,column=5,columnspan=1)
+		for i,v in enumerate(self.ResultsAnimateVarsToPlot):
+			exec("self.p"+str(i)+"VarPlot = Tkinter.BooleanVar()")
+			exec("self.p"+str(i)+"VarPlot.set(bool(int(v[0])))")
+			exec("self.p"+str(i)+"VarBgColor = Tkinter.StringVar()")
+			exec("self.p"+str(i)+"VarBgColor.set(v[2])")
+			exec("self.p"+str(i)+"VarFgColor = Tkinter.StringVar()")
+			exec("self.p"+str(i)+"VarFgColor.set(v[3])")
+			exec("self.p"+str(i)+"VarMin = Tkinter.StringVar()")
+			exec("self.p"+str(i)+"VarMin.set(v[4])")
+			exec("self.p"+str(i)+"VarMax = Tkinter.StringVar()")
+			exec("self.p"+str(i)+"VarMax.set(v[5])")
+			exec("Tkinter.Checkbutton(self.Win1,height=self.CheckButtonY,width=self.CheckButtonX,variable=self.p"+str(i)+"VarPlot,text=v[1]).grid(sticky='w',row=2+i,column=1,columnspan=1)")
+			exec("self.MenuItem"+str(i)+"1 = Tkinter.OptionMenu(self.Win1,self.p"+str(i)+"VarBgColor,*self.Colors)")
+			exec("self.MenuItem"+str(i)+"1['menu'].delete(0,'end')")
+			for color in self.Colors:
+				exec("self.MenuItem"+str(i)+"1['menu'].add_command(label='Change',command=Tkinter._setit(self.p"+str(i)+"VarBgColor,color),background=color,foreground=color,activebackground=color,activeforeground=color)")
+			exec("self.MenuItem"+str(i)+"1.grid(sticky='w'+'e',row=2+i,column=2,columnspan=1)")
+			exec("self.MenuItem"+str(i)+"2 = Tkinter.OptionMenu(self.Win1,self.p"+str(i)+"VarFgColor,*self.Colors)")
+			exec("self.MenuItem"+str(i)+"2['menu'].delete(0,'end')")
+			for color in self.Colors:
+				exec("self.MenuItem"+str(i)+"2['menu'].add_command(label='Change',command=Tkinter._setit(self.p"+str(i)+"VarFgColor,color),background=color,foreground=color,activebackground=color,activeforeground=color)")
+			exec("self.MenuItem"+str(i)+"2.grid(sticky='w'+'e',row=2+i,column=3,columnspan=1)")
+			exec("Tkinter.Entry(self.Win1,textvariable=self.p"+str(i)+"VarMin,).grid(sticky='w',row=2+i,column=4,columnspan=1)")
+			exec("Tkinter.Entry(self.Win1,textvariable=self.p"+str(i)+"VarMax,).grid(sticky='w',row=2+i,column=5,columnspan=1)")
+		Tkinter.Button(self.Win1,wraplength=self.MenuX*0.8,text="OK",command=self.Menu_Main_Results_Animate_Variables_OK).grid(sticky='w'+'e',row=2+len(self.ResultsAnimateVarsToPlot),column=5,columnspan=1)
+		self.centerWindow(self.Win1)
+		self.Win1.wait_window()
+
+	def Menu_Main_Results_Animate_Variables_OK(self):
+		for i,v in enumerate(self.ResultsAnimateVarsToPlot):
+			exec("self.ResultsAnimateVarsToPlot[i][0] = int(self.p"+str(i)+"VarPlot.get())")
+			exec("self.ResultsAnimateVarsToPlot[i][2] = self.p"+str(i)+"VarBgColor.get()")
+			exec("self.ResultsAnimateVarsToPlot[i][3] = self.p"+str(i)+"VarFgColor.get()")
+			exec("self.ResultsAnimateVarsToPlot[i][4] = self.p"+str(i)+"VarMin.get()")
+			exec("self.ResultsAnimateVarsToPlot[i][5] = self.p"+str(i)+"VarMax.get()")
+		self.CloseWin_1()
+
+	def Menu_Main_Results_Animate_Create(self):
+		fname = self.ResultsList[zip(*self.ResultsList)[0].index(self.ResultNameVariable.get())][1]
+		[resname, resdata] = readers.readDAT(fname)[0]
+		if 'Time' not in resdata:
+			tkMessageBox.showerror('Metadata inconsistent','Time information for the images is not found in results file. Can not create animation.')
+			return False
+		self.Message.set('Creating animation...|busy:True')
+		(imglist,datetimelist) = fetchers.fetchImages(self, self.Message,  self.ResultsAnimateSource, self.proxy, self.connection, self.imagespath.get(), [0,0,0,0,'List',resdata[resdata.index('Time')*2+1]], online=self.imagesdownload.get())
+		mask = None
+		fnames = calcfuncs.animateImagesFromResults(imglist, datetimelist, mask, settings,self.Message, self.ResultsAnimateTemporalMode.get(), self.ResultsAnimateTemporalRange, self.ResultsAnimateTemporalThreshold.get(), self.ResultsAnimateReplaceImages.get(), self.ResultsAnimateVarsToPlot, self.ResultsAnimateBarWidth.get(), self.ResultsAnimateBarLocation.get(), self.ResultsAnimateDuration.get(), self.ResultsAnimateFPS.get(), self.ResultsAnimateResolution.get(),self.ResultsAnimateFormat.get(), resdata)
+		if fnames is not False:
+			fnames = fnames[0][1][1]
+		else:
+			self.Message.set('Animation creation failed.|busy:False')
+			tkMessageBox.showerror('Animation','Animation creation failed.')
+			return False
+		fnamet = os.path.splitext(fname)[0]+os.path.splitext(fnames)[1]
+		if os.path.isfile(fnamet):
+			os.remove(fnamet)
+		shutil.copy(fnames,fnamet)
+		if os.path.isfile(fnames):
+			os.remove(fnames)
+		self.Message.set('Animation is saved as '+fnamet+'|busy:False')
+		tkMessageBox.showinfo('Animation','Animation is saved as '+fnamet+'.')
+
 	def Menu_Main_Results_Customize(self):
 		self.ClearMenu()
 		self.ActiveMenu.set("Customize Graph")
@@ -3031,7 +3846,7 @@ class monimet_gui(Tkinter.Tk):
 				NItems = 10
 		space = 0.02
 		Item = 3
-		self.MenuItem1 = Tkinter.Checkbutton(self,variable=self.LegendVar,wraplength=self.MenuX*0.7,text="Legend/Color bar")
+		self.MenuItem1 = Tkinter.Checkbutton(self,variable=self.LegendVar,wraplength=self.MenuX*0.7,height=self.CheckButtonY,width=self.CheckButtonX,text="Legend/Color bar")
 		self.MenuItem1.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		if vars:
 			#Item = Item+int(vars)
@@ -3068,16 +3883,16 @@ class monimet_gui(Tkinter.Tk):
 		NItems = 10
 		space = 0.02
 		Item = 3
-		self.MenuItem1 = Tkinter.Checkbutton(self,variable=self.PlotVarLogXSwitch,wraplength=self.MenuX*0.7,text='Logarithmic X')
+		self.MenuItem1 = Tkinter.Checkbutton(self,variable=self.PlotVarLogXSwitch,wraplength=self.MenuX*0.7,height=self.CheckButtonY,width=self.CheckButtonX,text='Logarithmic X')
 		self.MenuItem1.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 4
-		self.MenuItem2 = Tkinter.Checkbutton(self,variable=self.PlotVarLogYSwitch,wraplength=self.MenuX*0.7,text='Logarithmic Y')
+		self.MenuItem2 = Tkinter.Checkbutton(self,variable=self.PlotVarLogYSwitch,wraplength=self.MenuX*0.7,height=self.CheckButtonY,width=self.CheckButtonX,text='Logarithmic Y')
 		self.MenuItem2.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 5
-		self.MenuItem3 = Tkinter.Checkbutton(self,variable=self.PlotVarInvertXSwitch,wraplength=self.MenuX*0.7,text='Invert X')
+		self.MenuItem3 = Tkinter.Checkbutton(self,variable=self.PlotVarInvertXSwitch,wraplength=self.MenuX*0.7,height=self.CheckButtonY,width=self.CheckButtonX,text='Invert X')
 		self.MenuItem3.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 6
-		self.MenuItem4 = Tkinter.Checkbutton(self,variable=self.PlotVarInvertYSwitch,wraplength=self.MenuX*0.7,text='Invert Y')
+		self.MenuItem4 = Tkinter.Checkbutton(self,variable=self.PlotVarInvertYSwitch,wraplength=self.MenuX*0.7,height=self.CheckButtonY,width=self.CheckButtonX,text='Invert Y')
 		self.MenuItem4.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 
 
@@ -3139,7 +3954,7 @@ class monimet_gui(Tkinter.Tk):
 		for i in range(len(Results_Captions)):
 			Item = i + (NItems - len(Results_Captions))/2
 			lastitem = Item
-			exec("self.MenuItem"+str(i)+" = Tkinter.Checkbutton(self,variable=self.PlotVar"+str(i)+"Switch,wraplength=self.MenuX*0.7,text='"+Results_Captions[int(i)]+"')")
+			exec("self.MenuItem"+str(i)+" = Tkinter.Checkbutton(self,variable=self.PlotVar"+str(i)+"Switch,wraplength=self.MenuX*0.7,height=self.CheckButtonY,width=self.CheckButtonX,text='"+Results_Captions[int(i)]+"')")
 			exec("self.MenuItem"+str(i)+".place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)")
 
 		Item = lastitem + 1
@@ -3418,7 +4233,7 @@ class monimet_gui(Tkinter.Tk):
 			self.PreviewCanvasSwitch.set(False)
 		if self.ActiveMenu.get() not in self.plotonlist:
 			self.PlotCanvasSwitch.set(False)
-			self.SensVariable.set(24)
+			self.SensVariable.set(self.SensVariableDef)
 
 	def callbackMenuItemSwitch(self,*args):
 		exec(self.MenuEnablerFunc.get())
@@ -3501,6 +4316,7 @@ class monimet_gui(Tkinter.Tk):
 		if ext == ".tsv" or ext == ".dat":	#v0.15.4 and before support
 			f = open(self.ResultsFileNameVariable.get(),'r')
 			line = f.readline()
+			line = line.replace('\n','')
 			if line[0] == '!':
 				line = line[1:].split('\t')
 			else:
@@ -3676,7 +4492,7 @@ class monimet_gui(Tkinter.Tk):
 		except:
 			pass
 		if self.PlotCanvasSwitch.get() and self.ResultVariableNameVariable.get() != "":
-			self.geometry(str(self.WindowX+self.SensVariable.get()*40)+"x"+str(self.SensVariable.get()*30))
+			self.geometry(str(self.WindowX+self.SensVariable.get()*33*self.UnitSize)+"x"+str(self.SensVariable.get()*25*self.UnitSize))
 			drawable = True
 			data_index = self.ResultsCaptions.index(self.ResultVariableNameVariable.get())*2+1
 			try:
@@ -3700,15 +4516,15 @@ class monimet_gui(Tkinter.Tk):
 					lat_index = self.ResultsCaptions.index("Latitude")*2+1
 					lon_index = self.ResultsCaptions.index("Longitude")*2+1
 
-				matplotlib.rcParams.update({'font.size': 11})
+				matplotlib.rcParams.update({'font.size': 3*self.FontSize})
 				pgrid = [1,1]
 				pindex = 1
 				if offset == 1:
 					self.XMax = self.ResultsData[1][1].max()
 					self.XMin = self.ResultsData[1][1].min()
 					self.XDist = self.XMax - self.XMin
-					self.YMax = self.ResultsData[1][data_index].max()
-					self.YMin = self.ResultsData[1][data_index].min()
+					self.YMax = np.nanmax(self.ResultsData[1][data_index])
+					self.YMin = np.nanmin(self.ResultsData[1][data_index])
 					if self.ResultVariableNameVariable.get() == "Merged Plot":
 						ymins = []
 						ymaxs = []
@@ -3717,14 +4533,14 @@ class monimet_gui(Tkinter.Tk):
 							exec("switch = self.PlotVar"+str(i-1)+"Switch.get()")
 							if switch:
 								emptyplot = False
-								ymins = np.append(ymins,self.ResultsData[1][i*2 +1].min())
-								ymaxs = np.append(ymaxs,self.ResultsData[1][i*2 +1].max())
+								ymins = np.append(ymins,np.nanmin(self.ResultsData[1][i*2 +1]))
+								ymaxs = np.append(ymaxs,np.nanmax(self.ResultsData[1][i*2 +1]))
 						if emptyplot:
 							self.YMax = 1.0
 							self.YMin = 0.0
 						else:
-							self.YMax = ymaxs.max()
-							self.YMin = ymins.min()
+							self.YMax = np.nanmax(ymaxs)
+							self.YMin = np.nanmin(ymins)
 					self.YDist = self.YMax - self.YMin
 					if self.ResultsCaptions[0] == "Time" or self.ResultsCaptions[0] == "Date":
 						self.XDist = self.XDist.days*86400 + self.XDist.seconds
@@ -3759,7 +4575,7 @@ class monimet_gui(Tkinter.Tk):
 							self.ax.plot(self.ResultsData[1][1],self.ResultsData[1][data_index],label=self.ResultVariableNameVariable.get(),marker=self.PlotVarMarker.get(), linestyle=self.PlotVarStyle.get(), color=self.PlotVarColor.get())
 							self.ax.axis((self.XMin+self.XDist*self.PlotXStartFactor.get(),self.XMax-self.XDist*self.PlotXEndFactor.get(),self.YMin+self.YDist*self.PlotYStartFactor.get(),self.YMax-self.YDist*self.PlotYEndFactor.get()))
 					if self.LegendVar.get():
-						lgd = self.ax.legend(framealpha=0.8, prop={'size':11})
+						lgd = self.ax.legend(framealpha=0.8, prop={'size':3*self.FontSize})
 					if self.PlotVarLogXSwitch.get():
 						self.ax.set_xscale('log')
 					if self.PlotVarLogYSwitch.get():
@@ -3837,7 +4653,7 @@ class monimet_gui(Tkinter.Tk):
 
 				grid = None
 				self.PlotCanvas = FigureCanvasTkAgg(self.PlotFigure, master=self)
-				self.PlotCanvas.get_tk_widget().place(x=self.WindowX,y=0,height=self.SensVariable.get()*30,width=self.SensVariable.get()*40)
+				self.PlotCanvas.get_tk_widget().place(x=self.WindowX,y=0,height=self.SensVariable.get()*25*self.UnitSize,width=self.SensVariable.get()*33*self.UnitSize)
 				self.PlotCanvas.draw()
 
 				self.PlotCanvas.mpl_connect('button_press_event', self.callbackPlotCanvas)
@@ -4012,6 +4828,9 @@ class monimet_gui(Tkinter.Tk):
 
 	def LoadValues(self):
 		self.ScenarioNameVariable.set(self.setup[self.AnalysisNoVariable.get()-1]['name'])
+		#fill missing thresholds
+		for i in range(len(self.setup[self.AnalysisNoVariable.get()-1]['thresholds']),len(scenario_def['thresholds'])):
+			self.setup[self.AnalysisNoVariable.get()-1]['thresholds'].append(deepcopy(scenario_def['thresholds'][i]))
 		self.RedFLTVariable.set(self.setup[self.AnalysisNoVariable.get()-1]['thresholds'][0])
 		self.RedFUTVariable.set(self.setup[self.AnalysisNoVariable.get()-1]['thresholds'][1])
 		self.GreenFLTVariable.set(self.setup[self.AnalysisNoVariable.get()-1]['thresholds'][2])
@@ -4024,6 +4843,8 @@ class monimet_gui(Tkinter.Tk):
 		self.GreenUTVariable.set(self.setup[self.AnalysisNoVariable.get()-1]['thresholds'][11])
 		self.BlueLTVariable.set(self.setup[self.AnalysisNoVariable.get()-1]['thresholds'][12])
 		self.BlueUTVariable.set(self.setup[self.AnalysisNoVariable.get()-1]['thresholds'][13])
+		self.GreyLTVariable.set(self.setup[self.AnalysisNoVariable.get()-1]['thresholds'][16])
+		self.GreyUTVariable.set(self.setup[self.AnalysisNoVariable.get()-1]['thresholds'][17])
 		self.BrightnessLTVariable.set(self.setup[self.AnalysisNoVariable.get()-1]['thresholds'][6])
 		self.BrightnessUTVariable.set(self.setup[self.AnalysisNoVariable.get()-1]['thresholds'][7])
 		self.LuminanceLTVariable.set(self.setup[self.AnalysisNoVariable.get()-1]['thresholds'][14])
@@ -4129,6 +4950,8 @@ class monimet_gui(Tkinter.Tk):
 		self.setup[self.AnalysisNoVariable.get()-1]['thresholds'][11] = self.GreenUTVariable.get()
 		self.setup[self.AnalysisNoVariable.get()-1]['thresholds'][12] = self.BlueLTVariable.get()
 		self.setup[self.AnalysisNoVariable.get()-1]['thresholds'][13] = self.BlueUTVariable.get()
+		self.setup[self.AnalysisNoVariable.get()-1]['thresholds'][16] = self.GreyLTVariable.get()
+		self.setup[self.AnalysisNoVariable.get()-1]['thresholds'][17] = self.GreyUTVariable.get()
 		self.setup[self.AnalysisNoVariable.get()-1]['thresholds'][6] = self.BrightnessLTVariable.get()
 		self.setup[self.AnalysisNoVariable.get()-1]['thresholds'][7] = self.BrightnessUTVariable.get()
 		self.setup[self.AnalysisNoVariable.get()-1]['thresholds'][14] = self.LuminanceLTVariable.get()
@@ -4163,20 +4986,20 @@ class monimet_gui(Tkinter.Tk):
 
 	def UpdatePictures(self):
 		if self.PreviewCanvasSwitch.get():
-			if self.WindowY < self.SensVariable.get()*30:
-				self.geometry(str(self.WindowX+self.SensVariable.get()*40)+"x"+str(self.SensVariable.get()*30))
+			if self.WindowY < self.SensVariable.get()*25*self.UnitSize:
+				self.geometry(str(self.WindowX+self.SensVariable.get()*33*self.UnitSize)+"x"+str(self.SensVariable.get()*25*self.UnitSize))
 			else:
-				self.geometry(str(self.WindowX+self.SensVariable.get()*40)+"x"+str(self.WindowY))
-			self.PictureCanvas = Tkinter.Canvas(self,height=self.SensVariable.get()*40,width=self.SensVariable.get()*30)
+				self.geometry(str(self.WindowX+self.SensVariable.get()*33*self.UnitSize)+"x"+str(self.WindowY))
+			self.PictureCanvas = Tkinter.Canvas(self,height=self.SensVariable.get()*33*self.UnitSize,width=self.SensVariable.get()*25*self.UnitSize)
 			self.PictureCanvas.bind("<Button-1>",self.callbackPictureCanvas)
-			self.PictureCanvas.place(x=self.WindowX,y=0,height=self.SensVariable.get()*30,width=self.SensVariable.get()*40)
+			self.PictureCanvas.place(x=self.WindowX,y=0,height=self.SensVariable.get()*25*self.UnitSize,width=self.SensVariable.get()*33*self.UnitSize)
 			self.PictureImage = Image.open(self.PictureFileName.get())
 			if self.PictureImage.size[0] > self.PictureImage.size[1]:
-				self.PictureSize = (40*self.SensVariable.get(),int(40*self.SensVariable.get()*(self.PictureImage.size[1]/float(self.PictureImage.size[0]))))
-				self.PictureRatio = (40*self.SensVariable.get())/float(self.PictureImage.size[0])
+				self.PictureSize = (self.SensVariable.get()*33*self.UnitSize,int(self.SensVariable.get()*33*self.UnitSize*(self.PictureImage.size[1]/float(self.PictureImage.size[0]))))
+				self.PictureRatio = (self.SensVariable.get()*33*self.UnitSize)/float(self.PictureImage.size[0])
 			else:
-				self.PictureSize = (int(30*self.SensVariable.get()*(self.PictureImage.size[0]/float(self.PictureImage.size[1]))),30*self.SensVariable.get())
-				self.PictureRatio = (30*self.SensVariable.get())/float(self.PictureImage.size[1])
+				self.PictureSize = (int(self.SensVariable.get()*25*self.UnitSize*(self.PictureImage.size[0]/float(self.PictureImage.size[1]))),self.SensVariable.get()*25*self.UnitSize)
+				self.PictureRatio = (self.SensVariable.get()*25*self.UnitSize)/float(self.PictureImage.size[1])
 			self.PictureImage = self.PictureImage.resize(self.PictureSize,Image.ANTIALIAS)
 			self.PicturePhoto = ImageTk.PhotoImage(self.PictureImage)
 			self.PictureCanvas.delete("all")
@@ -4658,7 +5481,7 @@ class monimet_gui(Tkinter.Tk):
 	def LogWindowOn(self):
 		self.LogWindow = Tkinter.Toplevel(self,padx=10,pady=10)
 		self.LogWindow.wm_title('Log')
-		self.LogScrollbar = Tkinter.Scrollbar(self.LogWindow,width=20)
+		self.LogScrollbar = Tkinter.Scrollbar(self.LogWindow,width=self.ScrollbarX)
 		self.LogScrollbar.grid(sticky='w'+'e'+'n'+'s',row=2,column=2,columnspan=1)
 		self.LogText = Tkinter.Text(self.LogWindow, yscrollcommand=self.LogScrollbar.set,wrap='word')
 		self.LogText.grid(sticky='w'+'e',row=2,column=1,columnspan=1)
@@ -4670,6 +5493,18 @@ class monimet_gui(Tkinter.Tk):
 			self.LogWindow.destroy()
 		self.grab_set()
 		self.lift()
+
+	def ReplaceOptMenuParams(self,scenario_in):
+		scenario = deepcopy(scenario_in)
+		for analysis in scenario['analyses']:
+			c_i = calcids.index(scenario[analysis]['id'])
+			for parameter in scenario[analysis]:
+				if parameter == 'name' or parameter == 'id':
+					continue
+				p_i = paramnames[c_i].index(parameter)
+				if isinstance(paramopts[c_i][p_i],list):
+					scenario[analysis][parameter] = paramopts[c_i][p_i][int(scenario[analysis][parameter])]
+		return scenario
 
 	def RunAnalyses(self):
 		self.Run()
@@ -4686,6 +5521,7 @@ class monimet_gui(Tkinter.Tk):
 		else:
 			runq = ("Run scenario","FMIPROT will now run the scenario. Depending on the options selected, it may take a long time. It is adviced to check your input before runs. 'Generate Report' option is quite handy to check everything about your input.\nFMIPROT will save your setup under the your results directory ("+self.resultspath.get()+") for any case. If your runs fail, you may load the setup from that directory.\nDo you want to proceed?")
 		if not sysargv['prompt'] or tkMessageBox.askyesno(runq[0],runq[1]):
+			settings = {'memory_limit':self.memorylimit.get()}
 			if self.outputmodevariable.get() == output_modes[1]:
 				if not self.checkemptyoutput(out=True):
 					self.Menu_Main_Output()
@@ -4714,6 +5550,7 @@ class monimet_gui(Tkinter.Tk):
 			if scn == None:
 				self.Message.set('Scenario: |progress:10|queue:0|total:'+str(len(self.setup)))
 			for s,scenario in enumerate(self.setup):
+				scenario = self.ReplaceOptMenuParams(scenario)
 				csvlist.append([])
 				if scn == None or scn == s:
 					source_ = sources.getSource(self.Message,sources.getSources(self.Message,self.sourcelist,scenario['source']['network'],prop='network'),scenario['source']['name'])
@@ -4872,7 +5709,7 @@ class monimet_gui(Tkinter.Tk):
 												for j in outputtvd[::-1]:
 													del outputtv[r+1][1][2*i+1][j]
 											else:
-												outputtv[r+1][1][2*i+1] = np.delete(outputtv[r+1][1][2*i+1],outputtvd)
+												np.delete(outputtv[r+1][1][2*i+1],outputtvd)
 									imglist = [] #missing
 									datetimelist = []
 									pathlist = []
@@ -4930,7 +5767,7 @@ class monimet_gui(Tkinter.Tk):
 						if len(outputt)>0:
 							if self.TimeZoneConversion.get() and self.TimeZone.get() != '+00:00':
 								outputt = convertTZoutput(outputt,self.TimeZone.get())
-							csvf = storeData(filelabel, analysis_captions , outputt,self.Message,csvout=True)
+							csvf = storeData(filelabel, analysis_captions , outputt,self.Message,visout=True)
 							csvlist[s][a].append(csvf)
 						else:
 							csvlist[s][a].append([False])
@@ -4954,12 +5791,13 @@ class monimet_gui(Tkinter.Tk):
 				self.setupFileReportFunc([os.path.join(resultspath,'report.html')]+csvlist)
 			if not sysargv['gui']:
 				return False
-			self.ResultFolderNameVariable.set(resultspath)#xxx result dir default problematic
+			self.ResultFolderNameVariable.set(resultspath)
 			self.Message.set("Running scenarios completed.|busy:False")
 			self.LogFileName[1] = ''
 			if self.outputmodevariable.get() == output_modes[0]:
 				self.callbackoutputmode()
 			self.Menu_Main_Results()
+			self.FinishUp()
 
 	def ApplyMask(self):
 		if np.array(self.PolygonCoordinatesVariable2polygonicmask(self.PolygonCoordinatesVariable.get())).sum() != 0:
@@ -5216,20 +6054,20 @@ class monimet_gui(Tkinter.Tk):
 
 	def SensMinus(self):
 		if self.PreviewCanvasSwitch.get():
-			if self.SensVariable.get() > 24:
+			if self.SensVariable.get() > self.SensVariableDef:
 				self.SensVariable.set(self.SensVariable.get()-1)
 				self.Message.set("Point selection sensitivity decreased.")
 			else:
-				self.SensVariable.set(24)
+				self.SensVariable.set(self.SensVariableDef)
 				self.Message.set("Point selection sensitivity/Plot Size is already minimum.")
 			self.UpdateWindowSize()
 
 	def UpdateWindowSize(self):
-		self.geometry(str(self.WindowX+self.SensVariable.get()*40)+"x"+str(self.SensVariable.get()*30))
+		self.geometry(str(self.WindowX+self.SensVariable.get()*33*self.UnitSize)+"x"+str(self.SensVariable.get()*25*self.UnitSize))
 		if self.ActiveMenu.get() == 'Result Viewer':
-			self.PlotCanvas.get_tk_widget().place(x=self.WindowX,y=0,height=self.SensVariable.get()*30,width=self.SensVariable.get()*40)
+			self.PlotCanvas.get_tk_widget().place(x=self.WindowX,y=0,height=self.SensVariable.get()*25*self.UnitSize,width=self.SensVariable.get()*33*self.UnitSize)
 		else:
-			self.PictureCanvas.place(x=self.WindowX,y=0,height=self.SensVariable.get()*30,width=self.SensVariable.get()*40)
+			self.PictureCanvas.place(x=self.WindowX,y=0,height=self.SensVariable.get()*25*self.UnitSize,width=self.SensVariable.get()*33*self.UnitSize)
 		self.UpdatePictures()
 		self.Message.set("Window size updated.")
 
@@ -5417,7 +6255,7 @@ class monimet_gui(Tkinter.Tk):
 			self.Log.set(self.Log.get() + " ~ " + time + ": " + message)
 			self.LogLL.set(message)
 			self.update()
-		if "progress" in meta and meta['total'] != 1:
+		if "progress" in meta and meta['total'] != 1 and meta['total'] != 0:
 			p_level = meta['progress']
 			p_fraction = float(10000*meta['queue']/meta['total'])/100
 			if meta['total'] != 0 and meta['queue'] != 0 and p_level in self.MessagePrev:
@@ -5437,7 +6275,7 @@ class monimet_gui(Tkinter.Tk):
 			if meta['queue']==meta['total']:
 				print ''
 		if self.LogText.winfo_exists():
-			if "progress" in meta and meta['total'] != 1:
+			if "progress" in meta and meta['total'] != 1 and meta['total'] != 0:
 				try:
 					exec("self.LogProgressLabelLevel"+str(p_level)+".config(text=p_string)")
 					exec("self.LogProgressBarLevel"+str(p_level)+"['value']=p_fraction")

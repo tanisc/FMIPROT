@@ -2,16 +2,20 @@
 License Summary
 -------------------------------------------------------------------------------
 License does not expire.
+License is valid for the program versions 0.21 and newer. Authors' right to change the license is reserved.
 Can be used for creating unlimited applications.
-Can be distributed in binary or object form only.
-Commercial use allowed.
-Cannot modify source-code for any purpose (cannot create derivative works).
+Can be distributed in binary, object form or source code.
+Commercial use not allowed allowed.
+Source can be modified freely and derivate works can be created.
 Attribution to software creator must be made as specified:
-Whenever the software is used in research, the publication should refer at least to the user manual. The manual is published at https://doi.org/10.5281/zenodo.891068 .
-Whenever the software is used in application or service, name of the software should be mentioned, the user manual at https://doi.org/10.5281/zenodo.891068 should be linked and the copyright notice below should be included to the webpage, manual, book of the application or the service or any other similar type of publication:
+Whenever the software is used in research, the publication should refer at least to the article at https://doi.org/10.3390/data3030023.
+Whenever the software is used in application or service, name of the software should be mentioned, the user manual at https://doi.org/10.5281/zenodo.891068 should be linked and the copyright notice below should be included to the webpage, manual, book of the application or the service or any other similar type of publication.
+Whenever the software code is modified and/or is used in other software, the copyright notice below should be included in the license.
+
 Copyright (c) 2018, Finnish Meteorological Institute
 Authors: Cemal Melih Tanis, Ali Nadir Arslan.
 All rights reserved.
+
 --------------------
 Parts of the software are provided under separate licenses which are added to the end of this document, as follows:
 
@@ -26,6 +30,10 @@ All rights reserved.
 jQuery 1.10.1:
 Copyright JS Foundation and other contributors, https://js.foundation/
 
+imageio 2.1.2:
+Copyright (c) 2014-2018, imageio developers
+All rights reserved.
+
 Mahotas 1.4.4:
 Copyright (c) 2008-2013
 Luis Pedro Coelho <luis@luispedro.org>
@@ -36,6 +44,12 @@ Davis King
 matplotlib 2.2.0:
 Copyright (c) 2012-2013 Matplotlib Development Team; All Rights Reserved.
 
+moviepy 0.2.3.2:
+Copyright (c) 2015 Zulko.
+
+netCDF4 1.3.1:
+Copyright: 2008 by Jeffrey Whitaker.
+
 numpy 1.14.1:
 Copyright (c) 2005, NumPy Developers
 All rights reserved.
@@ -44,12 +58,17 @@ Pillow 5.0.0:
 Copyright (c) 1997-2011 by Secret Labs AB
 Copyright (c) 1995-2011 by Fredrik Lundh
 
-Polygon2 2.0.8 is under LGPL.
+Polygon2 2.0.8 is under LGPL v3.
 
-PyInstaller 3.3.1
+PyInstaller 3.3.1 is distributed under the GPL license (see the 
+file COPYING.txt in the source code), with a special exception 
+which allows to use PyInstaller to build and distribute non-free 
+programs (including commercial ones). 
 
 pyproj 1.9.5.1:
 Copyright (c) 2013 by Jeffrey Whitaker.
+
+pyresample 1.9.2 is under LPGL v3.
 
 Python 2.7.6
 
@@ -60,11 +79,22 @@ Copyright 2017- dateutil contributors
 pytz 2018.3:
 Copyright (c) 2003-2005 Stuart Bishop <stuart@stuartbishop.net>
 
+scipy 1.1.0:
+Copyright (c) 2001, 2002 Enthought, Inc.
+All rights reserved.
+
+Copyright (c) 2003-2017 SciPy Developers.
+All rights reserved.
+
+VTK 8.1.1:
+Copyright (c) 1993-2008 Ken Martin, Will Schroeder, Bill Lorensen
+All rights reserved.
+
 -------------------------------------------------------------------------------
 Finnish Meteorological Institute Image Processing Toolbox (FMIPROT) - Terms and conditions
 -------------------------------------------------------------------------------
-1.	Preamble: This Agreement, signed on May 1, 2018 (hereinafter: Effective Date) governs the relationship between User, any individual person, institute, company or business entity (hereinafter: Licensee) and Finnish Meteorological Institute, a public research institute whose principal place of headquarters is Erik Palménin Aukio 1 Helsinki 00560, Finland (hereinafter: Licensor). This Agreement sets the terms, rights, restrictions and obligations on using Finnish Meteorological Institute Image Processing Toolbox (FMIPROT) (hereinafter: The Software) created and owned by Licensor, as detailed herein.
-2.	License Grant: Licensor hereby grants Licensee a Personal, Non-assignable & non-transferable, Perpetual, Commercial, Royalty free, Without rights to create derivative works, Non-exclusive license all in accordance to FMIPROT with the following terms:
+1.	Preamble: This Agreement, signed on November 28, 2018 (hereinafter: Effective Date) governs the relationship between User, any individual person, institute, company or business entity (hereinafter: Licensee) and Finnish Meteorological Institute, a public research institute whose principal place of headquarters is Erik Palménin Aukio 1 Helsinki 00560, Finland (hereinafter: Licensor). This Agreement sets the terms, rights, restrictions and obligations on using Finnish Meteorological Institute Image Processing Toolbox (FMIPROT) (hereinafter: The Software) created and owned by Licensor, as detailed herein.
+2.	License Grant: Licensor hereby grants Licensee a personal, non-assignable & non-transferable, perpetual, non-commercial, with rights to create derivative works, Non-exclusive license all in accordance to FMIPROT with the following terms:
   2.1.	Limitation: Licensee may use Software for the purpose of:
     2.1.1.	Running Software on Licensee’s Website[s] and Server[s];
     2.1.2.	Allowing 3rd Parties to run Software on Licensee’s Website[s] and Server[s];
@@ -72,10 +102,10 @@ Finnish Meteorological Institute Image Processing Toolbox (FMIPROT) - Terms and 
     2.1.4.	Distribute verbatim copies of Software’s output (including compiled binaries);
     2.1.5.	Modify Software to suit Licensee’s needs and specifications.
   2.2.	This license is granted perpetually, as long as you do not materially breach it.
-  2.3.	Binary Restricted: Licensee may sublicense Software as a part of a larger work containing more than Software, distributed solely in Object or Binary form under a personal, non-sublicensable, limited license. Such redistribution shall be limited to unlimited codebases.
+  2.3.	Licensee may sublicense Software as a part of a larger work containing more than Software, distributed solely in Object, Binary or Source code form under a personal, non-sublicensable, limited license. Such redistribution shall be limited to unlimited codebases.
   2.4.	Non Assignable & Non-Transferable: Licensee may not assign or transfer his rights and duties under this license.
-  2.5.	Commercial, Royalty Free: Licensee may use Software for any purpose, including paid-services, without any royalties
-  2.6.	With Attribution Requirements: Whenever the software is used in research, the publication should refer at least to the user manual. The manual is published at https://doi.org/10.5281/zenodo.854476 . Whenever the software is used in application or service, name of the software should be mentioned and the user manual at https://doi.org/10.5281/zenodo.854476 should be linked.
+  2.5.	Non-commercial: Licensee may use Software only for non-commercial purpose. For commercial purposes, separate licenses should be signed with the Licensor. 
+  2.6.	With Attribution Requirements: Whenever the software is used in research, the publication should refer at least to the article at https://doi.org/10.3390/data3030023. Whenever the software is used in application or service, name of the software should be mentioned, the user manual at https://doi.org/10.5281/zenodo.891068 should be linked and the copyright notice should be included to the webpage, manual, book of the application or the service or any other similar type of publication. Whenever the software code is modified and/or is used in other software, the copyright notice should be included in the license.
 3.	Term & Termination: The Term of this license shall be until terminated. Licensor may terminate this Agreement, including Licensee’s license in the case where Licensee :
   3.1.	exported The Software to any jurisdiction where licensor may not enforce his rights under this agreements in; or
   3.2.	Licensee was in breach of any of this license's terms and conditions and such breach was not cured, immediately upon notification; or
@@ -203,6 +233,33 @@ externally maintained libraries used by this software which have their
 own licenses; we recommend you read them, as their terms may differ from
 the terms above.
 
+imageio License:
+-------------------------------------------------------------------------------
+Copyright (c) 2014-2018, imageio developers
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
 
 mahotas License
 -------------------------------------------------------------------------------
@@ -251,6 +308,66 @@ matplotlib License
 7. Nothing in this License Agreement shall be deemed to create any relationship of agency, partnership, or joint venture between MDT and Licensee. This License Agreement does not grant permission to use MDT trademarks or trade name in a trademark sense to endorse or promote products or services of Licensee, or any third party.
 
 8. By copying, installing or otherwise using matplotlib 2.2.2, Licensee agrees to be bound by the terms and conditions of this License Agreement.
+
+
+moviepy License
+-------------------------------------------------------------------------------
+The MIT License (MIT)
+[OSI Approved License]
+
+The MIT License (MIT)
+
+Copyright (c) 2015 Zulko
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+
+
+netCDF4 License
+-------------------------------------------------------------------------------
+copyright: 2008 by Jeffrey Whitaker.
+
+Permission to use, copy, modify, and distribute this software and
+its documentation for any purpose and without fee is hereby granted,
+provided that the above copyright notice appear in all copies and that
+both the copyright notice and this permission notice appear in
+supporting documentation.
+
+THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
+INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO
+EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, INDIRECT OR
+CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
+USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+PERFORMANCE OF THIS SOFTWARE.
+
+
+The above copyright notice and this permission notice shall be included
+in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
 numpy License
@@ -788,6 +905,231 @@ THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
+
+scipy License
+-------------------------------------------------------------------------------
+Copyright (c) 2001, 2002 Enthought, Inc.
+All rights reserved.
+
+Copyright (c) 2003-2017 SciPy Developers.
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+  a. Redistributions of source code must retain the above copyright notice,
+     this list of conditions and the following disclaimer.
+  b. Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in the
+     documentation and/or other materials provided with the distribution.
+  c. Neither the name of Enthought nor the names of the SciPy Developers
+     may be used to endorse or promote products derived from this software
+     without specific prior written permission.
+
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS
+BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
+OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+THE POSSIBILITY OF SUCH DAMAGE.
+
+
+
+SciPy bundles a number of libraries that are compatibly licensed.  We list
+these here.
+
+Name: Numpydoc
+Files: doc/sphinxext/numpydoc/*
+License: 2-clause BSD
+  For details, see doc/sphinxext/LICENSE.txt
+
+Name: scipy-sphinx-theme
+Files: doc/scipy-sphinx-theme/*
+License: 3-clause BSD, PSF and Apache 2.0
+  For details, see doc/sphinxext/LICENSE.txt
+
+Name: Six
+Files: scipy/_lib/six.py
+License: MIT
+  For details, see the header inside scipy/_lib/six.py
+
+Name: Decorator
+Files: scipy/_lib/decorator.py
+License: 2-clause BSD
+  For details, see the header inside scipy/_lib/decorator.py
+
+Name: ID
+Files: scipy/linalg/src/id_dist/*
+License: 3-clause BSD
+  For details, see scipy/linalg/src/id_dist/doc/doc.tex
+
+Name: L-BFGS-B
+Files: scipy/optimize/lbfgsb/*
+License: BSD license
+  For details, see scipy/optimize/lbfgsb/README
+
+Name: SuperLU
+Files: scipy/sparse/linalg/dsolve/SuperLU/*
+License: 3-clause BSD
+  For details, see scipy/sparse/linalg/dsolve/SuperLU/License.txt
+
+Name: ARPACK
+Files: scipy/sparse/linalg/eigen/arpack/ARPACK/*
+License: 3-clause BSD
+  For details, see scipy/sparse/linalg/eigen/arpack/ARPACK/COPYING
+
+Name: Qhull
+Files: scipy/spatial/qhull/*
+License: Qhull license (BSD-like)
+  For details, see scipy/spatial/qhull/COPYING.txt
+
+Name: Cephes
+Files: scipy/special/cephes/*
+License: 3-clause BSD
+  Distributed under 3-clause BSD license with permission from the author,
+  see https://lists.debian.org/debian-legal/2004/12/msg00295.html
+  
+  Cephes Math Library Release 2.8:  June, 2000
+  Copyright 1984, 1995, 2000 by Stephen L. Moshier
+  
+  This software is derived from the Cephes Math Library and is
+  incorporated herein by permission of the author.
+  
+  All rights reserved.
+  
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+      * Redistributions of source code must retain the above copyright
+        notice, this list of conditions and the following disclaimer.
+      * Redistributions in binary form must reproduce the above copyright
+        notice, this list of conditions and the following disclaimer in the
+        documentation and/or other materials provided with the distribution.
+      * Neither the name of the <organization> nor the
+        names of its contributors may be used to endorse or promote products
+        derived from this software without specific prior written permission.
+  
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+Name: Faddeeva
+Files: scipy/special/Faddeeva.*
+License: MIT
+  Copyright (c) 2012 Massachusetts Institute of Technology
+  
+  Permission is hereby granted, free of charge, to any person obtaining
+  a copy of this software and associated documentation files (the
+  "Software"), to deal in the Software without restriction, including
+  without limitation the rights to use, copy, modify, merge, publish,
+  distribute, sublicense, and/or sell copies of the Software, and to
+  permit persons to whom the Software is furnished to do so, subject to
+  the following conditions:
+  
+  The above copyright notice and this permission notice shall be
+  included in all copies or substantial portions of the Software.
+  
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+  LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+  OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
+
+Name: qd
+Files: scipy/special/cephes/dd_*.[ch]
+License: modified BSD license ("BSD-LBNL-License.doc")
+  This work was supported by the Director, Office of Science, Division
+  of Mathematical, Information, and Computational Sciences of the
+  U.S. Department of Energy under contract numbers DE-AC03-76SF00098 and
+  DE-AC02-05CH11231.
+  
+  Copyright (c) 2003-2009, The Regents of the University of California,
+  through Lawrence Berkeley National Laboratory (subject to receipt of
+  any required approvals from U.S. Dept. of Energy) All rights reserved.
+  
+  1. Redistribution and use in source and binary forms, with or
+  without modification, are permitted provided that the following
+  conditions are met:
+  
+  (1) Redistributions of source code must retain the copyright
+  notice, this list of conditions and the following disclaimer.
+  
+  (2) Redistributions in binary form must reproduce the copyright
+  notice, this list of conditions and the following disclaimer in
+  the documentation and/or other materials provided with the
+  distribution.
+  
+  (3) Neither the name of the University of California, Lawrence
+  Berkeley National Laboratory, U.S. Dept. of Energy nor the names
+  of its contributors may be used to endorse or promote products
+  derived from this software without specific prior written
+  permission.
+  
+  2. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  
+  3. You are under no obligation whatsoever to provide any bug fixes,
+  patches, or upgrades to the features, functionality or performance of
+  the source code ("Enhancements") to anyone; however, if you choose to
+  make your Enhancements available either publicly, or directly to
+  Lawrence Berkeley National Laboratory, without imposing a separate
+  written license agreement for such Enhancements, then you hereby grant
+  the following license: a non-exclusive, royalty-free perpetual license
+  to install, use, modify, prepare derivative works, incorporate into
+  other computer software, distribute, and sublicense such enhancements
+  or derivative works thereof, in binary and source code form.
+
+VTK License
+-------------------------------------------------------------------------------
+Copyright (c) 1993-2008 Ken Martin, Will Schroeder, Bill Lorensen
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, 
+are permitted provided that the following conditions are met:
+
+ - Redistributions of source code must retain the above copyright notice, this 
+list of conditions and the following disclaimer. 
+ - Redistributions in binary form must reproduce the above copyright notice, 
+this list of conditions and the following disclaimer in the documentation and/or 
+other materials provided with the distribution.
+ - Neither name of Ken Martin, Will Schroeder, or Bill Lorensen nor the names of 
+any contributors may be used to endorse or promote products derived from this 
+software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” 
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHORS OR CONTRIBUTORS BE LIABLE FOR 
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES 
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON 
+ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING 
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN 
+IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 
 
 GNU LESSER GENERAL PUBLIC LICENSE

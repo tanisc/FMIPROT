@@ -1,4 +1,4 @@
-version = '0.20.5 (Beta)'
+version = '0.21.0 (Beta)'
 #sysargv
 import argparse
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -12,7 +12,7 @@ parser.add_argument('-c','--config-settings',action='store_true', help="Configur
 parser.add_argument('--cleantemp',action='store_true', help="Clean temporary files. DO NOT USE THAT OPTION IF ANY INSTANCE OF THE PROGRAM IS RUNNING. These files also include files used by other running instances. Exits after cleaning.")
 parser.add_argument('--version', action='version', version='Version: ' + version)
 parser.add_argument('--license', action='store_true', help='Show license and exit.')
-#parser.add_argument('-d','--dev', action='store_true', help="Devmode")
+parser.add_argument('-d','--dev', action='store_true', help="Devmode")
 #parser.print_help()
 global sysargv
 sysargv = vars(parser.parse_args())
@@ -45,7 +45,7 @@ cmaps = [('Sequential',     ['binary', 'Blues', 'BuGn', 'BuPu', 'gist_yarg',
          ('Diverging',      ['BrBG', 'bwr', 'coolwarm', 'PiYG', 'PRGn', 'PuOr',
                              'RdBu', 'RdGy', 'RdYlBu', 'RdYlGn', 'seismic']),
          ('Qualitative',    ['Accent', 'Dark2', 'hsv', 'Paired', 'Pastel1',
-                             'Pastel2', 'Set1', 'Set2', 'Set3', 'spectral']),
+                             'Pastel2', 'Set1', 'Set2', 'Set3']),
          ('Miscellaneous',  ['gist_earth', 'gist_ncar', 'gist_rainbow',
                              'gist_stern', 'jet', 'brg', 'CMRmap', 'cubehelix',
                              'gnuplot', 'gnuplot2', 'ocean', 'rainbow',
@@ -99,8 +99,6 @@ ProxylistFile = os.path.join(SourceDir,'proxylist.tsvx')
 
 if sysargv['dev']:
     BinDir = os.path.split(os.path.realpath(os.sys.argv[0]))[0]
-    if os.path.exists(settingsFile):
-        os.remove(settingsFile)
 
 #clean temporary files
 if sysargv['cleantemp']:
@@ -121,9 +119,9 @@ if sysargv['cleantemp']:
         print 'Cancelled.'
     os._exit(1)
 #definitions, labels, keys for sources
-settings = ['http_proxy','https_proxy','ftp_proxy','ftp_passive','ftp_numberofconnections','results_path','images_path','images_download','timezone','convert_timezone','generate_report']
-settingsn = ['Proxy address for HTTP connections','Proxy address for HTTPS connections','Proxy address for FTP connections','Use passive connection for FTP','Maximum number of simultaneous FTP connections','Default results directory','Local image directory','Check and download new images from the camera network servers','Timezone offset','Convert time zone of timestamps of the images','Generate setup report with analysis results']
-settingso = ['(host:port)','(host:port)','(host:port)','(0/1)','(0-10)','(Path to directory)','(Path to directory)','(0/1)','(+HH:MM/-HH:MM or +00:00 for UTC)','(0/1)','(0/1)']
+settings = ['http_proxy','https_proxy','ftp_proxy','ftp_passive','ftp_numberofconnections','results_path','images_path','images_download','timezone','convert_timezone','generate_report','memory_limit']
+settingsn = ['Proxy address for HTTP connections','Proxy address for HTTPS connections','Proxy address for FTP connections','Use passive connection for FTP','Maximum number of simultaneous FTP connections','Default results directory','Local image directory','Check and download new images from the camera network servers','Timezone offset','Convert time zone of timestamps of the images','Generate setup report with analysis results','Maximum memory size to be used for the heavy applications, where available.']
+settingso = ['(host:port)','(host:port)','(host:port)','(0/1)','(0-10)','(Path to directory)','(Path to directory)','(0/1)','(+HH:MM/-HH:MM or +00:00 for UTC)','(0/1)','(0/1)','MB']
 source_metadata_hidden = ['host','username','password','path','filenameformat','networkid']
 source_metadata_names = {'network':'Source network','protocol':'Communication protocol','host':'Host address','username':'Username','password':'Password','device':'Device type','channels':'List of channels in the images','name':'Source Name','path':'Path on the server','filenameformat':'Filename convention of the images'}
 source_metadata_names.update({'sharedsources':'Other image sources that produces image including any shared location'})
@@ -133,11 +131,10 @@ source_metadata_names.update({'lastimagetime':'Time of the latest image produced
 source_metadata_names.update({'firstimagetime':'Time of the earliest image'})
 source_metadata_names.update({'previewimagetime':'Time of the image to be used as preview image'})
 
-settingsd = ['','','','1',str(FTPNumCon),ResultsDir,ImagesDir,str(int(ImagesDownload)),'+00:00','0','1']
+settingsd = ['','','','1',str(FTPNumCon),ResultsDir,ImagesDir,str(int(ImagesDownload)),'+00:00','0','1','4000']
 
 #create missing dirs and files
-dlist = [ResultsDir,ImagesDir,LogDir,PluginsDir,TmpDir,SourceDir]
-dlist = [LogDir,PluginsDir,TmpDir,SourceDir]
+dlist = [AuxDir,DEMDir,ResultsDir,ImagesDir,LogDir,PluginsDir,TmpDir,SourceDir]
 if sysargv['dev']:
     dlist = [AuxDir,DEMDir,ResultsDir,ImagesDir,LogDir,PluginsDir,TmpDir,SourceDir]
 for d in dlist:
@@ -157,3 +154,10 @@ if not os.path.exists(NetworklistFile):
 if not os.path.exists(ProxylistFile):
     f = open(ProxylistFile,'w')
     f.close()
+
+#auxdata settings
+from auxdata import auxlist,auxnamelist
+for source in auxnamelist:
+    for setk in auxlist[source]["settings"]:
+        settings.append(source+'-'+setk)
+        settingsd.append(auxlist[source]["settings"][setk])
