@@ -119,7 +119,7 @@ def salvatoriSnowMask(imglist,datetimelist,mask,settings,logger,red,green,blue):
 	thb = []
 	for i,img in enumerate(imglist):
 		img = mahotas.imread(img)
-		sc_img,thv = salvatoriSnowDetect(img,mask*maskers.thmask(img,th),logger,red,green,blue)
+		sc_img,thv = salvatoriSnowDetect(img,mask*maskers.thmask(img,th),settings,logger,red,green,blue)
 		sc_img = np.dstack(((sc_img==0)*255,(sc_img==1)*255,(sc_img==2)*255))
 		sc_img = sc_img.astype('uint8')
 		sc.append(str(datetimelist[i])+' Snow Mask')
@@ -227,7 +227,7 @@ def salvatoriSnowCover(img_imglist,datetimelist,mask,settings,logger,red,green,b
 			snow = 0
 			nosnow = 0
 			img = mahotas.imread(imgf)
-			(img,thv) = salvatoriSnowDetect(img,mask*maskers.thmask(img,th),logger,red,green,blue)
+			(img,thv) = salvatoriSnowDetect(img,mask*maskers.thmask(img,th),settings,logger,red,green,blue)
 			mimg = np.dstack((img==1,img==0,img==2)).astype(np.uint8)*255
 			if -1 in thv:
 				continue
@@ -269,7 +269,7 @@ def salvatoriSnowMap(img_imglist,datetimelist,mask,settings,logger,red,green,blu
 	sc = []
 	for i,img in enumerate(imglist):
 		img = mahotas.imread(img)
-		sc_img = salvatoriSnowDetect(img,mask*maskers.thmask(img,th),logger,red,green,blue)[0]
+		sc_img = salvatoriSnowDetect(img,mask*maskers.thmask(img,th),settings,logger,red,green,blue)[0]
 		sc.append(str(datetimelist[i])+' Snow Map')
 		sc_img = Georectify1(sc_img,None,mask,settings,logger,extent,extent_proj,res,dem,C,C_proj,Cz,hd,td,vd,f,w,interpolate,flat,origin,ax,ay)[0][1][1]
 		sc.append(sc_img)
