@@ -20,7 +20,7 @@ import gzip
 from netCDF4 import Dataset
 import subprocess
 import numpy as np
-from osgeo import gdal, ogr, osr    #temporarily disable for current server operations (gdal not installed)
+#from osgeo import gdal, ogr, osr    #temporarily disable for current server operations (gdal not installed)
 import pyproj
 import datetime
 from definitions import TmpDir
