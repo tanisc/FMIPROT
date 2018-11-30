@@ -863,7 +863,7 @@ calcnames.append("Snow Cover Fraction - SNOWCOV001")
 calccommands.append("salvatoriSnowCover(imglist,datetimelist,mask,settings,logger,params)")
 paramnames.append(paramnames[calcids.index("SNOWDET001")]+["Store mid-step and extra output data","Use georectification"]+paramnames[calcids.index('GEOREC001')])
 paramopts.append(paramopts[calcids.index("SNOWDET001")]+["Checkbox","Checkbox"]+paramopts[calcids.index('GEOREC001')])
-paramdefs.append(paramdefs[calcids.index("SNOWDET001")]+[0,1]+paramdefs[calcids.index('GEOREC001')])
+paramdefs.append(paramdefs[calcids.index("SNOWDET001")]+[0,0]+paramdefs[calcids.index('GEOREC001')])
 paramhelps.append(paramhelps[calcids.index("SNOWDET001")]+["Store mid-step and extra output data like thresholds, number of pixels with snow etc.","Use georectification"]+paramhelps[calcids.index('GEOREC001')])
 calcdescs.append("Snow cover fraction analysis.")
 

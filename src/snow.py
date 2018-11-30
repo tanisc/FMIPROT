@@ -203,9 +203,9 @@ def salvatoriSnowCover(img_imglist,datetimelist,mask,settings,logger,red,green,b
 	mask, pgs, th = mask
 	Wp *= (mask.transpose(2,0,1)[0]==1)
 	if np.mean(mask) == 1:
-		logger.set("Weightmask quality: " + np.sum(Wp[-100:,Wp.shape[1]/2-50:Wp.shape[1]/2+50] != 0)/10000)
+		logger.set("Weightmask quality: " + str(np.sum(Wp[-100:,Wp.shape[1]/2-50:Wp.shape[1]/2+50] != 0)/10000))
 	else:
-		logger.set("Weightmask quality: "+str(1 - np.sum((Wp==0)*(mask.transpose(2,0,1)[0]==1))/float(np.sum((mask.transpose(2,0,1)[0]==1)))))
+		logger.set("Weightmask quality: "+ str(1 - np.sum((Wp==0)*(mask.transpose(2,0,1)[0]==1))/float(np.sum((mask.transpose(2,0,1)[0]==1)))))
 	logger.set("Calculating snow cover fractions...")
 	scr = []
 	ssr = []

@@ -518,9 +518,9 @@ def Georectify1(img_imglist,datetimelist,mask,settings,logger,extent,extent_proj
 		logger.set('Image: |progress:4|queue:'+str(i_img)+'|total:'+str(len(img_imglist)))
 
 	if np.mean(mask) == 1:
-		logger.set("Weightmask quality: " + np.sum(Wp[-100:,Wp.shape[1]/2-50:Wp.shape[1]/2+50] != 0)/10000)
+		logger.set("Weightmask quality: " + str(np.sum(Wp[-100:,Wp.shape[1]/2-50:Wp.shape[1]/2+50] != 0)/10000))
 	else:
-		logger.set("Weightmask quality: "+str(1 - np.sum((Wp==0)*(mask.transpose(2,0,1)[0]==1))/float(np.sum((mask.transpose(2,0,1)[0]==1)))))
+		logger.set("Weightmask quality: " + str(1 - np.sum((Wp==0)*(mask.transpose(2,0,1)[0]==1))/float(np.sum((mask.transpose(2,0,1)[0]==1)))))
 
 	output.append("Area count")	#to be inversed in calculations. Wp[::-1] aligns with img = mahotas.imread
 	output.append(LensCorrRadial(Wp,'0',None,origin,ax,ay,1)[0][1][1])
