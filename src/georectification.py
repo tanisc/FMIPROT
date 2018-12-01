@@ -525,13 +525,14 @@ def Georectify1(img_imglist,datetimelist,mask,settings,logger,extent,extent_proj
 	output.append("Area count")	#to be inversed in calculations. Wp[::-1] aligns with img = mahotas.imread
 	output.append(LensCorrRadial(Wp,'0',None,origin,ax,ay,1)[0][1][1])
 
-	output.append("Perspective projection")
-	output.append(LensCorrRadial((Wp>0).astype(np.uint8),'0',None,origin,ax,ay,1)[0][1][1])
-
 	Wp *= (mask.transpose(2,0,1)[0]==1)
 	Wp = LensCorrRadial(Wp,'0',None,origin,ax,ay,1)[0][1][1]
 	output.append("Area count in ROI")
 	output.append(Wp)	#to be inversed in calculations. Wp[::-1] aligns with img = mahotas.imread
+
+
+	output.append("Perspective projection")
+	output.append(LensCorrRadial((Wp>0).astype(np.uint8),'0',None,origin,ax,ay,1)[0][1][1])
 
 	output.append("Mask")
 	mask = LensCorrRadial(mask,'0',None,origin,ax,ay,1)[0][1][1]
