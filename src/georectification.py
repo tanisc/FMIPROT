@@ -300,7 +300,7 @@ def Georectify1(img_imglist,datetimelist,mask,settings,logger,extent,extent_proj
 	ax = float(ax)
 	ay = float(ay)
 	(td,vd,hd) = (float(td),float(vd),float(hd))
-	params = map(np.copy,[extent,extent_proj,res,dem,C,C_proj,Cz,hd,td,vd,f,w,interpolate,flat,origin,ax,ay])
+	params = map(np.copy,[extent,extent_proj,res,dem,C,C_proj,Cz,hd,td,vd,f,w,interpolate,flat])
 
 	auxfilename = False
 	from definitions import AuxDir, TmpDir
