@@ -5,10 +5,8 @@ moviepy==0.2.3.2
 netCDF4==1.3.1
 numpy==1.14.1
 Pillow==5.0.0
-Polygon2==2.0.8
 PyInstaller==3.3.1
 pyproj==1.9.5.1
-pyresample==1.9.2
 python-dateutil==2.6.1
 pytz==2018.3
 scipy==1.1.0
