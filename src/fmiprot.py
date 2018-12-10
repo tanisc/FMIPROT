@@ -38,7 +38,7 @@ from copy import deepcopy
 import subprocess
 from auxdata import auxlist, auxnamelist
 import auxdata
-import comparators
+#import comparators
 
 import webbrowser
 import h5py
