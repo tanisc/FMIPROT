@@ -897,7 +897,7 @@ paramdefs.append([5,25,"720p","MP4"])
 paramhelps.append(["Duration of the animation in seconds","Number of frames per second. Enter 0 for automatic selection of FPS to use all the images available in the temporal range. Use the automatic selection only if you can estimate the size/bitrate of the animated video. If it is too high, it will not be practical to play it.","Image height of the animation. For example, VGA resolution is 480p. \"Original\" is the resolution of the camera images.","Output format of the file. GIF production is much slower."])
 calcdescs.append("Creates animations from images.")
 
-import template
+from template import *
 
 #disabled calcs
 for i,id  in enumerate(calcsw):

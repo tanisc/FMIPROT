@@ -12,10 +12,10 @@ calcdescs.append("My new algorithm is something I do")
 def myNewAlgorithm(imglist,datetimelist,mask,settings,logger,param1,param2,param3,rectsw,extent,extent_proj,res,dem,C,C_proj,Cz,hd,td,vd,f,w,interpolate,flat,origin,ax,ay):
     rectsw = bool(float(rectsw))    #all parameters arrive here as string
     if rectsw:
-        Wp = Georectify1([img_imglist[0]],[datetimelist[0]],mask,settings,logger,extent,extent_proj,res,dem,C,C_proj,Cz,hd,td,vd,f,w,interpolate,flat,origin,ax,ay)[0][1][3]
+        Wp = Georectify1([imglist[0]],[datetimelist[0]],mask,settings,logger,extent,extent_proj,res,dem,C,C_proj,Cz,hd,td,vd,f,w,interpolate,flat,origin,ax,ay)[0][1][3]
         Wp = Wp[::-1]   #y axis is inverse in images
     else:
-        Wp = np.ones(mahotas.imread(img_imglist[0]).shape[:2])
+        Wp = np.ones(mahotas.imread(imglist[0]).shape[:2])
 
     mask, pgs, th = mask
     Wp *= (mask.transpose(2,0,1)[0]==1)
@@ -23,7 +23,7 @@ def myNewAlgorithm(imglist,datetimelist,mask,settings,logger,param1,param2,param
     time = []
     values = []
 
-    for i,imgf in enumerate(img_imglist):
+    for i,imgf in enumerate(imglist):
         time = np.append(time,(str(datetimelist[i])))
 
         img = mahotas.imread(imgf)
@@ -31,11 +31,13 @@ def myNewAlgorithm(imglist,datetimelist,mask,settings,logger,param1,param2,param
 
         # calculate value here
         # value = ?
+        r,g,b = img.transpose(2,0,1)
+        value = np.mean(r)
 
         # multiply with Wp (weightmask) the array result if needed
         # for example with snow-nosnow mask
 
         values = np.append(values,value)
-        logger.set('Image: |progress:4|queue:'+str(i_img+1)+'|total:'+str(len(img_imglist)))
+        logger.set('Image: |progress:4|queue:'+str(i+1)+'|total:'+str(len(imglist)))
 
     return [["My algorithm title",["Time",time,"My values",values]]]
