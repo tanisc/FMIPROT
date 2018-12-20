@@ -1,3 +1,4 @@
+from calculations import *
 calcids.append("MYNEWALGORITHM")
 calcsw.append(True)
 calcnames.append("My new algorithm")
@@ -20,7 +21,7 @@ def myNewAlgorithm(imglist,datetimelist,mask,settings,logger,param1,param2,param
     Wp *= (mask.transpose(2,0,1)[0]==1)
 
     time = []
-	values = []
+    values = []
 
     for i,imgf in enumerate(img_imglist):
         time = np.append(time,(str(datetimelist[i])))
