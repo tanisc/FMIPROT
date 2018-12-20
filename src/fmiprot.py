@@ -62,8 +62,13 @@ class monimet_gui(Tkinter.Tk):
 		self.parent = parent
 		self.resizable(False, False)
 
-		self.UnitSize = self.winfo_screenwidth() / 640
-		self.FontSize = int(3.2*self.UnitSize/(self.UnitSize/3))
+		screen_sizes = [self.winfo_screenwidth(),self.winfo_screenheight()]
+		self.UnitSize = min(screen_sizes)
+		if screen_sizes.index(self.UnitSize) == 0:
+			self.UnitSize /= 640
+		else:
+			self.UnitSize /= 360
+		self.FontSize = self.UnitSize*3
 		self.DefFont = tkFont.nametofont("TkDefaultFont")
 		self.DefFont.configure(size=self.FontSize)
 		self.option_add("*Font", self.DefFont)
