@@ -85,9 +85,12 @@ def readResultsData(fname,logger):
 			for i in range(len(data_captions[r][1])/2):
 				if data_captions[r][1][i*2] != 'Time' and data_captions[r][1][i*2] != 'Date':
 					try:
-						data_captions[r][1][i*2+1] = np.array(data_captions[r][1][i*2+1],dtype='int64')
+						try:
+							data_captions[r][1][i*2+1] = np.array(data_captions[r][1][i*2+1],dtype='int64')
+						except:
+							data_captions[r][1][i*2+1] = np.array(data_captions[r][1][i*2+1],dtype='float64')
 					except:
-						data_captions[r][1][i*2+1] = np.array(data_captions[r][1][i*2+1],dtype='float64')
+							data_captions[r][1][i*2+1] = np.array(data_captions[r][1][i*2+1])
 
 	return (analysis_captions, data_captions)
 
@@ -156,9 +159,26 @@ def storeData(fname, analysis_captions, data_captions,logger,visout=False):
 					f.write('var'+str(c))
 					f.write('\t')
 			f.write('\n')
+			if 'filetocopy' in captions:
+				if not os.path.exists(fname):
+					os.makedirs(fname)
+				for v in os.listdir(fname):
+					if v not in data[captions.index('Filename')]:
+						os.remove(os.path.join(fname,v))
 			for d in zip(*data):
 				for i,v in enumerate(d):
-					f.write(str(v).replace(' ','T'))
+					if captions[i] == "filetocopy":
+						f.write('hidden')
+						fnamet = os.path.join(fname,d[captions.index('Filename')])
+						if bool(int(d[captions.index('filemodified')])) and os.path.isfile(fnamet):
+							os.remove(fnamet)
+						if not os.path.isfile(fnamet):
+							shutil.copy(v,fnamet)
+					else:
+						if captions[i] == "Time":
+							f.write(str(v).replace(' ','T'))
+						else:
+							f.write(str(v))
 					f.write('\t')
 				f.write('\n')
 			f.close()
@@ -172,7 +192,13 @@ def storeData(fname, analysis_captions, data_captions,logger,visout=False):
 				for d in zip(*data):
 					g.write('\n')
 					for i,v in enumerate(d):
-						g.write(str(v).replace(' ','T'))
+						if captions[i] == "filetocopy":
+							g.write('hidden')
+						else:
+							if captions[i] == "Time":
+								g.write(str(v).replace(' ','T'))
+							else:
+								g.write(str(v))
 						if i != len(d) -1:
 							g.write(',')
 				g.close()
