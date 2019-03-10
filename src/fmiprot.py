@@ -631,7 +631,7 @@ class monimet_gui(Tkinter.Tk):
 		Tkinter.Button(self.manager_network_window,text='?',command=lambda: tkMessageBox.showinfo('Network Manager','Name of the network can be edited here. It should not be same as or similar (e.g. Helsinki North, HelsinkiNorth, Helsinki-North etc.) to any other camera network name. The manage will warn you in such case.\n')).grid(sticky='w'+'e',row=r,column=6)
 		r += 1
 		Tkinter.Label(self.manager_network_window,anchor='w',text='CNIF Communication Protocol:').grid(sticky='w'+'e',row=r,column=1)
-		Tkinter.OptionMenu(self.manager_network_window,self.manager_network_protocol,'FTP','HTTP','LOCAL').grid(sticky='w'+'e',row=r,column=2,columnspan=4)
+		Tkinter.OptionMenu(self.manager_network_window,self.manager_network_protocol,'FTP','HTTP','HTTPS','LOCAL').grid(sticky='w'+'e',row=r,column=2,columnspan=4)
 		Tkinter.Button(self.manager_network_window,text='?',command=lambda: tkMessageBox.showinfo('Network Manager','The communication protocol to reach CNIF. If the CNIF is/will be in this computer, select LOCAL.')).grid(sticky='w'+'e',row=r,column=6)
 		r += 1
 		Tkinter.Label(self.manager_network_window,anchor='w',text='CNIF Host:').grid(sticky='w'+'e',row=r,column=1)
@@ -698,7 +698,7 @@ class monimet_gui(Tkinter.Tk):
 			Tkinter.Button(self.modify_source_window,text='?',command=lambda: tkMessageBox.showinfo('Edit Sources','Name of the camera can be edited here. It should not be same as or similar (e.g. Helsinki North, HelsinkiNorth, Helsinki-North etc.) to any other camera name. The manage will warn you in such case.\n')).grid(sticky='w'+'e',row=r,column=6)
 			r += 1
 			Tkinter.Label(self.modify_source_window,anchor='w',text='Camera Communication Protocol:').grid(sticky='w'+'e',row=r,column=1)
-			Tkinter.OptionMenu(self.modify_source_window,self.modify_source_protocol,'FTP','HTTP','LOCAL').grid(sticky='w'+'e',row=r,column=2,columnspan=4)
+			Tkinter.OptionMenu(self.modify_source_window,self.modify_source_protocol,'FTP','HTTP','HTTPS','LOCAL').grid(sticky='w'+'e',row=r,column=2,columnspan=4)
 			Tkinter.Button(self.modify_source_window,text='?',command=lambda: tkMessageBox.showinfo('Edit Sources','The communication protocol to fetch camera images. If the images are/will be in this computer, select LOCAL.')).grid(sticky='w'+'e',row=r,column=6)
 			r += 1
 			Tkinter.Label(self.modify_source_window,anchor='w',text='Image archive Host:').grid(sticky='w'+'e',row=r,column=1)
@@ -798,7 +798,7 @@ class monimet_gui(Tkinter.Tk):
 		Tkinter.Button(self.manager_source_window,text='?',command=lambda: tkMessageBox.showinfo('Edit Sources','Name of the camera can be edited here. It should not be same as or similar (e.g. Helsinki North, HelsinkiNorth, Helsinki-North etc.) to any other camera name. The manage will warn you in such case.\n')).grid(sticky='w'+'e',row=r,column=6)
 		r += 1
 		Tkinter.Label(self.manager_source_window,anchor='w',text='Camera Communication Protocol:').grid(sticky='w'+'e',row=r,column=1)
-		Tkinter.OptionMenu(self.manager_source_window,self.manager_source_protocol,'FTP','HTTP','LOCAL').grid(sticky='w'+'e',row=r,column=2,columnspan=4)
+		Tkinter.OptionMenu(self.manager_source_window,self.manager_source_protocol,'FTP','HTTP','HTTPS','LOCAL').grid(sticky='w'+'e',row=r,column=2,columnspan=4)
 		Tkinter.Button(self.manager_source_window,text='?',command=lambda: tkMessageBox.showinfo('Edit Sources','The communication protocol to fetch camera images. If the images are/will be in this computer, select LOCAL.')).grid(sticky='w'+'e',row=r,column=6)
 		r += 1
 		Tkinter.Label(self.manager_source_window,anchor='w',text='Image archive Host:').grid(sticky='w'+'e',row=r,column=1)
@@ -1531,8 +1531,8 @@ class monimet_gui(Tkinter.Tk):
 		Tkinter.Button(self.manager_proxy_window,text='?',command=lambda: tkMessageBox.showinfo('Edit Sources','When reaching images of a camera with parameters on the "Original value" side, instead the parameters in "Proxy value" will be used. Use "*" as a wildcard to include any value for a parameter. Check the user manual for detailed information and examples.')).grid(sticky='w'+'e',row=r,column=7)
 		r += 1
 		Tkinter.Label(self.manager_proxy_window,anchor='w',text='Camera Communication Protocol:').grid(sticky='w'+'e',row=r,column=1,columnspan=4)
-		Tkinter.OptionMenu(self.manager_proxy_window,self.manager_proxy_protocol,'FTP','HTTP','LOCAL').grid(sticky='w'+'e',row=r,column=5)
-		Tkinter.OptionMenu(self.manager_proxy_window,self.manager_proxy_protocol_target,'FTP','HTTP','LOCAL').grid(sticky='w'+'e',row=r,column=6)
+		Tkinter.OptionMenu(self.manager_proxy_window,self.manager_proxy_protocol,'FTP','HTTP','HTTPS','LOCAL').grid(sticky='w'+'e',row=r,column=5)
+		Tkinter.OptionMenu(self.manager_proxy_window,self.manager_proxy_protocol_target,'FTP','HTTP','HTTPS','LOCAL').grid(sticky='w'+'e',row=r,column=6)
 		Tkinter.Button(self.manager_proxy_window,text='?',command=lambda: tkMessageBox.showinfo('Edit Sources','The communication protocol to fetch camera images. If the images are/will be in this computer, select LOCAL.')).grid(sticky='w'+'e',row=r,column=7)
 		r += 1
 		Tkinter.Label(self.manager_proxy_window,anchor='w',text='Image archive Host:').grid(sticky='w'+'e',row=r,column=1,columnspan=4)
