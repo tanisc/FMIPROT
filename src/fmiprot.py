@@ -2662,7 +2662,7 @@ class monimet_gui(Tkinter.Tk):
 
 	def Tools_Georectification(self):
 		from georectification import georectificationTool
-		georectificationTool(self.Message)
+		georectificationTool(self.Message,self.memorylimit.get())
 
 	def Menu_Base(self):
 		greentexture = Tkinter.PhotoImage(file=os.path.join(ResourcesDir,'green_grad_inv.gif'))

@@ -26,7 +26,7 @@ def makeColor(value,offset,scale):
 	color = map(int,color)
 	return color
 
-def georectificationTool(logger):
+def georectificationTool(logger,memorylimit):
 	# Levi
 	extent = "-1500;-1000;1500;3000"
 	extent_proj = "ETRS-TM35FIN(EPSG:3067) GEOID with Camera at Origin"
@@ -87,6 +87,24 @@ def georectificationTool(logger):
 	# img = mahotas.imread("/home/tanisc/FMIPROT/dev/images/MONIMET_Snow_Test/Sodankyla_Pine_Peatland/sod_pin_peatland_20141017_110135.jpg")
 	# img = LensCorrRadial(img,None,None,'0.0;0.0','0.09','0.09',0)[0][1][1]
 
+
+	# Tvarminne
+	extent = "-325;0;0;275"
+	extent_proj = "ETRS-TM35FIN(EPSG:3067) GEOID with Camera at Origin"
+	C = "59.844555;23.249109"
+	C_proj = "WGS84(EPSG:4326)"
+	dem = 'NLS-DEM2'
+	Cz = 11.7
+	res = 1
+	td = 304 + 2.5
+	vd = 4.5
+	hd = 0
+	f = 50*0.001
+	s = 1
+	img = mahotas.imread("/home/tanisc/FMIPROT/dev/images/4-MONIMET/Tvarminne_Birch_Landscape/tvarminne_landscape_20190306_102231.jpg")
+	# img = LensCorrRadial(img,None,None,'0.0;0.0','0.09','0.09',0)[0][1][1]
+
+
 	h,w = img.shape[:2]
 	Wp = np.zeros((h,w),np.float64)
 
@@ -132,7 +150,7 @@ def georectificationTool(logger):
 		extent = transExtent(extent,extent_proj)
 
 	[x1,y1,x2,y2] = extent
-	demData = getDEM(x1,y1,x2,y2,res*2,res*2,dem,flat=False,interpolate=True,maxmem=settings['memory_limit'])
+	demData = getDEM(x1,y1,x2,y2,res*2,res*2,dem,flat=False,interpolate=True,maxmem=memorylimit)
 	surfarea = np.zeros(demData.shape[1:],np.float64)
 
 
