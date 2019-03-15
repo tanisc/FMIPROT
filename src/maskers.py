@@ -53,6 +53,8 @@ def thmask(img,th):
 	img = img.transpose(2,0,1)
 	mask = np.zeros(img.shape,'uint8')
 	mask2 = (img[0]>=th[8])*(img[0]<=th[9])*(img[1]>=th[10])*(img[1]<=th[11])*(img[2]>=th[12])*(img[2]<=th[13])
+	if len(th) <= 16:
+		th += [0.0,255.0]
 	mask2 *= (img[0]>=th[16])*(img[1]>=th[16])*(img[2]>=th[16])*(img[0]<=th[17])*(img[1]<=th[17])*(img[2]<=th[17])
 	img = None
 	mask[0] = mask2
