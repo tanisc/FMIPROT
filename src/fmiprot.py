@@ -103,6 +103,7 @@ class monimet_gui(Tkinter.Tk):
 		self.LogWindowOn()
 		self.initialize()
 		self.centerWindow(self.LogWindow,ontheside=True)
+		# self.Tools_Georectification()
 
 	def initialize(self):
 		self.MenuTitleBgColor = 'RoyalBlue4'

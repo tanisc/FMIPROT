@@ -367,19 +367,19 @@ def Georectify1(img_imglist,datetimelist,mask,settings,logger,extent,extent_proj
 		#round extent,C
 		(i,j) = (0,2)
 		if extent[i] > extent[j]:
-			(i.j) = (j,i)
+			(i,j) = (j,i)
 		extent[i] -= extent[i]%res
 		extent[j] += res - extent[j]%res
 		(i,j) = (1,3)
 		if extent[i] > extent[j]:
-			(i.j) = (j,i)
+			(i,j) = (j,i)
 		extent[i] -= extent[i]%res
 		extent[j] += res - extent[j]%res
-		for i in [0,1]:
-			if C[i]%res < (res/2):
-				C[i] -= C[i]%res
-			else:
-				C[i] += res - C[i]%res
+		# for i in [0,1]:
+		# 	if C[i]%res < (res/2):
+		# 		C[i] -= C[i]%res
+		# 	else:
+		# 		C[i] += res - C[i]%res
 
 		vis = None
 		extentvis = np.copy(extent)
