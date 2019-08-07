@@ -26,84 +26,45 @@ def makeColor(value,offset,scale):
 	color = map(int,color)
 	return color
 
-def georectificationTool(logger,memorylimit):
-	# Levi
-	extent = "-1500;-1000;1500;3000"
-	extent_proj = "ETRS-TM35FIN(EPSG:3067) GEOID with Camera at Origin"
-	C = "67.78562383;24.794"
-	C_proj = "WGS84(EPSG:4326)"
-	dem = 'NLS-DEM2'
-	Cz = 206.98
-	res = 2
-	vd = 5
-	td = 0
-	hd = 0
-	f = 24*0.001
-	s = 1
+def georectificationTool(logger,imgfile,analysis,geoparams,geoopts,corrparams,memorylimit):
+	logger.set('Running georectification preview...|busy:True')
+	interpolate = True
+	flat = False
 
-	# Kenttarova
-	extent = "-7000;-1000;0;7000"
-	extent = "-7000;-7000;7000;7000"
-	extent_proj = "ETRS-TM35FIN(EPSG:3067) GEOID with Camera at Origin"
-	C = "67.98726;24.24302"
-	C_proj = "WGS84(EPSG:4326)"
-	dem = 'NLS-DEM10'
-	Cz = 21.20
-	res = 40
-	td = 273 + 32
-	vd = 20 - 7
-	hd = 2 + 3
-	f = 4*0.001
-	s = 1
-	img = mahotas.imread("/home/tanisc/FMIPROT/dev/images/MONIMET_Snow_Test/Kenttarova_Spruce_Canopy/ken_spr_canopy_20160810_113000.jpg")
+	extent = analysis[geoparams[0]]
+	extent_proj = analysis[geoparams[1]]
+	res = float(analysis[geoparams[2]])
+	dem = analysis[geoparams[3]]
+	C = analysis[geoparams[4]]
+	C_proj = analysis[geoparams[5]]
+	Cz = float(analysis[geoparams[6]])
+	hd = float(analysis[geoparams[7]])
+	td = float(analysis[geoparams[8]])
+	vd = float(analysis[geoparams[9]])
+	f = float(analysis[geoparams[10]])*0.001
+	s = float(analysis[geoparams[11]])
+	interpolate = analysis[geoparams[12]]
+	flat = analysis[geoparams[13]]
 
-	# Kenttarova closeup
-	# extent = "-2000;-100;0;1900"
-	# extent_proj = "ETRS-TM35FIN(EPSG:3067) GEOID with Camera at Origin"
-	# C = "67.98726;24.24302"
-	# C_proj = "WGS84(EPSG:4326)"
-	# dem = 'NLS-DEM10'
-	# Cz = 21.20
-	# res = 1
-	# td = 273 + 32
-	# vd = 20 - 7
-	# hd = 2 + 3
-	# f = 4*0.001
-	# s = 1
+	extent_proj = geoopts[1][int(extent_proj)]
+	dem = geoopts[3][int(dem)]
+	C_proj = geoopts[5][int(C_proj)]
 
-	# Sodankyla peatland
-	# extent = "-100;0;230;340"
-	# extent_proj = "ETRS-TM35FIN(EPSG:3067) GEOID with Camera at Origin"
-	# C = "485157.0;7472496.1"
-	# C_proj = "ETRS-TM35FIN(EPSG:3067)"
-	# dem = 'NLS-DEM2'
-	# Cz = 2.41
-	# res = 2
-	# td = 27.75
-	# vd = 14.75 - 3.25
-	# hd = 8.5	#-0.5
-	# f = 50*0.001
-	# s = 1#532.04
-	# img = mahotas.imread("/home/tanisc/FMIPROT/dev/images/MONIMET_Snow_Test/Sodankyla_Pine_Peatland/sod_pin_peatland_20141017_110135.jpg")
-	# img = LensCorrRadial(img,None,None,'0.0;0.0','0.09','0.09',0)[0][1][1]
+	origin = analysis[corrparams[0]]
+	ax = analysis[corrparams[1]]
+	ay = analysis[corrparams[2]]
 
+	if flat == '0':
+		flat = False
+	else:
+		flat = True
+	if interpolate == '0':
+		interpolate = False
+	else:
+		interpolate = True
 
-	# Tvarminne
-	extent = "-325;0;0;275"
-	extent_proj = "ETRS-TM35FIN(EPSG:3067) GEOID with Camera at Origin"
-	C = "59.844555;23.249109"
-	C_proj = "WGS84(EPSG:4326)"
-	dem = 'NLS-DEM2'
-	Cz = 11.7
-	res = 1
-	td = 304 + 2.5
-	vd = 4.5
-	hd = 0
-	f = 50*0.001
-	s = 1
-	img = mahotas.imread("/home/tanisc/FMIPROT/dev/images/4-MONIMET/Tvarminne_Birch_Landscape/tvarminne_landscape_20190306_102231.jpg")
-	# img = LensCorrRadial(img,None,None,'0.0;0.0','0.09','0.09',0)[0][1][1]
-
+	img = mahotas.imread(imgfile)
+	img = LensCorrRadial(img,None,None,origin,ax,ay,0)[0][1][1]
 
 	h,w = img.shape[:2]
 	Wp = np.zeros((h,w),np.float64)
@@ -112,7 +73,7 @@ def georectificationTool(logger,memorylimit):
 	C = map(float,C.split(';'))
 	C = transSingle(C,C_proj)
 	C = np.append(C,float(Cz))
-	C[2] += getDEM(C[0],C[1],C[0],C[1],1,1,dem,flat=False,interpolate=True)[2][0][0]
+	C[2] += getDEM(C[0],C[1],C[0],C[1],1,1,dem,flat,interpolate)[2][0][0]
 	C = C.tolist()
 
 	renderer = vtk.vtkRenderer()
@@ -139,6 +100,7 @@ def georectificationTool(logger,memorylimit):
 	renderWindow.Render()
 
 	txt.SetInput("Bulding 3D World %0")
+	logger.set('Bulding 3D World...')
 	renderWindow.Render()
 	if extent != [0,0,0,0]:
 		if extent_proj == "ETRS-TM35FIN(EPSG:3067) GEOID with Camera at Origin":
@@ -150,7 +112,7 @@ def georectificationTool(logger,memorylimit):
 		extent = transExtent(extent,extent_proj)
 
 	[x1,y1,x2,y2] = extent
-	demData = getDEM(x1,y1,x2,y2,res*2,res*2,dem,flat=False,interpolate=True,maxmem=memorylimit)
+	demData = getDEM(x1,y1,x2,y2,res*2,res*2,dem,flat,interpolate,maxmem=memorylimit)
 	surfarea = np.zeros(demData.shape[1:],np.float64)
 
 
@@ -207,7 +169,7 @@ def georectificationTool(logger,memorylimit):
 	camera = vtk.vtkCamera();
 	renderer.SetActiveCamera(camera);
 	camera.SetPosition(C)
-	N, U, V = cameraDirection(np.array(C),0,td,vd,dem,flat=False,interpolate=True)	# U (right) and V(up) are opposite direction in this function
+	N, U, V = cameraDirection(np.array(C),0,td,vd,dem,flat,interpolate)	# U (right) and V(up) are opposite direction in this function
 	los = np.abs(np.linalg.norm(np.array((demData[0][-1][-1]-demData[0][0][0],demData[1][-1][-1]-demData[1][0][0]))))
 	nearz, farz = -los, los
 	radius = np.abs(np.linalg.norm(np.array((max(demData[0][-1][-1],demData[0][0][0]),max(demData[1][-1][-1],demData[1][0][0])))))
@@ -232,6 +194,7 @@ def georectificationTool(logger,memorylimit):
 	camera.SetClippingRange(0.1,radius)
 
 	txt.SetInput("Calculating shades %"+str(int(100*(0)/float(w*h))))
+	logger.set('Calculating shades...')
 	renderWindow.Render()
 	# shed = np.zeros(demData.shape[1:],np.uint8)
 	# def pickerFunc(i,j,k, renderer):
@@ -241,9 +204,10 @@ def georectificationTool(logger,memorylimit):
 	# 	return np.where((np.abs(demData[0]-x)<res/2)*(np.abs(demData[1]-y)<res/2))
 	# vPick = np.vectorize(pickerFunc)
 	# shed[vPick(np.indices((h,w))[0],np.indices((h,w))[1], 0,renderer)] = 1
-	shed = viewShedWang(logger,demData,np.array([C[0],C[1],Cz]),dem,flat=False,interpolate=True)
+	shed = viewShedWang(logger,demData,np.array([C[0],C[1],Cz]),dem,flat,interpolate)
 
 	txt.SetInput("Projecting camera image %"+str(int(100*(0)/float(demData[2].shape[0]))))
+	logger.set('Projecting camera image...')
 	renderWindow.Render()
 	colors = vtk.vtkUnsignedCharArray()
 	colors.SetNumberOfComponents(3)
@@ -287,6 +251,7 @@ def georectificationTool(logger,memorylimit):
 
 	txt.SetInput("Ready. Projection quality: %.6f"%q)
 	renderWindowInteractor.Start()
+	logger.set('Georectification preview ready...|busy:False')
 
 def Georectify1(img_imglist,datetimelist,mask,settings,logger,extent,extent_proj,res,dem,C,C_proj,Cz,hd,td,vd,f,w,interpolate,flat,origin,ax,ay):
 	mask, pgs, th = mask

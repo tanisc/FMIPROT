@@ -103,7 +103,6 @@ class monimet_gui(Tkinter.Tk):
 		self.LogWindowOn()
 		self.initialize()
 		self.centerWindow(self.LogWindow,ontheside=True)
-		# self.Tools_Georectification()
 
 	def initialize(self):
 		self.MenuTitleBgColor = 'RoyalBlue4'
@@ -557,7 +556,7 @@ class monimet_gui(Tkinter.Tk):
 		ToolsMenu.add_command(label="Add Plugin...",command=self.Plugins_Add)
 		ToolsMenu.add_command(label="Remove Plugin...",command=self.Plugins_Remove)
 		#ToolsMenu.add_command(label="Comparison tool...",command=self.Tools_Comparison)
-		#ToolsMenu.add_command(label="Georectification tool...",command=self.Tools_Georectification)
+		ToolsMenu.add_command(label="Georectification preview...",command=self.Tools_Georectification)
 		menubar.add_cascade(label="Tools", menu=ToolsMenu)
 		self.config(menu=menubar)
 
@@ -2662,8 +2661,65 @@ class monimet_gui(Tkinter.Tk):
 			self.ResultFolderNameVariable.set(resultspath)
 
 	def Tools_Georectification(self):
-		from georectification import georectificationTool
-		georectificationTool(self.Message,self.memorylimit.get())
+		self.UpdateSetup()
+		from georectification import georectificationTool, transSingle, transExtent
+		analysis = self.setup[self.AnalysisNoVariable.get()-1]['analysis-'+str(self.CalculationNoVariable.get())]
+		geoparams = paramnames[calcids.index('GEOREC001')]
+		geoopts = paramopts[calcids.index('GEOREC001')]
+		corrparams = paramnames[calcids.index('IMGCORR01')]
+		message = ''
+		message += 'This tool simulates the georectification using VTK and OpenGL libraries. The parameters are taken from the current analysis parameters in the current scenario. The preview image used is the one chosen in the Camera menu.\n'
+
+		try:
+			extent = analysis[geoparams[0]]
+			extent_proj = analysis[geoparams[1]]
+			res = float(analysis[geoparams[2]])
+			dem = analysis[geoparams[3]]
+			C = analysis[geoparams[4]]
+			C_proj = analysis[geoparams[5]]
+			Cz = float(analysis[geoparams[6]])
+			hd = float(analysis[geoparams[7]])
+			td = float(analysis[geoparams[8]])
+			vd = float(analysis[geoparams[9]])
+			f = float(analysis[geoparams[10]])*0.001
+			s = float(analysis[geoparams[11]])
+			interpolate = analysis[geoparams[12]]
+			flat = analysis[geoparams[13]]
+
+			extent_proj = geoopts[1][int(extent_proj)]
+			dem = geoopts[3][int(dem)]
+			C_proj = geoopts[5][int(C_proj)]
+
+			origin = analysis[corrparams[0]]
+			ax = analysis[corrparams[1]]
+			ay = analysis[corrparams[2]]
+		except:
+			message += '\nGeorectification parameters are not found in the current analysis or an unexpected error has occured. Check the analysis type and parameters and try again.\n'
+			tkMessageBox.showwarning('Georectification preview',message)
+			return 0
+
+		extent = map(float,extent.split(';'))
+		C = map(float,C.split(';'))
+		C = transSingle(C,C_proj)
+		if extent != [0,0,0,0]:
+			if extent_proj == "ETRS-TM35FIN(EPSG:3067) GEOID with Camera at Origin":
+				extent[0] += C[0]
+				extent[2] += C[0]
+				extent[1] += C[1]
+				extent[3] += C[1]
+				extent_proj = "ETRS-TM35FIN(EPSG:3067)"
+			extent = transExtent(extent,extent_proj)
+
+		[x1,y1,x2,y2] = extent
+		size = int(((y2-y1)/res)*((x2-x1)/res))
+
+		message += '\nThere are over ' + str(size) + ' points in the real world to be simulated for the preview. It is adviced to keep the number of points under half million, otherwise the process may take too long.\n'
+		message += '\nThe spatial resolution or the spatial extent can be decreased to decrease number of points.\n'
+		message += '\nDo you wish the continue?'
+
+
+		if tkMessageBox.askyesno('Georectification preview',message):
+			georectificationTool(self.Message,self.PictureFileName.get(),analysis,geoparams,geoopts,corrparams,self.memorylimit.get())
 
 	def Menu_Base(self):
 		greentexture = Tkinter.PhotoImage(file=os.path.join(ResourcesDir,'green_grad_inv.gif'))
