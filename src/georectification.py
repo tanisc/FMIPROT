@@ -100,8 +100,8 @@ def georectificationTool(logger,imgfile,analysis,geoparams,geoopts,corrparams,me
 	renderWindow.SetSize(w, h)
 	renderWindow.Render()
 
-	txt.SetInput("Bulding 3D World %0")
-	logger.set('Bulding 3D World...')
+	txt.SetInput("Handling DEM data...")
+	logger.set('Handling DEM data...')
 	renderWindow.Render()
 	if extent != [0,0,0,0]:
 		if extent_proj == "ETRS-TM35FIN(EPSG:3067) GEOID with Camera at Origin":
@@ -116,57 +116,8 @@ def georectificationTool(logger,imgfile,analysis,geoparams,geoopts,corrparams,me
 	demData = getDEM(x1,y1,x2,y2,res*2,res*2,dem,flat,interpolate,maxmem=memorylimit)
 	surfarea = np.zeros(demData.shape[1:],np.float64)
 
-
-	# Define points, triangles and colors
-	colors = vtk.vtkUnsignedCharArray()
-	colors.SetNumberOfComponents(3)
-	points = vtk.vtkPoints()
-	triangles = vtk.vtkCellArray()
-
-	count = 0
-	for i in range(demData[2].shape[0] - 1):
-		for j in range(demData[2].shape[1] - 1):
-			surftriangles = vtk.vtkCellArray()
-
-			xyz = [[],[],[]]
-			for k in range(3):
-				xyz[k] = [demData[k][i][j],demData[k][i][j+1],(demData[k][i][j]+demData[k][i+1][j+1])/2.0,demData[k][i+1][j],demData[k][i+1][j+1]]
-
-			triangle = vtk.vtkTriangle()
-			r = [255,255,255]
-			ijk = [[0,1,2],[0,2,3],[1,2,4],[2,3,4]]
-			for l in range(4):
-				for m in range(3):
-					points.InsertNextPoint(xyz[0][ijk[l][m]], xyz[1][ijk[l][m]], xyz[2][ijk[l][m]])
-					triangle.GetPointIds().SetId(m, count)
-					count += 1
-				triangles.InsertNextCell(triangle)
-				colors.InsertNextTypedTuple(r)
-				surftriangles.InsertNextCell(triangle)
-
-			surftrianglePolyData = vtk.vtkPolyData()
-			surftrianglePolyData.SetPoints(points)
-			surftrianglePolyData.SetPolys(surftriangles)
-			mass = vtk.vtkMassProperties()
-			mass.SetInputData(surftrianglePolyData)
-			surfarea[i][j] = mass.GetSurfaceArea()
-
-		logger.set('Row: |progress:4|queue:'+str(i+1)+'|total:'+str(demData[2].shape[0]-1))
-		txt.SetInput("Bulding 3D World %"+str(int(100*(i+1)/float(demData[2].shape[0]-1))))
-		renderWindow.Render()
-
-	trianglePolyData = vtk.vtkPolyData()
-	trianglePolyData.SetPoints(points)
-	trianglePolyData.GetPointData().SetScalars(colors)
-	trianglePolyData.SetPolys(triangles)
-	mapper = vtk.vtkPolyDataMapper()
-	mapper.SetInputData(trianglePolyData)
-	actor = vtk.vtkActor()
-	actor.SetMapper(mapper)
-	renderer.AddActor(actor)
-	renderWindow.Render()
-
 	txt.SetInput("Placing camera...")
+	renderWindow.Render()
 	camera = vtk.vtkCamera();
 	renderer.SetActiveCamera(camera);
 	camera.SetPosition(C)
@@ -192,7 +143,7 @@ def georectificationTool(logger,imgfile,analysis,geoparams,geoopts,corrparams,me
 	ctm = np.matrix(np.array(ctm).reshape(4,4))
 	print "\tCPM: ", ctm
 
-	txt.SetInput("Calculating shades %"+str(int(100*(0)/float(w*h))))
+	txt.SetInput("Calculating shades...")#%"+str(int(100*(0)/float(w*h))))
 	logger.set('Calculating shades...')
 	renderWindow.Render()
 	# shed = np.zeros(demData.shape[1:],np.uint8)
@@ -205,21 +156,38 @@ def georectificationTool(logger,imgfile,analysis,geoparams,geoopts,corrparams,me
 	# shed[vPick(np.indices((h,w))[0],np.indices((h,w))[1], 0,renderer)] = 1
 	shed = viewShedWang(logger,demData,np.array([C[0],C[1],Cz]),dem,flat,interpolate)
 
-	txt.SetInput("Projecting camera image %"+str(int(100*(0)/float(demData[2].shape[0]))))
-	logger.set('Projecting camera image...')
+	txt.SetInput("Bulding 3D World %0")
+	logger.set('Bulding 3D World...')
+	light = vtk.vtkLight()
+	light.SetColor(1.0, 1.0, 1.0)
+	light.SetLightTypeToSceneLight()
+	renderer.AddLight(light)
 	renderWindow.Render()
+	# Define points, triangles and colors
 	colors = vtk.vtkUnsignedCharArray()
 	colors.SetNumberOfComponents(3)
-	pp = []
-	for i in range(demData[2].shape[0]-1):
-		for j in range(demData[2].shape[1]-1):
+	colors_proj = vtk.vtkUnsignedCharArray()
+	colors_proj.SetNumberOfComponents(3)
+	points = vtk.vtkPoints()
+	triangles = vtk.vtkCellArray()
+
+	count = 0
+	for i in range(demData[2].shape[0] - 1):
+		for j in range(demData[2].shape[1] - 1):
+			surftriangles = vtk.vtkCellArray()
+
 			xyz = [[],[],[]]
 			for k in range(3):
 				xyz[k] = [demData[k][i][j],demData[k][i][j+1],(demData[k][i][j]+demData[k][i+1][j+1])/2.0,demData[k][i+1][j],demData[k][i+1][j+1]]
 
+			triangle = vtk.vtkTriangle()
+			r_def = [63, 63, 63]
 			ijk = [[0,1,2],[0,2,3],[1,2,4],[2,3,4]]
 			for l in range(4):
 				for m in range(3):
+					points.InsertNextPoint(xyz[0][ijk[l][m]], xyz[1][ijk[l][m]], xyz[2][ijk[l][m]])
+					triangle.GetPointIds().SetId(m, count)
+					count += 1
 					cclip = ctm*np.array((xyz[0][ijk[l][m]], xyz[1][ijk[l][m]], xyz[2][ijk[l][m]],1)).reshape(4,1)
 					cclip = np.array(cclip).reshape(4,1)
 					cndc = cclip/cclip[3]
@@ -228,25 +196,40 @@ def georectificationTool(logger,imgfile,analysis,geoparams,geoopts,corrparams,me
 					px = int(round((w-1.0)*(px+1)/2.0))
 					py = int(round((h-1.0)*(py+1)/2.0))
 					if shed[i][j] == 0:
-						r = [63,63,63]
+						r = r_def
 					elif  cclip[2] < 0 or px < 0 or px >= w or py < 0 or py >= h:
-						r = [63,63,63]
+						r = r_def
 					else:
-						Wp[py][px] += 1#surfarea[i][j]
+						Wp[py][px] += 1
 						r = img[py][px]
-					colors.InsertNextTypedTuple(r)
+					colors_proj.InsertNextTypedTuple(r)
+					colors.InsertNextTypedTuple(r_def)
+				triangles.InsertNextCell(triangle)
+				surftriangles.InsertNextCell(triangle)
+
+			surftrianglePolyData = vtk.vtkPolyData()
+			surftrianglePolyData.SetPoints(points)
+			surftrianglePolyData.SetPolys(surftriangles)
+			mass = vtk.vtkMassProperties()
+			mass.SetInputData(surftrianglePolyData)
+			surfarea[i][j] = mass.GetSurfaceArea()
 
 		logger.set('Row: |progress:4|queue:'+str(i+1)+'|total:'+str(demData[2].shape[0]-1))
-		txt.SetInput("Projecting camera image %"+str(int(100*(i+1)/float(demData[2].shape[0]-1))))
+		txt.SetInput("Bulding 3D World %"+str(int(100*(i+1)/float(demData[2].shape[0]-1))))
 		renderWindow.Render()
-	q = np.sum(Wp.astype(np.int64) != 0)/float(np.prod((Wp).shape))
-	trianglePolyData.GetPointData().SetScalars(colors)
-	light = vtk.vtkLight()
-	light.SetColor(1.0, 1.0, 1.0)
-	light.SetLightTypeToSceneLight()
-	renderer.AddLight(light)
+
+	trianglePolyData = vtk.vtkPolyData()
+	trianglePolyData.SetPoints(points)
+	trianglePolyData.GetPointData().SetScalars(colors_proj)
+	trianglePolyData.SetPolys(triangles)
+	mapper = vtk.vtkPolyDataMapper()
+	mapper.SetInputData(trianglePolyData)
+	actor = vtk.vtkActor()
+	actor.SetMapper(mapper)
+	renderer.AddActor(actor)
 	renderWindow.Render()
 
+	q = np.sum(Wp.astype(np.int64) != 0)/float(np.prod((Wp).shape))
 	txt.SetInput("Ready. Projection quality: %.6f"%q)
 	renderWindowInteractor.Start()
 	logger.set('Georectification preview ready...|busy:False')
