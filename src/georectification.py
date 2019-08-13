@@ -98,6 +98,40 @@ def georectificationTool(logger,imgfile,analysis,geoparams,geoopts,corrparams,me
 
 	renderer.SetBackground(30/255.0, 144/255.0, 255/255.0)
 	renderWindow.SetSize(w, h)
+	renderWindow.SetSize(1024,768)
+	renderWindow.Render()
+
+	txt.SetInput("Placing 2D preview image...")
+	logger.set('Placing 2D preview image...')
+	renderWindow.Render()
+	(w_r,h_r) = renderWindow.GetSize()
+	zoom = min(w_r/float(w),h_r/float(h))
+	[w_r,h_r] = map(int,[w*zoom,h*zoom])
+	img_r = np.zeros((3,h_r,w_r),img.dtype)
+	for c in range(img.shape[2]):
+		img_r[c] = mahotas.imresize(img.transpose(2,0,1)[c],(h_r,w_r))
+	img_r = img_r.transpose(1,2,0)
+	imageData = vtk.vtkImageData();
+	imageData.SetDimensions(w_r, h_r, 1);
+	imageData.SetOrigin(0.0, 0.0, 0.0);
+	imageData.SetSpacing(1.0, 1.0, 1.0);
+	imageData.AllocateScalars(vtk.VTK_DOUBLE, 3)
+	for i in range(h_r):
+		for j in range(w_r):
+			for k in range(3):
+				imageData.SetScalarComponentFromFloat(j,h_r-i-1,0,k,img_r[i][j][k]);
+		logger.set('Row: |progress:4|queue:'+str(i+1)+'|total:'+str(h_r-1))
+		txt.SetInput("Placing 2D preview image %"+str(int(100*(i+1)/float(h_r-1))))
+		renderWindow.Render()
+	mapper = vtk.vtkImageMapper()
+	mapper.SetInputData(imageData)
+	mapper.SetColorWindow(255)
+	mapper.SetColorLevel(127.5)
+
+	actor = vtk.vtkActor2D()
+	actor.GetProperty().SetOpacity(0.25)
+	actor.SetMapper(mapper)
+	renderer.AddActor(actor)
 	renderWindow.Render()
 
 	txt.SetInput("Handling DEM data...")
@@ -201,7 +235,7 @@ def georectificationTool(logger,imgfile,analysis,geoparams,geoopts,corrparams,me
 						r = r_def
 					else:
 						Wp[py][px] += 1
-						r = img[py][px]
+						#r = img[py][px]
 					colors_proj.InsertNextTypedTuple(r)
 					colors.InsertNextTypedTuple(r_def)
 				triangles.InsertNextCell(triangle)
