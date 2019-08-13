@@ -114,7 +114,7 @@ def georectificationTool(logger,imgfile,analysis,geoparams,geoopts,corrparams,me
 
 	[x1,y1,x2,y2] = extent
 	demData = getDEM(x1,y1,x2,y2,res*2,res*2,dem,flat,interpolate,maxmem=memorylimit)
-	surfarea = np.zeros(demData.shape[1:],np.float64)
+	# surfarea = np.zeros(demData.shape[1:],np.float64)
 
 	txt.SetInput("Placing camera...")
 	renderWindow.Render()
@@ -210,9 +210,9 @@ def georectificationTool(logger,imgfile,analysis,geoparams,geoopts,corrparams,me
 			surftrianglePolyData = vtk.vtkPolyData()
 			surftrianglePolyData.SetPoints(points)
 			surftrianglePolyData.SetPolys(surftriangles)
-			mass = vtk.vtkMassProperties()
-			mass.SetInputData(surftrianglePolyData)
-			surfarea[i][j] = mass.GetSurfaceArea()
+			# mass = vtk.vtkMassProperties()
+			# mass.SetInputData(surftrianglePolyData)
+			# surfarea[i][j] = mass.GetSurfaceArea()
 
 		logger.set('Row: |progress:4|queue:'+str(i+1)+'|total:'+str(demData[2].shape[0]-1))
 		txt.SetInput("Bulding 3D World %"+str(int(100*(i+1)/float(demData[2].shape[0]-1))))
