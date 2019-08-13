@@ -81,8 +81,9 @@ def georectificationTool(logger,imgfile,analysis,geoparams,geoopts,corrparams,me
 	renderWindow = vtk.vtkRenderWindow()
 	renderWindow.AddRenderer(renderer)
 	renderer.SetViewport(0,0,1,1);
-	renderWindow.SetWindowName("Perspective projection")
+	renderWindow.SetWindowName("Georectification tool")
 	renderWindowInteractor = vtk.vtkRenderWindowInteractor()
+	renderWindowInteractor.SetInteractorStyle(vtk.vtkInteractorStyleJoystickCamera())
 	renderWindowInteractor.SetRenderWindow(renderWindow)
 
 	txt = vtk.vtkTextActor()
@@ -171,11 +172,10 @@ def georectificationTool(logger,imgfile,analysis,geoparams,geoopts,corrparams,me
 	camera.SetPosition(C)
 	N, U, V = cameraDirection(np.array(C),0,td,vd,dem,flat,interpolate)	# U (right) and V(up) are opposite direction in this function
 	los = np.abs(np.linalg.norm(np.array((demData[0][-1][-1]-demData[0][0][0],demData[1][-1][-1]-demData[1][0][0]))))
-	nearz, farz = -los, los
-	radius = np.abs(np.linalg.norm(np.array((max(demData[0][-1][-1],demData[0][0][0]),max(demData[1][-1][-1],demData[1][0][0])))))
 	camera.SetFocalPoint((np.array(C)+np.array(N)*f).tolist())
 	camera.SetViewUp(-V)
-	camera.Roll(-hd)	#Why negative? -> It doesnt set roll, rolls the camera from zero. Maybe?
+	camera.Roll(-hd)
+	camera.Zoom(s)
 
 	print "\tC: ", ["%.6f"%item for item in camera.GetPosition()]
 	print "\tF: ", ["%.6f"%item for item in camera.GetFocalPoint()]
@@ -191,7 +191,6 @@ def georectificationTool(logger,imgfile,analysis,geoparams,geoopts,corrparams,me
 			ctm.append(camera.GetCompositeProjectionTransformMatrix(aspect,1,1).GetElement(i,j))
 	ctm = np.matrix(np.array(ctm).reshape(4,4))
 	print "\tCPM: ", ctm
-	camera.SetClippingRange(0.1,radius)
 
 	txt.SetInput("Calculating shades %"+str(int(100*(0)/float(w*h))))
 	logger.set('Calculating shades...')
@@ -224,7 +223,7 @@ def georectificationTool(logger,imgfile,analysis,geoparams,geoopts,corrparams,me
 					cclip = ctm*np.array((xyz[0][ijk[l][m]], xyz[1][ijk[l][m]], xyz[2][ijk[l][m]],1)).reshape(4,1)
 					cclip = np.array(cclip).reshape(4,1)
 					cndc = cclip/cclip[3]
-					cndc = cndc[:3]/s
+					cndc = cndc[:3]
 					px, py, pz = (cndc[0][0],-cndc[1][0], cndc[2][0])
 					px = int(round((w-1.0)*(px+1)/2.0))
 					py = int(round((h-1.0)*(py+1)/2.0))
@@ -246,7 +245,6 @@ def georectificationTool(logger,imgfile,analysis,geoparams,geoopts,corrparams,me
 	light.SetColor(1.0, 1.0, 1.0)
 	light.SetLightTypeToSceneLight()
 	renderer.AddLight(light)
-	camera.SetClippingRange(0.1,radius)
 	renderWindow.Render()
 
 	txt.SetInput("Ready. Projection quality: %.6f"%q)
@@ -638,7 +636,7 @@ def georeferenceVTK(logger,settings,extent,C,hd,td,vd,f,s,h,w,dem,interpolate,fl
 		Pw = readData(Pw_,tile)[0]
 		Pw = curvDEM(C[0:2],Pw,flat)
 		Pc = Pw2PcVTK(Pw,M,Ca,f,s)
-		Pp = np.dstack((Pc[0]/(Pc[3]/s),Pc[1]/(Pc[3]/s))).transpose(2,0,1)
+		Pp = np.dstack((Pc[0]/(Pc[3]),Pc[1]/(Pc[3]))).transpose(2,0,1)
 		#values behind camera
 		out = (Pc[2]<0)#+(Pw[2]>Ca[2])
 		Pc = None

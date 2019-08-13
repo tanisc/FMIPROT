@@ -896,7 +896,7 @@ paramhelps.append(["Mathematical formula to be calculated with average values of
 calcdescs.append("Custom Color Index: Build your own color index")
 
 calcids.append("IMGCORR01")
-calcsw.append(False)#dev
+calcsw.append(True)#dev
 calcnames.append("Radial lens correction")
 calccommands.append("LensCorrRadial(imglist,datetimelist,logger,params)")
 paramnames.append(["Radial Center","Horizontal coefficient","Vertical Coefficient","Inverse Transform"])
