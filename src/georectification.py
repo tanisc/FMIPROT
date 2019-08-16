@@ -15,6 +15,9 @@ import Polygon, Polygon.IO, Polygon.Utils
 from sys import getsizeof
 import os
 from definitions import AuxDir, TmpDir
+from definitions import sysargv
+if sysargv['gui']:
+	import Tkinter, tkMessageBox,tkSimpleDialog
 #np.set_printoptions(threshold=np.nan)
 
 def makeColor(value,offset,scale):
@@ -26,8 +29,213 @@ def makeColor(value,offset,scale):
 	color = map(int,color)
 	return color
 
-def georectificationTool(logger,imgfile,analysis,geoparams,geoopts,corrparams,memorylimit):
-	logger.set('Running georectification preview...|busy:True')
+class InteractorStyleClass(vtk.vtkInteractorStyle):
+	# Ref: https://semisortedblog.wordpress.com/2014/09/04/building-vtk-user-interfaces-part-3c-vtk-interaction/
+	def __init__(self, renderer, iren, tkobj, txt, actor2, C,Cz,dem,flat,interpolate,hd,td,vd,f,s,w,h):
+		self.SetCurrentRenderer(renderer)
+		self.__obsIDLeftButtonPressTag = iren.AddObserver("LeftButtonPressEvent", self.LeftButtonPressCallback)
+		self.__obsIDMouseMoveTag = iren.AddObserver("MouseMoveEvent", self.MouseMoveCallback)
+		self.tkobj = tkobj
+		self.txt = txt
+		self.actor2 = actor2
+		self.C = C
+		self.Cz = Cz
+		self.dem = dem
+		self.flat = flat
+		self.interpolate = interpolate
+		self.hd = hd
+		self.td = td
+		self.vd = vd
+		self.f = f
+		self.s = s
+		self.w = w
+		self.h = h
+		self.opac = 0.25
+
+	def SetCameraPosition(self,C,Cz,dem,flat,interpolate,hd,td,vd,f,s):
+		self.C = C
+		self.Cz = Cz
+		self.hd = hd
+		self.td = td
+		self.vd = vd
+		self.f = f
+		self.s = s
+
+		camera = self.GetCurrentRenderer().GetActiveCamera()
+		C[2] = float(Cz) + getDEM(C[0],C[1],C[0],C[1],1,1,dem,flat,interpolate)[2][0][0]
+		camera.SetPosition(C)
+		N, U, V = cameraDirection(np.array(C),0,td,vd,dem,flat,interpolate)	# U (right) and V(up) are opposite direction in this function
+		camera.SetFocalPoint((np.array(C)+np.array(N)*f).tolist())
+		camera.SetViewUp(-V)
+		camera.Roll(-hd)
+		camera.Zoom(s)
+		print "\tC: ", ["%.6f"%item for item in camera.GetPosition()]
+		print "\tF: ", ["%.6f"%item for item in camera.GetFocalPoint()]
+		print "\tf: ", "%.6f"%camera.GetDistance()
+		print "\tA: ", ["%.2f"%item for item in camera.GetOrientation()]
+		print "\tN: ", ["%.2f"%item for item in camera.GetDirectionOfProjection()]
+		print "\tU: ", ["%.2f"%item for item in camera.GetViewUp()]
+
+
+	def LeftButtonPressCallback(self, obj, event):
+		iren = self.GetInteractor()
+		if iren is None: return
+
+		camera = self.GetCurrentRenderer().GetActiveCamera()
+		Ppx,Ppy = iren.GetEventPosition()[0],iren.GetLastEventPosition()[1]
+		screenSize = iren.GetRenderWindow().GetSize()
+
+		picker = vtk.vtkCellPicker()
+		picker.Pick(Ppx,Ppy,0, self.GetCurrentRenderer())
+		Pwx,Pwy, Pwz = picker.GetPickPosition()
+		Ppx = self.w*Ppx/float(screenSize[0])
+		Ppy = self.h*Ppy/float(screenSize[1])
+		self.EditParameters(Ppx,Ppy,Pwx,Pwy,Pwz)
+
+	def MouseMoveCallback(self, obj, event):
+		iren = self.GetInteractor()
+		if iren is None: return
+
+		camera = self.GetCurrentRenderer().GetActiveCamera()
+		Ppx,Ppy = iren.GetEventPosition()[0],iren.GetLastEventPosition()[1]
+		screenSize = iren.GetRenderWindow().GetSize()
+
+		picker = vtk.vtkCellPicker()
+		picker.Pick(Ppx,Ppy,0, self.GetCurrentRenderer())
+		Pwx,Pwy, Pwz = picker.GetPickPosition()
+		Ppx = self.w*Ppx/float(screenSize[0])
+		Ppy = self.h*Ppy/float(screenSize[1])
+
+		vect = np.array(self.C)[:2]-np.array((Pwx,Pwy))
+		dist = np.linalg.norm(vect)
+		head = np.arctan2(vect[0],vect[1])*180/np.pi
+
+		[Pwx,Pwy,Pwz,dist,head] = map(str,[Pwx,Pwy,Pwz,dist,head])
+		text = "World coordinate X: "
+		text += Pwx
+		text += "\n"
+		text += "World coordinate Y: "
+		text += Pwy
+		text += "\n"
+		text += "World coordinate Z: "
+		text += Pwz
+		text += "\n"
+		text += "Distance to the camera: "
+		text += dist
+		text += "\n"
+		text += "Heading from the camera: "
+		text += head
+		text += "\n"
+		text += "Picture coordinate X: "
+		text += str(int(Ppx))
+		text += "\n"
+		text += "Picture coordinate Y: "
+		text += str(int(Ppy))
+		self.txt.SetInput(text)
+		iren.GetRenderWindow().Render()
+
+	def EditParameters(self,Ppx,Ppy,Pwx,Pwy, Pwz):
+		iren = self.GetInteractor()
+		self.txt.SetInput("")
+		iren.GetRenderWindow().Render()
+
+		try:
+			self.edit_window.destroy()
+		except:
+			pass
+
+		self.edit_window = Tkinter.Toplevel(self.tkobj,padx=10,pady=10)
+		self.edit_window.wm_title('Edit camera parameters')
+		self.edit_window.columnconfigure(2, minsize=100)
+		self.edit_window.columnconfigure(3, minsize=100)
+		self.edit_window.columnconfigure(4, minsize=100)
+
+		self.edit_Cx = Tkinter.DoubleVar()
+		self.edit_Cx.set(self.C[0])
+		self.edit_Cy = Tkinter.DoubleVar()
+		self.edit_Cy.set(self.C[1])
+		self.edit_Cz = Tkinter.DoubleVar()
+		self.edit_Cz.set(self.Cz)
+		self.edit_hd = Tkinter.DoubleVar()
+		self.edit_hd.set(self.hd)
+		self.edit_td = Tkinter.DoubleVar()
+		self.edit_td.set(self.td)
+		self.edit_vd = Tkinter.DoubleVar()
+		self.edit_vd.set(self.vd)
+		self.edit_f = Tkinter.DoubleVar()
+		self.edit_f.set(self.f*1000)
+		self.edit_s = Tkinter.DoubleVar()
+		self.edit_s.set(self.s)
+		self.edit_opac = Tkinter.DoubleVar()
+		self.edit_opac.set(self.opac)
+
+		vect = np.array(self.C)[:2]-np.array((Pwx,Pwy))
+		dist = np.linalg.norm(vect)
+		head = np.arctan2(vect[0],vect[1])*180/np.pi
+
+		r = 0
+		r += 1
+		Tkinter.Label(self.edit_window,bg="RoyalBlue4",fg='white',anchor='w',text='Clicked point').grid(sticky='w'+'e',row=r,column=1,columnspan=4)
+		r += 1
+		Tkinter.Label(self.edit_window,anchor='w',text="World coordinate X").grid(sticky='w'+'e',row=r,column=1)
+		Tkinter.Label(self.edit_window,anchor='w',text=str(Pwx)).grid(sticky='w'+'e',row=r,column=2)
+		Tkinter.Label(self.edit_window,anchor='w',text="World coordinate Y").grid(sticky='w'+'e',row=r,column=3)
+		Tkinter.Label(self.edit_window,anchor='w',text=str(Pwy)).grid(sticky='w'+'e',row=r,column=4)
+		r += 1
+		Tkinter.Label(self.edit_window,anchor='w',text="Distance to the camera").grid(sticky='w'+'e',row=r,column=1)
+		Tkinter.Label(self.edit_window,anchor='w',text=str(dist)).grid(sticky='w'+'e',row=r,column=2)
+		Tkinter.Label(self.edit_window,anchor='w',text="Heading from the camera").grid(sticky='w'+'e',row=r,column=3)
+		Tkinter.Label(self.edit_window,anchor='w',text=str(head)).grid(sticky='w'+'e',row=r,column=4)
+		r += 1
+		Tkinter.Label(self.edit_window,anchor='w',text="World coordinate Z").grid(sticky='w'+'e',row=r,column=1)
+		Tkinter.Label(self.edit_window,anchor='w',text=str(Pwz)).grid(sticky='w'+'e',row=r,column=2)
+		r += 1
+		Tkinter.Label(self.edit_window,anchor='w',text="Picture coordinate X").grid(sticky='w'+'e',row=r,column=1)
+		Tkinter.Label(self.edit_window,anchor='w',text=str(int(Ppx))).grid(sticky='w'+'e',row=r,column=2)
+		Tkinter.Label(self.edit_window,anchor='w',text="Picture coordinate Y").grid(sticky='w'+'e',row=r,column=3)
+		Tkinter.Label(self.edit_window,anchor='w',text=str(int(Ppy))).grid(sticky='w'+'e',row=r,column=4)
+		r += 1
+		Tkinter.Label(self.edit_window,bg="RoyalBlue4",fg='white',anchor='w',text='Camera parameters').grid(sticky='w'+'e',row=r,column=1,columnspan=4)
+		r += 1
+		Tkinter.Label(self.edit_window,anchor='w',text="Camera Coordinate X").grid(sticky='w'+'e',row=r,column=1)
+		Tkinter.Entry(self.edit_window,textvariable=self.edit_Cx).grid(sticky='w'+'e',row=r,column=2)
+		Tkinter.Label(self.edit_window,anchor='w',text="Camera Coordinate Y").grid(sticky='w'+'e',row=r,column=3)
+		Tkinter.Entry(self.edit_window,textvariable=self.edit_Cy).grid(sticky='w'+'e',row=r,column=4)
+		r += 1
+		Tkinter.Label(self.edit_window,anchor='w',text="Camera height").grid(sticky='w'+'e',row=r,column=1)
+		Tkinter.Entry(self.edit_window,textvariable=self.edit_Cz).grid(sticky='w'+'e',row=r,column=2)
+		Tkinter.Label(self.edit_window,anchor='w',text="Horizontal position").grid(sticky='w'+'e',row=r,column=3)
+		Tkinter.Entry(self.edit_window,textvariable=self.edit_hd).grid(sticky='w'+'e',row=r,column=4)
+		r += 1
+		Tkinter.Label(self.edit_window,anchor='w',text="Target direction").grid(sticky='w'+'e',row=r,column=1)
+		Tkinter.Entry(self.edit_window,textvariable=self.edit_td).grid(sticky='w'+'e',row=r,column=2)
+		Tkinter.Label(self.edit_window,anchor='w',text="Vertical position").grid(sticky='w'+'e',row=r,column=3)
+		Tkinter.Entry(self.edit_window,textvariable=self.edit_vd).grid(sticky='w'+'e',row=r,column=4)
+		r += 1
+		Tkinter.Label(self.edit_window,anchor='w',text="Focal length").grid(sticky='w'+'e',row=r,column=1)
+		Tkinter.Entry(self.edit_window,textvariable=self.edit_f).grid(sticky='w'+'e',row=r,column=2)
+		Tkinter.Label(self.edit_window,anchor='w',text="Scale factor").grid(sticky='w'+'e',row=r,column=3)
+		Tkinter.Entry(self.edit_window,textvariable=self.edit_s).grid(sticky='w'+'e',row=r,column=4)
+		r += 1
+		Tkinter.Label(self.edit_window,bg="RoyalBlue4",fg='white',anchor='w',text='Tool settings').grid(sticky='w'+'e',row=r,column=1,columnspan=4)
+		r += 1
+		Tkinter.Label(self.edit_window,anchor='w',text="Preview image opacity").grid(sticky='w'+'e',row=r,column=1)
+		Tkinter.Entry(self.edit_window,textvariable=self.edit_opac).grid(sticky='w'+'e',row=r,column=2)
+		r += 1
+		Tkinter.Button(self.edit_window,bg="darkgreen",fg='white',text='Apply',command=self.ApplyParameters).grid(sticky='w'+'e'+'s'+'n',row=r,column=1,columnspan=4)
+		self.tkobj.centerWindow(self.edit_window)
+		self.edit_window.wait_window()
+
+	def ApplyParameters(self):
+		self.SetCameraPosition(np.array((self.edit_Cx.get(),self.edit_Cy.get(),0)),self.edit_Cz.get(),self.dem,self.flat,self.interpolate,self.edit_hd.get(),self.edit_td.get(),self.edit_vd.get(),self.edit_f.get()/1000.0,self.edit_s.get())
+		self.actor2.GetProperty().SetOpacity(self.edit_opac.get())
+		self.opac = self.edit_opac.get()
+		self.edit_window.destroy()
+		self.GetInteractor().GetRenderWindow().Render()
+		self.LeftButtonPressCallback(None,None)
+
+def georectificationTool(tkobj, logger,imgfile,analysis,geoparams,geoopts,corrparams,memorylimit):
+	logger.set('Running georectification tool...|busy:True')
 	interpolate = True
 	flat = False
 
@@ -72,9 +280,7 @@ def georectificationTool(logger,imgfile,analysis,geoparams,geoopts,corrparams,me
 	extent = map(float,extent.split(';'))
 	C = map(float,C.split(';'))
 	C = transSingle(C,C_proj)
-	C = np.append(C,float(Cz))
-	C[2] += getDEM(C[0],C[1],C[0],C[1],1,1,dem,flat,interpolate)[2][0][0]
-	C = C.tolist()
+	C = np.append(C,0.0)
 
 	renderer = vtk.vtkRenderer()
 	colors = vtk.vtkNamedColors()
@@ -82,19 +288,24 @@ def georectificationTool(logger,imgfile,analysis,geoparams,geoopts,corrparams,me
 	renderWindow.AddRenderer(renderer)
 	renderer.SetViewport(0,0,1,1);
 	renderWindow.SetWindowName("Georectification tool")
-	renderWindowInteractor = vtk.vtkRenderWindowInteractor()
-	renderWindowInteractor.SetInteractorStyle(vtk.vtkInteractorStyleJoystickCamera())
-	renderWindowInteractor.SetRenderWindow(renderWindow)
 
 	txt = vtk.vtkTextActor()
 	txt.SetInput("Loading...")
 	txtprop = txt.GetTextProperty()
 	txtprop.SetFontFamilyToArial()
 	txtprop.BoldOn()
-	txtprop.SetFontSize(36)
+	txtprop.SetFontSize(24)
 	txtprop.SetColor(colors.GetColor3d("White"))
 	txt.SetDisplayPosition(20, 30)
 	renderer.AddActor(txt)
+
+	actor2 = vtk.vtkActor2D()
+	actor2.GetProperty().SetOpacity(0.25)
+
+	renderWindowInteractor = vtk.vtkRenderWindowInteractor()
+	interactorStyle = InteractorStyleClass(renderer, renderWindowInteractor, tkobj,txt, actor2, C,Cz,dem,flat,interpolate,hd,td,vd,f,s,w,h)
+	renderWindowInteractor.SetInteractorStyle(interactorStyle)
+	renderWindowInteractor.SetRenderWindow(renderWindow)
 
 	renderer.SetBackground(30/255.0, 144/255.0, 255/255.0)
 	renderWindow.SetSize(w, h)
@@ -127,11 +338,8 @@ def georectificationTool(logger,imgfile,analysis,geoparams,geoopts,corrparams,me
 	mapper.SetInputData(imageData)
 	mapper.SetColorWindow(255)
 	mapper.SetColorLevel(127.5)
-
-	actor = vtk.vtkActor2D()
-	actor.GetProperty().SetOpacity(0.25)
-	actor.SetMapper(mapper)
-	renderer.AddActor(actor)
+	actor2.SetMapper(mapper)
+	renderer.AddActor(actor2)
 	renderWindow.Render()
 
 	txt.SetInput("Handling DEM data...")
@@ -148,26 +356,12 @@ def georectificationTool(logger,imgfile,analysis,geoparams,geoopts,corrparams,me
 
 	[x1,y1,x2,y2] = extent
 	demData = getDEM(x1,y1,x2,y2,res*2,res*2,dem,flat,interpolate,maxmem=memorylimit)
-	# surfarea = np.zeros(demData.shape[1:],np.float64)
 
 	txt.SetInput("Placing camera...")
 	renderWindow.Render()
 	camera = vtk.vtkCamera();
 	renderer.SetActiveCamera(camera);
-	camera.SetPosition(C)
-	N, U, V = cameraDirection(np.array(C),0,td,vd,dem,flat,interpolate)	# U (right) and V(up) are opposite direction in this function
-	los = np.abs(np.linalg.norm(np.array((demData[0][-1][-1]-demData[0][0][0],demData[1][-1][-1]-demData[1][0][0]))))
-	camera.SetFocalPoint((np.array(C)+np.array(N)*f).tolist())
-	camera.SetViewUp(-V)
-	camera.Roll(-hd)
-	camera.Zoom(s)
-
-	print "\tC: ", ["%.6f"%item for item in camera.GetPosition()]
-	print "\tF: ", ["%.6f"%item for item in camera.GetFocalPoint()]
-	print "\tf: ", "%.6f"%camera.GetDistance()
-	print "\tA: ", ["%.2f"%item for item in camera.GetOrientation()]
-	print "\tN: ", ["%.2f"%item for item in camera.GetDirectionOfProjection()]
-	print "\tU: ", ["%.2f"%item for item in camera.GetViewUp()]
+	interactorStyle.SetCameraPosition(C,Cz,dem,flat,interpolate,hd,td,vd,f,s)
 
 	aspect = w/float(h)
 	ctm = []
@@ -180,24 +374,16 @@ def georectificationTool(logger,imgfile,analysis,geoparams,geoopts,corrparams,me
 	txt.SetInput("Calculating shades...")#%"+str(int(100*(0)/float(w*h))))
 	logger.set('Calculating shades...')
 	renderWindow.Render()
-	# shed = np.zeros(demData.shape[1:],np.uint8)
-	# def pickerFunc(i,j,k, renderer):
-	# 	picker = vtk.vtkCellPicker()
-	# 	picker.Pick(i,j,0, renderer)
-	# 	x,y = picker.GetPickPosition()[:2]
-	# 	return np.where((np.abs(demData[0]-x)<res/2)*(np.abs(demData[1]-y)<res/2))
-	# vPick = np.vectorize(pickerFunc)
-	# shed[vPick(np.indices((h,w))[0],np.indices((h,w))[1], 0,renderer)] = 1
 	shed = viewShedWang(logger,demData,np.array([C[0],C[1],Cz]),dem,flat,interpolate)
 
-	txt.SetInput("Bulding 3D World %0")
-	logger.set('Bulding 3D World...')
+	txt.SetInput("Building 3D World %0")
+	logger.set('Building 3D World...')
 	light = vtk.vtkLight()
 	light.SetColor(1.0, 1.0, 1.0)
 	light.SetLightTypeToSceneLight()
 	renderer.AddLight(light)
 	renderWindow.Render()
-	# Define points, triangles and colors
+
 	colors = vtk.vtkUnsignedCharArray()
 	colors.SetNumberOfComponents(3)
 	colors_proj = vtk.vtkUnsignedCharArray()
@@ -235,6 +421,7 @@ def georectificationTool(logger,imgfile,analysis,geoparams,geoopts,corrparams,me
 						r = r_def
 					else:
 						Wp[py][px] += 1
+						r = r_def
 						#r = img[py][px]
 					colors_proj.InsertNextTypedTuple(r)
 					colors.InsertNextTypedTuple(r_def)
@@ -244,9 +431,6 @@ def georectificationTool(logger,imgfile,analysis,geoparams,geoopts,corrparams,me
 			surftrianglePolyData = vtk.vtkPolyData()
 			surftrianglePolyData.SetPoints(points)
 			surftrianglePolyData.SetPolys(surftriangles)
-			# mass = vtk.vtkMassProperties()
-			# mass.SetInputData(surftrianglePolyData)
-			# surfarea[i][j] = mass.GetSurfaceArea()
 
 		logger.set('Row: |progress:4|queue:'+str(i+1)+'|total:'+str(demData[2].shape[0]-1))
 		txt.SetInput("Bulding 3D World %"+str(int(100*(i+1)/float(demData[2].shape[0]-1))))
@@ -264,9 +448,10 @@ def georectificationTool(logger,imgfile,analysis,geoparams,geoopts,corrparams,me
 	renderWindow.Render()
 
 	q = np.sum(Wp.astype(np.int64) != 0)/float(np.prod((Wp).shape))
-	txt.SetInput("Ready. Projection quality: %.6f"%q)
+	txt.SetInput("Click anywhere to edit parameters")
+	logger.set('Georectification preview ready. Click anywhere to edit parameters|busy:False')
+	renderWindowInteractor.Initialize()
 	renderWindowInteractor.Start()
-	logger.set('Georectification preview ready...|busy:False')
 
 def Georectify1(img_imglist,datetimelist,mask,settings,logger,extent,extent_proj,res,dem,C,C_proj,Cz,hd,td,vd,f,w,interpolate,flat,origin,ax,ay):
 	mask, pgs, th = mask

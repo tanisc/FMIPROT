@@ -556,7 +556,7 @@ class monimet_gui(Tkinter.Tk):
 		ToolsMenu.add_command(label="Add Plugin...",command=self.Plugins_Add)
 		ToolsMenu.add_command(label="Remove Plugin...",command=self.Plugins_Remove)
 		#ToolsMenu.add_command(label="Comparison tool...",command=self.Tools_Comparison)
-		ToolsMenu.add_command(label="Georectification preview...",command=self.Tools_Georectification)
+		ToolsMenu.add_command(label="Georectification tool...",command=self.Tools_Georectification)
 		menubar.add_cascade(label="Tools", menu=ToolsMenu)
 		self.config(menu=menubar)
 
@@ -2719,7 +2719,7 @@ class monimet_gui(Tkinter.Tk):
 
 
 		if tkMessageBox.askyesno('Georectification preview',message):
-			georectificationTool(self.Message,self.PictureFileName.get(),analysis,geoparams,geoopts,corrparams,self.memorylimit.get())
+			georectificationTool(self,self.Message,self.PictureFileName.get(),analysis,geoparams,geoopts,corrparams,self.memorylimit.get())
 
 	def Menu_Base(self):
 		greentexture = Tkinter.PhotoImage(file=os.path.join(ResourcesDir,'green_grad_inv.gif'))
