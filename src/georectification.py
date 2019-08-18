@@ -53,14 +53,6 @@ class InteractorStyleClass(vtk.vtkInteractorStyle):
 		self.opac = 0.25
 
 	def SetCameraPosition(self,C,Cz,dem,flat,interpolate,hd,td,vd,f,s):
-		self.C = C
-		self.Cz = Cz
-		self.hd = hd
-		self.td = td
-		self.vd = vd
-		self.f = f
-		self.s = s
-
 		camera = self.GetCurrentRenderer().GetActiveCamera()
 		C[2] = float(Cz) + getDEM(C[0],C[1],C[0],C[1],1,1,dem,flat,interpolate)[2][0][0]
 		camera.SetPosition(C)
@@ -68,6 +60,7 @@ class InteractorStyleClass(vtk.vtkInteractorStyle):
 		camera.SetFocalPoint((np.array(C)+np.array(N)*f).tolist())
 		camera.SetViewUp(-V)
 		camera.Roll(-hd)
+		camera.Zoom(1./self.s)
 		camera.Zoom(s)
 		print "\tC: ", ["%.6f"%item for item in camera.GetPosition()]
 		print "\tF: ", ["%.6f"%item for item in camera.GetFocalPoint()]
@@ -75,6 +68,14 @@ class InteractorStyleClass(vtk.vtkInteractorStyle):
 		print "\tA: ", ["%.2f"%item for item in camera.GetOrientation()]
 		print "\tN: ", ["%.2f"%item for item in camera.GetDirectionOfProjection()]
 		print "\tU: ", ["%.2f"%item for item in camera.GetViewUp()]
+
+		self.C = C
+		self.Cz = Cz
+		self.hd = hd
+		self.td = td
+		self.vd = vd
+		self.f = f
+		self.s = s
 
 
 	def LeftButtonPressCallback(self, obj, event):
