@@ -620,9 +620,14 @@ def LensCorrRadialFix(imglist,datetimelist,logger,origin,ax,ay,inverse):
 			Pp[0] = ((2*Pp[0] - img_shape[1])/img_shape[1])
 			Pp[1] = ((2*Pp[1] - img_shape[0])/img_shape[0])
 			Pp = RadDistTrans(Pp,origin,ax,ay,inverse)
-			#Pp[0] = (Pp[0]+1)*img_shape[1]/2.0
+			A = Pp.astype(int)
+			B = Pp.astype(int)
+			C = Pp.astype(int)
+			D = Pp.astype(int) + 1
+			B[0] = D[0]
+			C[1] = D[1]
+			A*(1 - Pp[0])*(1-Pp[1]) + B*Pp[0]*(1-Pp[1]) + C*Pp[1]*(1-Pp[0]) + D*Pp[0]*Pp[1]
 			Pp[0] = (Pp[0]*2.0/img_shape[1])-1
-			#Pp[1] = (Pp[1]+1)*img_shape[0]/2.0
 			Pp[1] = (Pp[1]*2.0/img_shape[0])-1
 			Pp = np.rint(Pp).astype(int)
 			outmask = (0<Pp[0])*(0<Pp[1])*(Pp[0]<img_shape[1])*(Pp[1]<img_shape[0])
@@ -651,9 +656,14 @@ def LensCorrRadialFix(imglist,datetimelist,logger,origin,ax,ay,inverse):
 			Pp[0] = ((2*Pp[0] - img_shape[1])/img_shape[1])
 			Pp[1] = ((2*Pp[1] - img_shape[0])/img_shape[0])
 			Pp = RadDistTrans(Pp,origin,ax,ay,inverse)
-			#Pp[0] = (Pp[0]+1)*img_shape[1]/2.0
+			A = Pp.astype(int)
+			B = Pp.astype(int)
+			C = Pp.astype(int)
+			D = Pp.astype(int) + 1
+			B[0] = D[0]
+			C[1] = D[1]
+			A*(1 - Pp[0])*(1-Pp[1]) + B*Pp[0]*(1-Pp[1]) + C*Pp[1]*(1-Pp[0]) + D*Pp[0]*Pp[1]
 			Pp[0] = (Pp[0]*2.0/img_shape[1])-1
-			#Pp[1] = (Pp[1]+1)*img_shape[0]/2.0
 			Pp[1] = (Pp[1]*2.0/img_shape[0])-1
 			Pp = np.rint(Pp).astype(int)
 			outmask = (0<Pp[0])*(0<Pp[1])*(Pp[0]<img_shape[1])*(Pp[1]<img_shape[0])
@@ -678,21 +688,18 @@ def LensCorrRadialFix(imglist,datetimelist,logger,origin,ax,ay,inverse):
 
 def RadDistTrans(Pp,origin,ax,ay,inverse=False):	#PP is normalized  and pp[0] = x.
 	if ax != 0 or ay != 0:
+		iter = 4
+		M = np.ones(Pp.shape,Pp.dtype)
 		Pnorm2 = (Pp[0]-origin[0])**2+(Pp[1]-origin[1])**2
-		Pp_ = np.copy(Pp)
-		if ax != 0:
-			if inverse:
-				Pxnorm2 = (Pp[0]/(1 - ax * Pnorm2))**2+(Pp[1]/(1 - ax * Pnorm2))**2
-				Pp_[0] /= 1 - ax * Pxnorm2
-			else:
-				Pp_[0] *= 1 - ax * Pnorm2
-		if ay != 0:
-			if inverse:
-				Pynorm2 = (Pp[0]/(1 - ay * Pnorm2))**2+(Pp[1]/(1 - ay * Pnorm2))**2
-				Pp_[1] /= 1 - ay * Pynorm2
-			else:
-				Pp_[1] *= 1 - ay * Pnorm2
-		return Pp_
+		if not inverse:
+			for i in range(iter):
+				M[0] *= 1 / (1 + ax*Pnorm2*M[0])
+				M[1] *= 1 / (1 + ay*Pnorm2*M[1])
+		else:
+			M[0] *= (1+(ax)*Pnorm2)
+			M[1] *= (1+(ay)*Pnorm2)
+		Pp *= M
+		return Pp
 	else:
 		return Pp
 
