@@ -309,7 +309,7 @@ def georectificationTool(tkobj, logger,imgfile,analysis,geoparams,geoopts,corrpa
 	renderWindowInteractor.SetRenderWindow(renderWindow)
 
 	renderer.SetBackground(30/255.0, 144/255.0, 255/255.0)
-	renderWindow.SetSize(1024,int(768.*w/1024.))
+	renderWindow.SetSize(1024,int(1024.*h/w))
 	renderWindow.Render()
 
 	txt.SetInput("Placing 2D preview image...")
