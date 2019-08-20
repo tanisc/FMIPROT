@@ -60,7 +60,8 @@ class InteractorStyleClass(vtk.vtkInteractorStyle):
 		camera.SetFocalPoint((np.array(C)+np.array(N)*f).tolist())
 		camera.SetViewUp(-V)
 		camera.Roll(-hd)
-		camera.Zoom(1./self.s)
+		if self.s != s:
+			camera.Zoom(1./self.s)
 		camera.Zoom(s)
 		print "\tC: ", ["%.6f"%item for item in camera.GetPosition()]
 		print "\tF: ", ["%.6f"%item for item in camera.GetFocalPoint()]
