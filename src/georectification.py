@@ -276,7 +276,7 @@ def georectificationTool(tkobj, logger,imgfile,analysis,geoparams,geoopts,corrpa
 	img = LensCorrRadial(img,None,None,origin,ax,ay,0)[0][1][1]
 
 	h,w = img.shape[:2]
-	Wp = np.zeros((h,w),np.float64)
+	# Wp = np.zeros((h,w),np.float64)
 
 	extent = map(float,extent.split(';'))
 	C = map(float,C.split(';'))
@@ -371,10 +371,10 @@ def georectificationTool(tkobj, logger,imgfile,analysis,geoparams,geoopts,corrpa
 	ctm = np.matrix(np.array(ctm).reshape(4,4))
 	print "\tCPM: ", ctm
 
-	txt.SetInput("Calculating shades...")#%"+str(int(100*(0)/float(w*h))))
-	logger.set('Calculating shades...')
-	renderWindow.Render()
-	shed = viewShedWang(logger,demData,np.array([C[0],C[1],Cz]),dem,flat,interpolate)
+	# txt.SetInput("Calculating shades...")#%"+str(int(100*(0)/float(w*h))))
+	# logger.set('Calculating shades...')
+	# renderWindow.Render()
+	# shed = viewShedWang(logger,demData,np.array([C[0],C[1],Cz]),dem,flat,interpolate)
 
 	txt.SetInput("Building 3D World %0")
 	logger.set('Building 3D World...')
@@ -408,20 +408,20 @@ def georectificationTool(tkobj, logger,imgfile,analysis,geoparams,geoopts,corrpa
 					points.InsertNextPoint(xyz[0][ijk[l][m]], xyz[1][ijk[l][m]], xyz[2][ijk[l][m]])
 					triangle.GetPointIds().SetId(m, count)
 					count += 1
-					cclip = ctm*np.array((xyz[0][ijk[l][m]], xyz[1][ijk[l][m]], xyz[2][ijk[l][m]],1)).reshape(4,1)
-					cclip = np.array(cclip).reshape(4,1)
-					cndc = cclip/cclip[3]
-					cndc = cndc[:3]
-					px, py, pz = (cndc[0][0],-cndc[1][0], cndc[2][0])
-					px = int(round((w-1.0)*(px+1)/2.0))
-					py = int(round((h-1.0)*(py+1)/2.0))
-					if shed[i][j] == 0:
-						r = r_def
-					elif  cclip[2] < 0 or px < 0 or px >= w or py < 0 or py >= h:
-						r = r_def
-					else:
-						Wp[py][px] += 1
-						r = r_def
+					# cclip = ctm*np.array((xyz[0][ijk[l][m]], xyz[1][ijk[l][m]], xyz[2][ijk[l][m]],1)).reshape(4,1)
+					# cclip = np.array(cclip).reshape(4,1)
+					# cndc = cclip/cclip[3]
+					# cndc = cndc[:3]
+					# px, py, pz = (cndc[0][0],-cndc[1][0], cndc[2][0])
+					# px = int(round((w-1.0)*(px+1)/2.0))
+					# py = int(round((h-1.0)*(py+1)/2.0))
+					# if shed[i][j] == 0:
+					# 	r = r_def
+					# elif  cclip[2] < 0 or px < 0 or px >= w or py < 0 or py >= h:
+					# 	r = r_def
+					# else:
+						# Wp[py][px] += 1
+					r = r_def
 						#r = img[py][px]
 					colors_proj.InsertNextTypedTuple(r)
 					colors.InsertNextTypedTuple(r_def)
@@ -447,7 +447,7 @@ def georectificationTool(tkobj, logger,imgfile,analysis,geoparams,geoopts,corrpa
 	renderer.AddActor(actor)
 	renderWindow.Render()
 
-	q = np.sum(Wp.astype(np.int64) != 0)/float(np.prod((Wp).shape))
+	# q = np.sum(Wp.astype(np.int64) != 0)/float(np.prod((Wp).shape))
 	txt.SetInput("Click anywhere to edit parameters")
 	logger.set('Georectification preview ready. Click anywhere to edit parameters|busy:False')
 	renderWindowInteractor.Initialize()
