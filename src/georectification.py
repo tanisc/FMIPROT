@@ -60,8 +60,7 @@ class InteractorStyleClass(vtk.vtkInteractorStyle):
 		camera.SetFocalPoint((np.array(C)+np.array(N)*f).tolist())
 		camera.SetViewUp(-V)
 		camera.Roll(-hd)
-		if self.s != s:
-			camera.Zoom(1./self.s)
+		camera.Zoom(1./self.s)
 		camera.Zoom(s)
 		print "\tC: ", ["%.6f"%item for item in camera.GetPosition()]
 		print "\tF: ", ["%.6f"%item for item in camera.GetFocalPoint()]
@@ -305,7 +304,7 @@ def georectificationTool(tkobj, logger,imgfile,analysis,geoparams,geoopts,corrpa
 	actor2.GetProperty().SetOpacity(0.25)
 
 	renderWindowInteractor = vtk.vtkRenderWindowInteractor()
-	interactorStyle = InteractorStyleClass(renderer, renderWindowInteractor, tkobj,txt, actor2, C,Cz,dem,flat,interpolate,hd,td,vd,f,s,w,h)
+	interactorStyle = InteractorStyleClass(renderer, renderWindowInteractor, tkobj,txt, actor2, C,Cz,dem,flat,interpolate,hd,td,vd,f,1,w,h)
 	renderWindowInteractor.SetInteractorStyle(interactorStyle)
 	renderWindowInteractor.SetRenderWindow(renderWindow)
 
