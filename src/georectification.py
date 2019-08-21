@@ -802,6 +802,7 @@ def georeferenceVTK(logger,settings,extent,C,hd,td,vd,f,s,h,w,dem,interpolate,fl
 	camera.SetFocalPoint((np.array(Ca)+np.array(N)*f).tolist())
 	camera.SetViewUp(-V)
 	camera.Roll(-hd)	#Why negative? -> It doesnt set roll, rolls the camera from zero. Maybe?
+	camera.Zoom(s)
 
 	if np.prod(readData(Pw)[0].shape) > 20:
 		print "\tC: ", ["%.6f"%item for item in camera.GetPosition()]
