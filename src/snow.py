@@ -201,6 +201,7 @@ def salvatoriSnowCover(img_imglist,datetimelist,mask,settings,logger,red,green,b
 	else:
 		Wp = np.ones(mahotas.imread(img_imglist[0]).shape[:2])
 	mask, pgs, th = mask
+	mask = LensCorrRadial(mask,'0',logger,origin,ax,ay,0)[0][1][1]
 	Wp *= (mask.transpose(2,0,1)[0]==1)
 	if np.mean(mask) == 1:
 		logger.set("Weightmask quality: " + str(np.sum(Wp[-100:,Wp.shape[1]/2-50:Wp.shape[1]/2+50] != 0)/10000))
