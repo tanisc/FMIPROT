@@ -107,30 +107,32 @@ class InteractorStyleClass(vtk.vtkInteractorStyle):
 		Ppx = self.w*Ppx/float(screenSize[0])
 		Ppy = self.h*Ppy/float(screenSize[1])
 
-		vect = np.array(self.C)[:2]-np.array((Pwx,Pwy))
+		vect = np.array((Pwx,Pwy))-np.array(self.C)[:2]
 		dist = np.linalg.norm(vect)
-		head = np.arctan2(vect[0],vect[1])*180/np.pi
+		head = heading(vect)
 
-		[Pwx,Pwy,Pwz,dist,head] = map(str,[Pwx,Pwy,Pwz,dist,head])
-		text = "World coordinate X: "
-		text += Pwx
+		Pwx_,Pwy_ = transSingle((Pwx,Pwy),"ETRS-TM35FIN(EPSG:3067)","WGS84(EPSG:4326)")
+		text = "Coordinates: "
+		text += "{0:.3f}".format(round(Pwx,3))
+		text += ", "
+		text += "{0:.3f}".format(round(Pwy,3))
+		text += " ("
+		text += "{0:.6f}".format(round(Pwx_,6))
+		text += ", "
+		text += "{0:.6f}".format(round(Pwy_,6))
+		text += ")\n"
+		text += "Elevation: "
+		text += "{0:.3f}".format(round(Pwz,3))
+		text += ", "
+		text += "Distance: "
+		text += "{0:.3f}".format(round(dist,3))
+		text += ", "
+		text += "Heading: "
+		text += "{0:.3f}".format(round(head,3))
 		text += "\n"
-		text += "World coordinate Y: "
-		text += Pwy
-		text += "\n"
-		text += "World coordinate Z: "
-		text += Pwz
-		text += "\n"
-		text += "Distance to the camera: "
-		text += dist
-		text += "\n"
-		text += "Heading from the camera: "
-		text += head
-		text += "\n"
-		text += "Picture coordinate X: "
+		text += "Image pixel:  "
 		text += str(int(Ppx))
-		text += "\n"
-		text += "Picture coordinate Y: "
+		text += ", "
 		text += str(int(Ppy))
 		self.txt.SetInput(text)
 		iren.GetRenderWindow().Render()
@@ -1133,3 +1135,15 @@ def viewShedWang(logger,data,Cp,dem,flat,interpolate): #dem data, ref point (cam
 	(vis, r, r_, data, data_) = (None,None,None,None,None)
 	logger.set("Visibility calculated.")
 	return vis_	#mask for visibility (positive logic)
+
+def heading(vector):
+	if vector[0] == 0 and vector[1] == 0:
+		return 0.0
+	if vector[0] >= 0 and vector[1] > 0:
+		return np.arctan(np.abs(vector[0]/vector[1]))*180/np.pi
+	if vector[0] > 0 and vector[1] <= 0:
+		return 90 + np.arctan(np.abs(vector[1]/vector[0]))*180/np.pi
+	if vector[0] <= 0 and vector[1] < 0:
+		return 180 + np.arctan(np.abs(vector[0]/vector[1]))*180/np.pi
+	if vector[0] < 0 and vector[1] >= 0:
+		return 270 + np.arctan(np.abs(vector[1]/vector[0]))*180/np.pi
