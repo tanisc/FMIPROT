@@ -577,7 +577,10 @@ def Georectify1(img_imglist,datetimelist,mask,settings,logger,extent,extent_proj
 			from scipy import interpolate as interp
 			vis = False
 			logger.set("Interpolating visibility from the original resolution dataset...")
-			spl = interp.RectBivariateSpline(readData(Pwvis,tilesvis[0])[0][1].transpose(1,0)[0],readData(Pwvis,tilesvis[0])[0][0][0],readData(vis_org,tilesvis[0])[0].astype('float16'))
+			if np.prod(vis_org.shape) > 20:
+				spl = interp.RectBivariateSpline(readData(Pwvis,tilesvis[0])[0][1].transpose(1,0)[0],readData(Pwvis,tilesvis[0])[0][0][0],readData(vis_org,tilesvis[0])[0].astype('float16'))
+			else:
+				spl = interp.RectBivariateSpline(readData(Pwvis,tilesvis[0])[0][1].transpose(1,0)[0],readData(Pwvis,tilesvis[0])[0][0][0],readData(vis_org,tilesvis[0])[0].astype('float16'), kx = 2, ky = 2)
 			logger.set('Tile: |progress:4|queue:'+str(0)+'|total:'+str(len(tiles)))
 			for t,tile in enumerate(tiles):
 				if len(tiles) > 1:
