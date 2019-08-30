@@ -609,14 +609,17 @@ def RadDistTrans(Pp,origin,ax,ay,inverse=False):	#PP is normalized  and pp[0] = 
 		iter = 4
 		M = np.ones(Pp.shape,Pp.dtype)
 		Pnorm2 = (Pp[0]-origin[0])**2+(Pp[1]-origin[1])**2
-		if not inverse:
-			for i in range(iter):
-				M[0] *= 1 / (1 + ax*Pnorm2*M[0])
-				M[1] *= 1 / (1 + ay*Pnorm2*M[1])
+		# if not inverse:
+		# 	for i in range(iter):
+		# 		M[0] *= 1 / (1 + ax*Pnorm2*M[0])
+		# 		M[1] *= 1 / (1 + ay*Pnorm2*M[1])
+		# else:
+		M[0] *= (1+(ax)*Pnorm2)
+		M[1] *= (1+(ay)*Pnorm2)
+		if inverse:
+			Pp *= M
 		else:
-			M[0] *= (1+(ax)*Pnorm2)
-			M[1] *= (1+(ay)*Pnorm2)
-		Pp *= M
+			Pp /= M
 		return Pp
 	else:
 		return Pp
