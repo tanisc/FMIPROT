@@ -110,9 +110,9 @@ def salvatoriSnowMask(imglist,datetimelist,mask,settings,logger,red,green,blue):
 	if len(imglist) == 0:
 		return False
 	mask, pgs, th = mask
-	if not isinstance(pgs[0],list) or len(pgs) == 1:
-		logger.set('At least two polygons required for this analysis. Aborting.')
-		return False
+	# if not isinstance(pgs[0],list) or len(pgs) == 1:
+	# 	logger.set('At least two polygons required for this analysis. Aborting.')
+	# 	return False
 	sc = []
 	thr = []
 	thg = []
