@@ -874,10 +874,9 @@ def curvDEM(refpos,dem,flat=False):
 	return dem
 
 def cameraDirection(C,hd,td,vd,dem,interpolate,flat):
-	No = np.array((np.sin(td*np.pi/180.)*np.sqrt(np.cos(vd*np.pi/180.)),np.cos(td*np.pi/180.)*np.sqrt(np.cos(vd*np.pi/180.)),-np.sin(vd*np.pi/180.)))
+	No = np.array((np.sin(td*np.pi/180.)*np.cos(vd*np.pi/180.),np.cos(td*np.pi/180.)*np.cos(vd*np.pi/180.),-np.sin(vd*np.pi/180.)))
 
 	if np.prod(No[2].shape) == 1:
-		No = No/np.linalg.norm(No)
 		Nxy = np.array((No[0],No[1]))
 		Nxy = Nxy/np.linalg.norm(Nxy)
 		N = np.array(No)
