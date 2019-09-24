@@ -172,9 +172,9 @@ class InteractorStyleClass(vtk.vtkInteractorStyle):
 		self.edit_opac = Tkinter.DoubleVar()
 		self.edit_opac.set(self.opac)
 
-		vect = np.array(self.C)[:2]-np.array((Pwx,Pwy))
+		vect = np.array((Pwx,Pwy)) - np.array(self.C)[:2]
 		dist = np.linalg.norm(vect)
-		head = np.arctan2(vect[0],vect[1])*180/np.pi
+		head = heading(vect)
 
 		r = 0
 		r += 1
@@ -324,18 +324,12 @@ def georectificationTool(tkobj, logger,imgfile,analysis,geoparams,geoopts,corrpa
 	for c in range(img.shape[2]):
 		img_r[c] = mahotas.imresize(img.transpose(2,0,1)[c],(h_r,w_r))
 	img_r = img_r.transpose(1,2,0)
-	imageData = vtk.vtkImageData();
-	imageData.SetDimensions(w_r, h_r, 1);
-	imageData.SetOrigin(0.0, 0.0, 0.0);
-	imageData.SetSpacing(1.0, 1.0, 1.0);
-	imageData.AllocateScalars(vtk.VTK_DOUBLE, 3)
-	for i in range(h_r):
-		for j in range(w_r):
-			for k in range(3):
-				imageData.SetScalarComponentFromFloat(j,h_r-i-1,0,k,img_r[i][j][k]);
-		logger.set('Row: |progress:4|queue:'+str(i+1)+'|total:'+str(h_r-1))
-		txt.SetInput("Placing 2D preview image %"+str(int(100*(i+1)/float(h_r-1))))
-		renderWindow.Render()
+	jpeg_fname = os.path.join(TmpDir,str(uuid4())+'.jpg')
+	mahotas.imsave(jpeg_fname,img_r)
+	jpeg_reader = vtk.vtkJPEGReader()
+	jpeg_reader.SetFileName(jpeg_fname)
+	jpeg_reader.Update()
+	imageData = jpeg_reader.GetOutput()
 	mapper = vtk.vtkImageMapper()
 	mapper.SetInputData(imageData)
 	mapper.SetColorWindow(255)
@@ -650,6 +644,7 @@ def Georectify1(img_imglist,datetimelist,mask,settings,logger,extent,extent_proj
 		mask = LensCorrRadial(mask,'0',None,origin,ax,ay,0)[0][1][1]
 
 		ortho_ = str(uuid4())
+		fov_ = str(uuid4())
 
 		Pp_ = Pp
 		vis_ = vis
@@ -682,6 +677,8 @@ def Georectify1(img_imglist,datetimelist,mask,settings,logger,extent,extent_proj
 			his[0] -= (img_in == False).sum()
 			Wp += his.reshape(Wp.shape)
 
+			fov = np.zeros((x.shape[0],x.shape[1]),img.dtype)
+			fov = 255*mask.transpose(2,0,1)[0][y,x]*img_in + fov*(img_in==False)
 			img_in = np.dstack((img_in,img_in,img_in))
 			ortho = np.zeros((x.shape[0],x.shape[1],3),img.dtype)
 			ortho = img[y,x]*img_in + ortho*(img_in==False)
@@ -689,13 +686,18 @@ def Georectify1(img_imglist,datetimelist,mask,settings,logger,extent,extent_proj
 
 			if isinstance(Pp_,str):
 				writeData(ortho,ortho_,tile)
+				writeData(fov,fov_,tile)
 			else:
 				ortho_ = ortho
+				fov_ = fov
 			ortho = None
+			fov = None
 			logger.set('Tile: |progress:4|queue:'+str(t)+'|total:'+str(len(tiles)))
 
 		ortho = ortho_
 		ortho_ = None
+		fov = fov_
+		fov_ = None
 		Pp = Pp_
 		Pp_ = None
 		vis = vis_
@@ -703,6 +705,8 @@ def Georectify1(img_imglist,datetimelist,mask,settings,logger,extent,extent_proj
 
 		output.append("Orthoimage " + str(datetimelist[i_img]))
 		output.append(ortho)
+		output.append("Field of view " + str(datetimelist[i_img]))
+		output.append(fov)
 		logger.set('Image: |progress:4|queue:'+str(i_img)+'|total:'+str(len(img_imglist)))
 
 	if np.mean(mask) == 1:

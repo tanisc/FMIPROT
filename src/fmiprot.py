@@ -555,7 +555,7 @@ class monimet_gui(Tkinter.Tk):
 		ToolsMenu = Tkinter.Menu(menubar, tearoff=0)
 		ToolsMenu.add_command(label="Add Plugin...",command=self.Plugins_Add)
 		ToolsMenu.add_command(label="Remove Plugin...",command=self.Plugins_Remove)
-		#ToolsMenu.add_command(label="Comparison tool...",command=self.Tools_Comparison)
+		ToolsMenu.add_command(label="Comparison tool...",command=self.Tools_Comparison)
 		ToolsMenu.add_command(label="Georectification tool...",command=self.Tools_Georectification)
 		menubar.add_cascade(label="Tools", menu=ToolsMenu)
 		self.config(menu=menubar)
@@ -4578,7 +4578,7 @@ class monimet_gui(Tkinter.Tk):
 					lat_index = self.ResultsCaptions.index("Latitude")*2+1
 					lon_index = self.ResultsCaptions.index("Longitude")*2+1
 
-				matplotlib.rcParams.update({'font.size': 3*self.FontSize})
+				matplotlib.rcParams.update({'font.size': 1*self.FontSize})
 				pgrid = [1,1]
 				pindex = 1
 				if offset == 1:
@@ -4637,7 +4637,7 @@ class monimet_gui(Tkinter.Tk):
 							self.ax.plot(self.ResultsData[1][1],self.ResultsData[1][data_index],label=self.ResultVariableNameVariable.get(),marker=self.PlotVarMarker.get(), linestyle=self.PlotVarStyle.get(), color=self.PlotVarColor.get())
 							self.ax.axis((self.XMin+self.XDist*self.PlotXStartFactor.get(),self.XMax-self.XDist*self.PlotXEndFactor.get(),self.YMin+self.YDist*self.PlotYStartFactor.get(),self.YMax-self.YDist*self.PlotYEndFactor.get()))
 					if self.LegendVar.get():
-						lgd = self.ax.legend(framealpha=0.8, prop={'size':3*self.FontSize})
+						lgd = self.ax.legend(framealpha=0.8, prop={'size':1*self.FontSize})
 					if self.PlotVarLogXSwitch.get():
 						self.ax.set_xscale('log')
 					if self.PlotVarLogYSwitch.get():
