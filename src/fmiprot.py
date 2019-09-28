@@ -555,7 +555,7 @@ class monimet_gui(Tkinter.Tk):
 		ToolsMenu = Tkinter.Menu(menubar, tearoff=0)
 		ToolsMenu.add_command(label="Add Plugin...",command=self.Plugins_Add)
 		ToolsMenu.add_command(label="Remove Plugin...",command=self.Plugins_Remove)
-		ToolsMenu.add_command(label="Comparison tool...",command=self.Tools_Comparison)
+		#ToolsMenu.add_command(label="Comparison tool...",command=self.Tools_Comparison)
 		ToolsMenu.add_command(label="Georectification tool...",command=self.Tools_Georectification)
 		menubar.add_cascade(label="Tools", menu=ToolsMenu)
 		self.config(menu=menubar)
