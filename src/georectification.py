@@ -62,6 +62,7 @@ class InteractorStyleClass(vtk.vtkInteractorStyle):
 		camera.Roll(-hd)
 		camera.Zoom(1./self.s)
 		camera.Zoom(s)
+		self.GetCurrentRenderer().ResetCameraClippingRange()
 		print "\tC: ", ["%.6f"%item for item in camera.GetPosition()]
 		print "\tF: ", ["%.6f"%item for item in camera.GetFocalPoint()]
 		print "\tf: ", "%.6f"%camera.GetDistance()
@@ -446,6 +447,7 @@ def georectificationTool(tkobj, logger,imgfile,analysis,geoparams,geoopts,corrpa
 	# q = np.sum(Wp.astype(np.int64) != 0)/float(np.prod((Wp).shape))
 	txt.SetInput("Click anywhere to edit parameters")
 	logger.set('Georectification preview ready. Click anywhere to edit parameters|busy:False')
+	renderer.ResetCameraClippingRange()
 	renderWindowInteractor.Initialize()
 	renderWindowInteractor.Start()
 
