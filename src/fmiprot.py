@@ -38,7 +38,7 @@ from copy import deepcopy
 import subprocess
 from auxdata import auxlist, auxnamelist
 import auxdata
-#import comparators
+import comparators
 
 import webbrowser
 import h5py
@@ -555,7 +555,7 @@ class monimet_gui(Tkinter.Tk):
 		ToolsMenu = Tkinter.Menu(menubar, tearoff=0)
 		ToolsMenu.add_command(label="Add Plugin...",command=self.Plugins_Add)
 		ToolsMenu.add_command(label="Remove Plugin...",command=self.Plugins_Remove)
-		#ToolsMenu.add_command(label="Comparison tool...",command=self.Tools_Comparison)
+		# ToolsMenu.add_command(label="Comparison tool...",command=self.Tools_Comparison)
 		ToolsMenu.add_command(label="Georectification tool...",command=self.Tools_Georectification)
 		menubar.add_cascade(label="Tools", menu=ToolsMenu)
 		self.config(menu=menubar)
@@ -2212,11 +2212,11 @@ class monimet_gui(Tkinter.Tk):
 		self.Win1.columnconfigure(3, minsize=450)
 
 		self.Win1.ProdName = Tkinter.StringVar()
-		self.Win1.ProdName.set("MONIMET Visual observations - Snow Cover Fraction")
+		self.Win1.ProdName.set("FMIPROT Time series results - Snow Cover Fraction")
 		Tkinter.Label(self.Win1,text="Product data",anchor='w').grid(sticky='w'+'e',row=1,column=2,columnspan=1)
 		Tkinter.OptionMenu(self.Win1,self.Win1.ProdName,*auxnamelist).grid(sticky='w'+'e',row=1,column=3,columnspan=1)
 		self.Win1.RefrName = Tkinter.StringVar()
-		self.Win1.RefrName.set("SENTINEL-2 L2A Scene Classification - Snow")
+		self.Win1.RefrName.set("MONIMET Visual observations - Snow Cover Fraction")
 		Tkinter.Label(self.Win1,text="Reference data",anchor='w').grid(sticky='w'+'e',row=2,column=2,columnspan=1)
 		Tkinter.OptionMenu(self.Win1,self.Win1.RefrName,*auxnamelist).grid(sticky='w'+'e',row=2,column=3,columnspan=1)
 		self.Win1.ClsdName = Tkinter.StringVar()

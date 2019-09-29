@@ -59,14 +59,14 @@ def readResultsData(fname,logger):
 			header = data_f.readline()
 			if header[0] == '!':
 				header = header[1:]
-			header = header.replace('\n','').split('\t')
+			header = header.replace('\n','').replace('\r','').split('\t')
 			if header[-1] == '':
 				del header[-1]
 			for i,h in enumerate(header):
 				data_captions[r][1].append(metadata['var'+str(i)])
 				data_captions[r][1].append([])
 			for line in data_f:
-				line = line.replace('\n','').split('\t')
+				line = line.replace('\n','').replace('\r','').split('\t')
 				for i,h in enumerate(header):
 					data_captions[r][1][i*2+1].append(line[header.index('var'+str(i))])
 			for i,h in enumerate(header):
