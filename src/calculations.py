@@ -269,25 +269,6 @@ def histogram(img_imglist, datetimelist,mask,settings,logger,red,green,blue):
 			data_g[0] -= mask_zero
 			data_b = fullhistogram(img.transpose(2,0,1)[2])
 			data_b[0] -= mask_zero
-
-			dn = np.arange(256)
-			hist = data_b
-			hist = hist*(hist>hist.mean()*0.001)
-			hmin = 0
-			hmax = 0
-			for d in dn[::-1]:
-				if hist[d] != 0:
-						hmax = d
-						break
-			hist = hist[hmin:hmax+1]
-			dn = dn[hmin:hmax+1]
-			threshold = len(dn)/2.0
-			hists = np.zeros(hist.shape)
-			n = 5
-			for i in np.arange(len(hist)):
-				hists[i] = hist[(i-n)*((i-n)>=0):((i+n)*((i+n)<len(hist))+(len(hist)-1)*((i+n)>=len(hist)))].mean()
-			data_b=fillHistogram(hists)
-
 			result = [title,["DN",np.arange(256)]]
 			result[1].append("Red Channel")
 			if bool(float(red)):
@@ -301,6 +282,23 @@ def histogram(img_imglist, datetimelist,mask,settings,logger,red,green,blue):
 				result[1].append(np.zeros(256))
 			result[1].append("Blue Channel")
 			if bool(float(blue)):
+				hist = data_b
+				dn = np.arange(256)
+				hist = hist*(hist>hist.mean()*0.001)	#remove floor noise
+				hmin = 0
+				hmax = 0
+				for d in dn[::-1]:
+					if hist[d] != 0:
+							hmax = d
+							break
+				hist = hist[hmin:hmax+1]
+				dn = dn[hmin:hmax+1]
+				threshold = len(dn)/2.0
+				hists = np.zeros(hist.shape)
+				n = 5
+				for j in np.arange(len(hist)):
+					hists[j] = hist[(j-n)*((j-n)>=0):((j+n)*((j+n)<len(hist))+(len(hist)-1)*((j+n)>=len(hist)))].mean()
+				data_b = hists
 				result[1].append(data_b)
 			else:
 				result[1].append(np.zeros(256))
@@ -844,7 +842,7 @@ paramhelps.append(["Spatial extent (lat1,lon1,lat2,lon2)","Spatial Extent Coordi
 calcdescs.append("Transformation of an image to X/Y gridded map by georectification. More than few images may cause memory error for this algorithm.")
 
 calcids.append("HIST001")
-calcsw.append(False)#dev
+calcsw.append(True)#dev
 calcnames.append("Histograms")
 calccommands.append("histogram(imglist,datetimelist,mask,settings,logger,params)")
 paramnames.append(["Red Channel","Green Channel","Blue Channel"])
@@ -863,16 +861,6 @@ paramdefs.append([0,0,1])
 paramhelps.append(["Include Red Channel","Include Green Channel","Include Blue Channel"])
 calcdescs.append("Pixel-wise snow coverage information (snow-mask). More than few images may cause memory error for this algorithm.")
 
-calcids.append("SNOWDET002")
-calcsw.append(True)
-calcnames.append("Snow Mask - SNOWDET002")
-calccommands.append("salvatoriSnowMask2(imglist,datetimelist,mask,settings,logger,params)")
-paramnames.append([])
-paramopts.append([])
-paramdefs.append([])
-paramhelps.append([])
-calcdescs.append("Pixel-wise snow coverage information (snow-mask). More than few images may cause memory error for this algorithm.")
-
 calcids.append("SNOWCOV001")
 calcsw.append(True)
 calcnames.append("Snow Cover Fraction - SNOWCOV001")
@@ -883,24 +871,14 @@ paramdefs.append(paramdefs[calcids.index("SNOWDET001")]+[0,0]+paramdefs[calcids.
 paramhelps.append(paramhelps[calcids.index("SNOWDET001")]+["Store mid-step and extra output data like thresholds, number of pixels with snow etc.","Use georectification"]+paramhelps[calcids.index('GEOREC001')])
 calcdescs.append("Snow cover fraction analysis.")
 
-calcids.append("SNOWCOV002")
-calcsw.append(True)
-calcnames.append("Snow Cover Fraction - SNOWCOV002")
-calccommands.append("salvatoriSnowCover2(imglist,datetimelist,mask,settings,logger,params)")
-paramnames.append(paramnames[calcids.index("SNOWDET002")]+["Store mid-step and extra output data","Use georectification"]+paramnames[calcids.index('GEOREC001')])
-paramopts.append(paramopts[calcids.index("SNOWDET002")]+["Checkbox","Checkbox"]+paramopts[calcids.index('GEOREC001')])
-paramdefs.append(paramdefs[calcids.index("SNOWDET002")]+[0,0]+paramdefs[calcids.index('GEOREC001')])
-paramhelps.append(paramhelps[calcids.index("SNOWDET002")]+["Store mid-step and extra output data like thresholds, number of pixels with snow etc.","Use georectification"]+paramhelps[calcids.index('GEOREC001')])
-calcdescs.append("Snow cover fraction analysis. (Salvatori improved)")
-
 calcids.append("SNOWCOV003")
-calcsw.append(True)
+calcsw.append(False) # Dev
 calcnames.append("Snow on Canopy - SNOWCOV003")
 calccommands.append("salvatoriSnowOnCanopy(imglist,datetimelist,mask,settings,logger,params)")
-paramnames.append(paramnames[calcids.index("SNOWDET002")]+["Snow cover fraction threshold","Store mid-step and extra output data"])
-paramopts.append(paramopts[calcids.index("SNOWDET002")]+["","Checkbox"])
-paramdefs.append(paramdefs[calcids.index("SNOWDET002")]+[50,0])
-paramhelps.append(paramhelps[calcids.index("SNOWDET002")]+["Threshold (0-100) to decide binary snow status.","Store mid-step and extra output data like thresholds, number of pixels with snow etc."])
+paramnames.append(paramnames[calcids.index("SNOWDET001")]+["Snow cover fraction threshold","Store mid-step and extra output data"])
+paramopts.append(paramopts[calcids.index("SNOWDET001")]+["","Checkbox"])
+paramdefs.append(paramdefs[calcids.index("SNOWDET001")]+[50,0])
+paramhelps.append(paramhelps[calcids.index("SNOWDET001")]+["Threshold (0-100) to decide binary snow status.","Store mid-step and extra output data like thresholds, number of pixels with snow etc."])
 calcdescs.append("Snow cover fraction analysis. (Salvatori improved)")
 
 calcids.append("SNOWMAP001")
@@ -911,16 +889,6 @@ paramnames.append(paramnames[calcids.index("SNOWDET001")]+paramnames[calcids.ind
 paramopts.append(paramopts[calcids.index("SNOWDET001")]+paramopts[calcids.index('GEOREC001')])
 paramdefs.append(paramdefs[calcids.index("SNOWDET001")]+paramdefs[calcids.index('GEOREC001')])
 paramhelps.append(paramhelps[calcids.index("SNOWDET001")]+paramhelps[calcids.index('GEOREC001')])
-calcdescs.append("Pixel-wise snow coverage information (snow-mask) on gridded map.")
-
-calcids.append("SNOWMAP002")
-calcsw.append(False)#dev
-calcnames.append("Snow Cover Map - SNOWMAP002")
-calccommands.append("salvatoriSnowMap2(imglist,datetimelist,mask,settings,logger,params)")
-paramnames.append(paramnames[calcids.index("SNOWDET002")]+paramnames[calcids.index('GEOREC001')])
-paramopts.append(paramopts[calcids.index("SNOWDET002")]+paramopts[calcids.index('GEOREC001')])
-paramdefs.append(paramdefs[calcids.index("SNOWDET002")]+paramdefs[calcids.index('GEOREC001')])
-paramhelps.append(paramhelps[calcids.index("SNOWDET002")]+paramhelps[calcids.index('GEOREC001')])
 calcdescs.append("Pixel-wise snow coverage information (snow-mask) on gridded map.")
 
 calcids.append("SNOWDEP001")
