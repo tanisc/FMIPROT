@@ -282,44 +282,33 @@ def histogram(img_imglist, datetimelist,mask,settings,logger,red,green,blue):
 				result[1].append(np.zeros(256))
 			result[1].append("Blue Channel")
 			if bool(float(blue)):
-				hist = data_b
-				dn = np.arange(256)
-				hist = hist*(hist>hist.mean()*0.001)	#remove floor noise
-				hmin = 0
-				hmax = 0
-				for d in dn[::-1]:
-					if hist[d] != 0:
-							hmax = d
-							break
-				hist = hist[hmin:hmax+1]
-				dn = dn[hmin:hmax+1]
-				threshold = len(dn)/2.0
-				hists = np.zeros(hist.shape)
-				n = 5
-				for j in np.arange(len(hist)):
-					hists[j] = hist[(j-n)*((j-n)>=0):((j+n)*((j+n)<len(hist))+(len(hist)-1)*((j+n)>=len(hist)))].mean()
-				data_b = hists
 				result[1].append(data_b)
 			else:
 				result[1].append(np.zeros(256))
 			returntuple.append(result)
 		return returntuple
 	else:
-		img = img_imglist*mask
-		data_r = fullhistogram(img.transpose(2,0,1)[0])
-		data_r[0] -= mask_zero
-		data_g = fullhistogram(img.transpose(2,0,1)[1])
-		data_g[0] -= mask_zero
-		data_b = fullhistogram(img.transpose(2,0,1)[2])
-		data_b[0] -= mask_zero
-		result = [np.arange(256)]
-		if blue:
-			result.append(data_b)
-		if green:
-			result.append(data_g)
-		if red:
-			result.append(data_r)
-
+		if len(img_imglist.shape) == 3 and img_imglist.shape[2] == 3:
+			img = img_imglist*mask
+			data_r = fullhistogram(img.transpose(2,0,1)[0])
+			data_r[0] -= mask_zero
+			data_g = fullhistogram(img.transpose(2,0,1)[1])
+			data_g[0] -= mask_zero
+			data_b = fullhistogram(img.transpose(2,0,1)[2])
+			data_b[0] -= mask_zero
+			result = [np.arange(256)]
+			if red:
+				result.append(data_r)
+			if green:
+				result.append(data_g)
+			if blue:
+				result.append(data_b)
+		if len(img_imglist.shape) == 2:
+			img = img_imglist*mask.transpose(2,0,1)[0]
+			data = fullhistogram(img)
+			data[0] -= mask_zero
+			result = [np.arange(256)]
+			result.append(data)
 		return result
 
 def fullhistogram(img,maxsize=256):

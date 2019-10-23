@@ -35,15 +35,15 @@ def lowestCountourSnowDepth(imglist,datetimelist,mask,settings,logger,objsize,li
 			img = mahotas.imread(imgf,as_grey = True)
 			mbox = [pbox[0]*img.shape[0],pbox[1]*img.shape[0],pbox[2]*img.shape[1],pbox[3]*img.shape[1]]
 			mbox = map(int,map(np.rint,mbox))
-			# mahotas.imsave(path.join('/home/tanisc','1.jpg'),(img[mbox[0]:mbox[1],mbox[2]:mbox[3]]).astype(np.uint8))
+			# mahotas.imsave(path.join('/home/tanisc',str(datetimelist[i].day)+str(datetimelist[i].hour)+str(datetimelist[i].minute)+'1.jpg'),(img[mbox[0]:mbox[1],mbox[2]:mbox[3]]).astype(np.uint8))
 			if sigma != 0:
 				img = mahotas.gaussian_filter(img, sigma)
-			# mahotas.imsave(path.join('/home/tanisc','2.jpg'),(img[mbox[0]:mbox[1],mbox[2]:mbox[3]]).astype(np.uint8))
+			# mahotas.imsave(path.join('/home/tanisc',str(datetimelist[i].day)+str(datetimelist[i].hour)+str(datetimelist[i].minute)+'2.jpg'),(img[mbox[0]:mbox[1],mbox[2]:mbox[3]]).astype(np.uint8))
 			img = (img <= light_threshold)
-			# mahotas.imsave(path.join('/home/tanisc','3.jpg'),(img[mbox[0]:mbox[1],mbox[2]:mbox[3]]*255).astype(np.uint8))
+			# mahotas.imsave(path.join('/home/tanisc',str(datetimelist[i].day)+str(datetimelist[i].hour)+str(datetimelist[i].minute)+'3.jpg'),(img[mbox[0]:mbox[1],mbox[2]:mbox[3]]*255).astype(np.uint8))
 			img = img[mbox[0]:mbox[1],mbox[2]:mbox[3]]
 			bottom = mbox[1] - mbox[0]
-			# mahotas.imsave(path.join('/home/tanisc','4.jpg'),img.astype(np.uint8)*255)
+			# mahotas.imsave(path.join('/home/tanisc',str(datetimelist[i].day)+str(datetimelist[i].hour)+str(datetimelist[i].minute)+'4.jpg'),img.astype(np.uint8)*255)
 			labeled, n  = mahotas.label(img)
 			bboxes = mahotas.labeled.bbox(labeled)
 			bbheig = []
@@ -55,7 +55,10 @@ def lowestCountourSnowDepth(imglist,datetimelist,mask,settings,logger,objsize,li
 					height += bias
 					height = np.round(height*100)/100.0
 					bbheig.append(height)
-				height = min(bbheig)
+				if bbheig == []:
+					height = np.nan
+				else:
+					height = min(bbheig)
 			time = np.append(time,(str(datetimelist[i])))
 			sd = np.append(sd,height)
 			logger.set('Image: |progress:4|queue:'+str(i+1)+'|total:'+str(len(imglist)))
@@ -98,7 +101,7 @@ def salvatoriSnowDetect(img,mask,settings,logger,red,green,blue):	#produces snow
 				threshold = -1
 		else:
 			threshold = 0
-		sc_img[ch] = (img.transpose(2,0,1)[ch] > threshold)
+		sc_img[ch] = (img.transpose(2,0,1)[ch] >= threshold)
 		thresholds[ch] = threshold
 	sc_img = (sc_img[0]*sc_img[1]*sc_img[2])
 	sc_img = (sc_img*(mask.transpose(2,0,1)[0] == 1)+(mask.transpose(2,0,1)[0] == 0)*2)
