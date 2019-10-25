@@ -75,19 +75,14 @@ def salvatoriSnowDetect(img,mask,settings,logger,red,green,blue):	#produces snow
 	dn = data[0]
 	sc_img = np.zeros(img.transpose(2,0,1).shape,np.bool)
 	thresholds = [-1,-1,-1]
+	hmax = np.max(np.hstack((dn*(data[1]>0),dn*(data[2]>0),dn*(data[3]>0))))
 	for ch in range(3):
 		if bool(float([red,green,blue][ch])):
 			hist = data[ch+1]
 			hist = hist*(hist>hist.mean()*0.001)	#remove floor noise
-			hmin = 0
-			hmax = 0
-			for d in dn[::-1]:
-				if hist[d] != 0:
-						hmax = d
-						break
-			hist = hist[hmin:hmax+1]
-			dn = dn[hmin:hmax+1]
-			threshold = len(dn)/2.0
+			hist = hist[:hmax+1]
+			dn = dn[:hmax+1]
+			threshold = -1+(len(dn)+1)/2.0
 			hists = np.zeros(hist.shape)
 			n = 5
 			for i in np.arange(len(hist)):
@@ -96,7 +91,6 @@ def salvatoriSnowDetect(img,mask,settings,logger,red,green,blue):	#produces snow
 				if t >= threshold:
 					threshold = t
 					break
-			threshold += hmin
 			if threshold == 0:
 				threshold = -1
 		else:
