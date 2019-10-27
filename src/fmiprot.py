@@ -5742,7 +5742,7 @@ class monimet_gui(Tkinter.Tk):
 							else:
 								if outputtv != []:
 									output = [outputtv[0]]
-							if output is not False and output[0] != []:
+							if output is not False and output[0] != [] and not isinstance(output[0][1][1],str):
 								isorted = np.argsort(output[0][1][1])
 								for i in range(len(output[0][1])/2)[::-1]:
 									if isinstance(output[0][1][2*i+1],list):

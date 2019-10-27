@@ -32,7 +32,7 @@ def readResultsData(fname,logger):
 			rlist.append(r)
 			metalist.append(metadatafname)
 			datalist.append(datafname)
-                elif os.path.isfile(metadatafname  + '.tsvx') and os.path.isfile(datafname  + '.mp4'):  
+                elif os.path.isfile(metadatafname  + '.tsvx') and os.path.isfile(datafname  + '.mp4'):
                         rlist.append(r)
                         metalist.append(metadatafname)
                         datalist.append(datafname)
