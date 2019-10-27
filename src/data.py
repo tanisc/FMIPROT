@@ -32,6 +32,10 @@ def readResultsData(fname,logger):
 			rlist.append(r)
 			metalist.append(metadatafname)
 			datalist.append(datafname)
+                elif os.path.isfile(metadatafname  + '.tsvx') and os.path.isfile(datafname  + '.mp4'):  
+                        rlist.append(r)
+                        metalist.append(metadatafname)
+                        datalist.append(datafname)
 
 	if rlist == []:
 		return (analysis_captions,[])
@@ -53,6 +57,12 @@ def readResultsData(fname,logger):
 				data_f = open(fname + 'R' + str(r).zfill(3) + '.tsv')
 			elif os.path.isfile(fname + 'R' + str(r).zfill(3) + '.dat'):	#v0.15.3 and older support
 				data_f = open(fname + 'R' + str(r).zfill(3) + '.dat')
+			elif os.path.isfile(fname + 'R' + str(r).zfill(3) + '.mp4'):
+				data_captions[r][1].append("filename")
+				data_captions[r][1].append(fname + 'R' + str(r).zfill(3) + '.mp4')
+				del metadata['var0']
+				analysis_captions[r] = metadata
+				continue
 			else:
 				logger.set("Problem reading results data.")
 				return False
@@ -80,7 +90,7 @@ def readResultsData(fname,logger):
 						data_captions[r][1][1][i] = strftime2(strptime2(v,"%Y-%m-%d-%H:%M:%S")[0])[0]
 				except:
 					pass
-				if data_captions[r][1][1][0][-6] in '+-':	#convert to utc if TimeZone
+				if len(data_captions[r][1][1]) != 0 and data_captions[r][1][1][0][-6] in '+-':	#convert to utc if TimeZone
 					data_captions[r][1][1] = convertTZ(data_captions[r][1][1],data_captions[r][1][1][0][-6:],'+00:00')
 			for i in range(len(data_captions[r][1])/2):
 				if data_captions[r][1][i*2] != 'Time' and data_captions[r][1][i*2] != 'Date':
@@ -91,7 +101,6 @@ def readResultsData(fname,logger):
 							data_captions[r][1][i*2+1] = np.array(data_captions[r][1][i*2+1],dtype='float64')
 					except:
 							data_captions[r][1][i*2+1] = np.array(data_captions[r][1][i*2+1])
-
 	return (analysis_captions, data_captions)
 
 

@@ -5652,6 +5652,8 @@ class monimet_gui(Tkinter.Tk):
 						if self.outputmodevariable.get() == output_modes[2]:
 							self.Message.set('Reading results of image that are already processed...')
 							(analysis_captionsv, outputtv) = readResultsData(filelabel,logger)
+							if outputtv[0][1][0] == 'filename' and os.path.splitext(outputtv[0][1][1])[1] == '.mp4':
+								outputtv = []
 							if outputtv == []:
 								datetimelistp = []
 							else:
@@ -5738,8 +5740,9 @@ class monimet_gui(Tkinter.Tk):
 											output[0] = [outputtv[0]]
 											break
 							else:
-								output = [outputtv[0]]
-							if output[0] != []:
+								if outputtv != []:
+									output = [outputtv[0]]
+							if output is not False and output[0] != []:
 								isorted = np.argsort(output[0][1][1])
 								for i in range(len(output[0][1])/2)[::-1]:
 									if isinstance(output[0][1][2*i+1],list):

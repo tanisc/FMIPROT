@@ -56,6 +56,8 @@ def sTime2fTime(sTime):
 	return dTime2fTime(strptime2(sTime)[0])
 
 def oTime2dTime(oTime): #utc only
+	if oTime == []:
+		return oTime
 	if isinstance(oTime,list):
 		dTime = []
 		if len(oTime[0]) == 19:
