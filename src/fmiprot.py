@@ -6427,32 +6427,48 @@ class monimet_gui(Tkinter.Tk):
 		lf.close()
 
 	def License(self):
-		if sysargv['gui']:
-			LicenseWindow = Tkinter.Toplevel(self,padx=10,pady=10)
-			LicenseWindow.wm_title('License agreement')
-			scrollbar = Tkinter.Scrollbar(LicenseWindow,width=20)
-			scrollbar.grid(sticky='w'+'e'+'n'+'s',row=2,column=3,columnspan=1)
-			lictext = Tkinter.Text(LicenseWindow, yscrollcommand=scrollbar.set,wrap='word')
+		if os.path.exists(os.path.join(BinDir,'LICENSE')):
 			lic_f = open(os.path.join(BinDir,'LICENSE'))
-			lictext.insert('end', lic_f.read())
-			lic_f.close()
-			lictext.config(state='disabled')
-			lictext.grid(sticky='w'+'e',row=2,column=1,columnspan=2)
-			scrollbar.config(command=lictext.yview)
-
-			Tkinter.Button(LicenseWindow,text="Close",anchor="c",command=LicenseWindow.destroy).grid(sticky='w'+'e',row=3,column=1,columnspan=3)
-			self.centerWindow(LicenseWindow)
-			LicenseWindow.grab_set()
-			LicenseWindow.wait_window()
-			self.grab_set()
+		elif os.path.exists(os.path.join(BinDir,'..','LICENSE')):
+			lic_f = open(os.path.join(BinDir,'..','LICENSE'))
 		else:
-			print open(os.path.join(BinDir,'LICENSE')).read()
+			lic_f = None
+		if lic_f is not None:
+			if sysargv['gui']:
+				LicenseWindow = Tkinter.Toplevel(self,padx=10,pady=10)
+				LicenseWindow.wm_title('License agreement')
+				scrollbar = Tkinter.Scrollbar(LicenseWindow,width=20)
+				scrollbar.grid(sticky='w'+'e'+'n'+'s',row=2,column=3,columnspan=1)
+				lictext = Tkinter.Text(LicenseWindow, yscrollcommand=scrollbar.set,wrap='word')
+				lictext.insert('end', lic_f.read())
+				lic_f.close()
+				lictext.config(state='disabled')
+				lictext.grid(sticky='w'+'e',row=2,column=1,columnspan=2)
+				scrollbar.config(command=lictext.yview)
+
+				Tkinter.Button(LicenseWindow,text="Close",anchor="c",command=LicenseWindow.destroy).grid(sticky='w'+'e',row=3,column=1,columnspan=3)
+				self.centerWindow(LicenseWindow)
+				LicenseWindow.grab_set()
+				LicenseWindow.wait_window()
+				self.grab_set()
+			else:
+				print open(os.path.join(BinDir,'LICENSE')).read()
+		else:
+			if sysargv['gui']:
+				tkMessageBox.showerror('Not found','License file not found.')
+			else:
+				print "License file not found."
 
 	def LogFileOpen(self):
 		webbrowser.open(os.path.join(LogDir,self.LogFileName[0]),new=2)
 
 	def ManualFileOpen(self):
-		webbrowser.open(os.path.join(BinDir,'usermanual.pdf'),new=2)
+		if os.path.exists(os.path.join(BinDir,'usermanual.pdf')):
+			webbrowser.open(os.path.join(BinDir,'usermanual.pdf'),new=2)
+		elif os.path.exists(os.path.join(BinDir,'..','usermanual.pdf')):
+			webbrowser.open(os.path.join(BinDir,'..','usermanual.pdf'),new=2)
+		else:
+			tkMessageBox.showerror('Not found','User manual not found.')
 
 	def About(self):
 		tkMessageBox.showinfo("About...", "FMIPROT (Finnish Meteorological Institute Image Processing Tool) is a toolbox to analyze the images from multiple camera networks and developed under the project MONIMET, funded by EU Life Programme.\nCurrent version is " + sysargv['version'] + ".\nFor more information, contact Cemal.Melih.Tanis@fmi.fi.")
@@ -6461,7 +6477,7 @@ class monimet_gui(Tkinter.Tk):
 		webbrowser.open("http://monimet.fmi.fi",new=2)
 
 	def WebFMIPROT(self):
-		webbrowser.open("http://monimet.fmi.fi?page=FMIPROT",new=2)
+		webbrowser.open("https://fmiprot.fmi.fi",new=2)
 
 	def LogNew(self,*args):
 		self.LogFileName[0] = str(datetime.datetime.now()).replace(":",".").replace(" ",".").replace("-",".") + ".log"

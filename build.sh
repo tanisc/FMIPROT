@@ -1,4 +1,4 @@
-VER="0.21.0"
+VER="0.21.1"
 rm -R dist
 rm -R build
 rm fmiprot.spec

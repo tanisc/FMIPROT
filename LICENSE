@@ -12,7 +12,7 @@ Whenever the software is used in research, the publication should refer at least
 Whenever the software is used in application or service, name of the software should be mentioned, the user manual at https://doi.org/10.5281/zenodo.891068 should be linked and the copyright notice below should be included to the webpage, manual, book of the application or the service or any other similar type of publication.
 Whenever the software code is modified and/or is used in other software, the copyright notice below should be included in the license.
 
-Copyright (c) 2018, Finnish Meteorological Institute
+Copyright (c) 2020, Finnish Meteorological Institute
 Authors: Cemal Melih Tanis, Ali Nadir Arslan.
 All rights reserved.
 
@@ -44,7 +44,7 @@ Zachary Pincus
 Peter J. Verveer
 Davis King
 
-matplotlib 2.2.0:
+matplotlib 2.2.3:
 Copyright (c) 2012-2013 Matplotlib Development Team; All Rights Reserved.
 
 moviepy 0.2.3.2:
@@ -53,25 +53,27 @@ Copyright (c) 2015 Zulko.
 netCDF4 1.3.1:
 Copyright: 2008 by Jeffrey Whitaker.
 
-numpy 1.14.1:
+numpy 1.11.1:
 Copyright (c) 2005, NumPy Developers
 All rights reserved.
 
-Pillow 5.0.0:
+Pillow 6.2.1:
 Copyright (c) 1997-2011 by Secret Labs AB
 Copyright (c) 1995-2011 by Fredrik Lundh
+Copyright (c) 2010-2020 by Alex Clark and contributors
 
+Polygon2 2.0.6 is under LGPL v3.
 Polygon2 2.0.8 is under LGPL v3.
 
-PyInstaller 3.3.1 is distributed under the GPL license (see the 
-file COPYING.txt in the source code), with a special exception 
-which allows to use PyInstaller to build and distribute non-free 
-programs (including commercial ones). 
+PyInstaller 3.3.1 is distributed under the GPL license (see the
+file COPYING.txt in the source code), with a special exception
+which allows to use PyInstaller to build and distribute non-free
+programs (including commercial ones).
 
-pyproj 1.9.5.1:
+pyproj 1.9.6:
 Copyright (c) 2013 by Jeffrey Whitaker.
 
-pyresample 1.9.2 is under LPGL v3.
+pyresample 1.10.1 is under LPGL v3.
 
 Python 2.7.6
 
@@ -79,19 +81,22 @@ python-dateutil 2.6.1:
 Copyright 2017- Paul Ganssle <paul@ganssle.io>
 Copyright 2017- dateutil contributors
 
-pytz 2018.3:
+pytz 2017.2:
 Copyright (c) 2003-2005 Stuart Bishop <stuart@stuartbishop.net>
 
-scipy 1.1.0:
+scipy 0.18.0:
 Copyright (c) 2001, 2002 Enthought, Inc.
 All rights reserved.
 
 Copyright (c) 2003-2017 SciPy Developers.
 All rights reserved.
 
-VTK 8.1.1:
+VTK 6.3.0:
 Copyright (c) 1993-2008 Ken Martin, Will Schroeder, Bill Lorensen
 All rights reserved.
+
+NLS 2m and 10m DEM Data:
+Data from the National Land Survey of Finland Topographic Database 06/2014.
 
 -------------------------------------------------------------------------------
 Finnish Meteorological Institute Image Processing Toolbox (FMIPROT) - Terms and conditions
@@ -107,7 +112,7 @@ Finnish Meteorological Institute Image Processing Toolbox (FMIPROT) - Terms and 
   2.2.	This license is granted perpetually, as long as you do not materially breach it.
   2.3.	Licensee may sublicense Software as a part of a larger work containing more than Software, distributed solely in Object, Binary or Source code form under a personal, non-sublicensable, limited license. Such redistribution shall be limited to unlimited codebases.
   2.4.	Non Assignable & Non-Transferable: Licensee may not assign or transfer his rights and duties under this license.
-  2.5.	Non-commercial: Licensee may use Software only for non-commercial purpose. For commercial purposes, separate licenses should be signed with the Licensor. 
+  2.5.	Non-commercial: Licensee may use Software only for non-commercial purpose. For commercial purposes, separate licenses should be signed with the Licensor.
   2.6.	With Attribution Requirements: Whenever the software is used in research, the publication should refer at least to the article at https://doi.org/10.3390/data3030023. Whenever the software is used in application or service, name of the software should be mentioned, the user manual at https://doi.org/10.5281/zenodo.891068 should be linked and the copyright notice should be included to the webpage, manual, book of the application or the service or any other similar type of publication. Whenever the software code is modified and/or is used in other software, the copyright notice should be included in the license.
 3.	Term & Termination: The Term of this license shall be until terminated. Licensor may terminate this Agreement, including Licensee’s license in the case where Licensee :
   3.1.	exported The Software to any jurisdiction where licensor may not enforce his rights under this agreements in; or
@@ -180,8 +185,8 @@ notice, this list of conditions and the following disclaimer in the
 documentation and/or other materials provided with the
 distribution.
 
-c. Neither the name of the author nor the names of contributors may 
-be used to endorse or promote products derived from this software 
+c. Neither the name of the author nor the names of contributors may
+be used to endorse or promote products derived from this software
 without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -448,8 +453,8 @@ those combinations without any restriction coming from the use of those
 files. (The General Public License restrictions do apply in other respects;
 for example, they cover modification of the files, and distribution when
 not linked into a combine executable.)
- 
- 
+
+
 Bootloader and Related Files
 ----------------------------
 
@@ -459,7 +464,7 @@ final executable. This includes files in directories:
 ./bootloader/
 ./PyInstaller/loader
 
- 
+
 About the PyInstaller Development Team
 --------------------------------------
 
@@ -1019,15 +1024,15 @@ Files: scipy/special/cephes/*
 License: 3-clause BSD
   Distributed under 3-clause BSD license with permission from the author,
   see https://lists.debian.org/debian-legal/2004/12/msg00295.html
-  
+
   Cephes Math Library Release 2.8:  June, 2000
   Copyright 1984, 1995, 2000 by Stephen L. Moshier
-  
+
   This software is derived from the Cephes Math Library and is
   incorporated herein by permission of the author.
-  
+
   All rights reserved.
-  
+
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions are met:
       * Redistributions of source code must retain the above copyright
@@ -1038,7 +1043,7 @@ License: 3-clause BSD
       * Neither the name of the <organization> nor the
         names of its contributors may be used to endorse or promote products
         derived from this software without specific prior written permission.
-  
+
   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -1054,7 +1059,7 @@ Name: Faddeeva
 Files: scipy/special/Faddeeva.*
 License: MIT
   Copyright (c) 2012 Massachusetts Institute of Technology
-  
+
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
   "Software"), to deal in the Software without restriction, including
@@ -1062,17 +1067,17 @@ License: MIT
   distribute, sublicense, and/or sell copies of the Software, and to
   permit persons to whom the Software is furnished to do so, subject to
   the following conditions:
-  
+
   The above copyright notice and this permission notice shall be
   included in all copies or substantial portions of the Software.
-  
+
   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
   EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
   NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
   LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
   OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
+  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 Name: qd
 Files: scipy/special/cephes/dd_*.[ch]
@@ -1081,29 +1086,29 @@ License: modified BSD license ("BSD-LBNL-License.doc")
   of Mathematical, Information, and Computational Sciences of the
   U.S. Department of Energy under contract numbers DE-AC03-76SF00098 and
   DE-AC02-05CH11231.
-  
+
   Copyright (c) 2003-2009, The Regents of the University of California,
   through Lawrence Berkeley National Laboratory (subject to receipt of
   any required approvals from U.S. Dept. of Energy) All rights reserved.
-  
+
   1. Redistribution and use in source and binary forms, with or
   without modification, are permitted provided that the following
   conditions are met:
-  
+
   (1) Redistributions of source code must retain the copyright
   notice, this list of conditions and the following disclaimer.
-  
+
   (2) Redistributions in binary form must reproduce the copyright
   notice, this list of conditions and the following disclaimer in
   the documentation and/or other materials provided with the
   distribution.
-  
+
   (3) Neither the name of the University of California, Lawrence
   Berkeley National Laboratory, U.S. Dept. of Energy nor the names
   of its contributors may be used to endorse or promote products
   derived from this software without specific prior written
   permission.
-  
+
   2. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -1115,7 +1120,7 @@ License: modified BSD license ("BSD-LBNL-License.doc")
   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-  
+
   3. You are under no obligation whatsoever to provide any bug fixes,
   patches, or upgrades to the features, functionality or performance of
   the source code ("Enhancements") to anyone; however, if you choose to
@@ -1132,27 +1137,27 @@ VTK License
 Copyright (c) 1993-2008 Ken Martin, Will Schroeder, Bill Lorensen
 All rights reserved.
 
-Redistribution and use in source and binary forms, with or without modification, 
+Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
- - Redistributions of source code must retain the above copyright notice, this 
-list of conditions and the following disclaimer. 
- - Redistributions in binary form must reproduce the above copyright notice, 
-this list of conditions and the following disclaimer in the documentation and/or 
+ - Redistributions of source code must retain the above copyright notice, this
+list of conditions and the following disclaimer.
+ - Redistributions in binary form must reproduce the above copyright notice,
+this list of conditions and the following disclaimer in the documentation and/or
 other materials provided with the distribution.
- - Neither name of Ken Martin, Will Schroeder, or Bill Lorensen nor the names of 
-any contributors may be used to endorse or promote products derived from this 
+ - Neither name of Ken Martin, Will Schroeder, or Bill Lorensen nor the names of
+any contributors may be used to endorse or promote products derived from this
 software without specific prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” 
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
-ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHORS OR CONTRIBUTORS BE LIABLE FOR 
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES 
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON 
-ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING 
-NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS”
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHORS OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
@@ -1223,3 +1228,8 @@ Each version is given a distinguishing version number. If the Library as you rec
 If the Library as you received it specifies that a proxy can decide whether future versions of the GNU Lesser General Public License shall apply, that proxy's public statement of acceptance of any version is permanent authorization for you to choose that version for the Library.
 
 
+National Land Survey open data Attribution CC 4.0 licence
+-------------------------------------------------------------------------------
+Open data by National Land Survey of Finland is licensed under a Creative Commons Attribution 4.0 International License(link is external).
+
+Mention the name of the Licensor, the name of the dataset(s) and the time when the National Land Survey has delivered the dataset(s) (e.g.: contains data from the National Land Survey of Finland Topographic Database 06/2014)

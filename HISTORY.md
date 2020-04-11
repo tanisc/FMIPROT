@@ -1,3 +1,7 @@
+Version 0.21.1 (Beta)
+Bug fix (Minor): Opening user manual and license from GUI in source-code mode fixed.
+Documentation updates for 0.21.0 updates are done.
+
 Version 0.21.0 (Beta)
 Snow cover detection algorithm is added.
 Snow cover fraction algorithm is added.
