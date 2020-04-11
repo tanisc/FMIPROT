@@ -1,7 +1,12 @@
 import os
 import datetime
 import numpy as np
-from moviepy.editor import VideoClip
+try:
+    from moviepy.video.io.VideoFileClip import VideoFileClip
+except:
+    import imageio
+    imageio.plugins.ffmpeg.download()
+    from moviepy.video.io.VideoFileClip import VideoFileClip
 import mahotas
 from uuid import uuid4
 from definitions import TmpDir
