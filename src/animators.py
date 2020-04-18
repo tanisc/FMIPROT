@@ -1,12 +1,10 @@
 import os
 import datetime
 import numpy as np
-try:
-    from moviepy.video.io.VideoFileClip import VideoFileClip
-except:
-    import imageio
-    imageio.plugins.ffmpeg.download()
-    from moviepy.video.io.VideoFileClip import VideoFileClip
+from moviepy.video.VideoClip import VideoClip
+from moviepy.video.fx.resize import resize
+VideoClip.resize = resize
+
 import mahotas
 from uuid import uuid4
 from definitions import TmpDir

@@ -15,7 +15,7 @@ copy README.md bin\%VER%\win\README.md
 copy usermanual.pdf bin\%VER%\win\usermanual.pdf
 copy LICENSE bin\%VER%\win\LICENSE
 copy HISTORY.md bin\%VER%\win\HISTORY.md
-pyinstaller src\fmiprot.py
+pyinstaller src\fmiprot.py --clean
 xcopy dist\fmiprot\* bin\%VER%\win\ /q /s
 rmdir dist /s /q
 rmdir build /s /q

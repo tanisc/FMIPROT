@@ -19,7 +19,7 @@ cp LICENSE bin/$VER/lin/LICENSE
 cp LICENSE bin/$VER/LICENSE
 cp HISTORY.md bin/$VER/lin/HISTORY.md
 cp HISTORY.md bin/$VER/HISTORY.md
-pyinstaller src/fmiprot.py
+pyinstaller src/fmiprot.py --clean
 cp -R dist/fmiprot/* bin/$VER/lin/
 rm -R dist
 rm -R build
