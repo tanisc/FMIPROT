@@ -1,6 +1,12 @@
 Version 0.21.1 (Beta)
 Bug fix (Minor): Opening user manual and license from GUI in source-code mode fixed.
 Documentation updates for 0.21.0 updates are done.
+Library versions fixed.
+netCDF library version requirement added.
+Requirement file names changed to be compliant with conda cloud prefixes.
+Importing moviepy fixed.
+Clean flag added for build scripts.
+
 
 Version 0.21.0 (Beta)
 Snow cover detection algorithm is added.
