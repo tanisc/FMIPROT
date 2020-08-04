@@ -270,9 +270,10 @@ def filterImageListTemporal(logger,imglistv,pathlistv,fnameconv,timec,count):
 
 	if timec[4] == 'Latest one month':
 		if lastimageday.month == 1:
-			date1 = datetime.date(lastimageday.year-1,12,lastimageday.day)
+			daysinmonth = datetime.timedelta(days=31)
 		else:
-			date1 = datetime.date(lastimageday.year,lastimageday.month-1,lastimageday.day)
+			daysinmonth = datetime.date(lastimageday.year,lastimageday.month,15) - datetime.date(lastimageday.year,lastimageday.month-1,15)
+		date1 = lastimageday - daysinmonth
 		date2 = lastimageday
 		time1 = parsers.strptime2(timec[2],'%H:%M')[2]
 		time2 = parsers.strptime2(timec[3],'%H:%M')[2]
