@@ -2,6 +2,7 @@ Version 0.21.1 (Beta)
 Requirement file names fixed in conda scripts.
 libglu added to linux requirements.
 Bug fix (Minor): Latest one month temporal selection code.
+Setup report jquery link changed to Http to Https.
 
 Version 0.21.1 (Beta)
 Bug fix (Minor): Opening user manual and license from GUI in source-code mode fixed.

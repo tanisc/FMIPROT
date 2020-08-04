@@ -481,7 +481,7 @@ def writeSetupReport(filename,setup,logger):
 								if path.splitext(csvf)[1] == '.csv':
 									plt_f.write("\n\
 	<div id=\"graphdiv"+str(i)+str(j)+str(k)+str(l)+"\" style=\"position: absolute; left: 0px;  right: 21%; top: 20px; bottom: 8px;\"></div>\n\
-	<script type=\"text/javascript\" src=\"http://code.jquery.com/jquery-3.3.1.min.js\"></script>\n\
+	<script type=\"text/javascript\" src=\"https://code.jquery.com/jquery-3.3.1.min.js\"></script>\n\
 	<script type=\"text/javascript\">\n\
 	function vischange"+str(i)+str(j)+str(k)+str(l)+" (el) {g"+str(i)+str(j)+str(k)+str(l)+".setVisibility(el.id.substr((\""+str(i)+str(j)+str(k)+str(l)+"\".length),el.id.length-1), el.checked);}\n\
 	function legendFormatter(data) {\n\
