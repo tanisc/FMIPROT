@@ -1,4 +1,8 @@
 Version 0.21.1 (Beta)
+Requirement file names fixed in conda scripts.
+libglu added to linux requirements.
+
+Version 0.21.1 (Beta)
 Bug fix (Minor): Opening user manual and license from GUI in source-code mode fixed.
 Documentation updates for 0.21.0 updates are done.
 Library versions fixed.
