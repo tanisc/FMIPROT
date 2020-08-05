@@ -370,12 +370,11 @@ def checkPathCrawl(remote_path):
 	return crawl
 
 def listPathCrawl(remote_path,timec,timelimc):
-
 	#old version compatiblity
 	if timec[0] == 0:
 		timec[0] = '01.01.1970'
 	if timec[1] == 0:
-		timec[1] = '12.12.' + str(datetime.datetime.today().year+10)
+		timec[1] = (datetime.datetime.today()+datetime.timedelta(days=1)).strftime('%d.%m.%Y')
 	if timec[2] == 0:
 		timec[2] = '00:00'
 	if timec[3] == 0:
@@ -564,12 +563,39 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 		except:
 			pass
 
-	if 'lastimagetime' in source:
-		timelimc[1] = parsers.strptime2(source['lastimagetime'])[1]
-		timelimc[3] = parsers.strptime2(source['lastimagetime'])[2]
-	else:
-		timelimc[1] = parsers.strptime2(datetime.datetime.now()+datetime.timedelta(days=1))[1]	#timezone consideration
-		timelimc[3] = parsers.strptime2(datetime.datetime.now()+datetime.timedelta(days=1))[2]
+	# if 'lastimagetime' in source:
+	# 	timelimc[1] = parsers.strptime2(source['lastimagetime'])[1]
+	# 	timelimc[3] = parsers.strptime2(source['lastimagetime'])[2]
+	# else:
+	timelimc[1] = parsers.strptime2(datetime.datetime.now()+datetime.timedelta(days=1))[1]	#timezone consideration
+	timelimc[3] = parsers.strptime2(datetime.datetime.now()+datetime.timedelta(days=1))[2]
+
+	if len(timec) == 4:	#old version
+		timec.append('Date and time intervals')
+	
+	if 'Earliest date' in timec[4]:
+		timec[1] = (datetime.datetime.today()+datetime.timedelta(days=1)).strftime('%d.%m.%Y')
+		timec[3] = '23:59'
+	if 'Latest date' in timec[4]:
+		timec[0] = '01.01.1970'
+		timec[2] = '00:00'
+
+	if 'Last 24 hours' in timec[4] or 'Today only' in timec[4]:
+		timelimc[0] = parsers.strptime2(datetime.datetime.now()-datetime.timedelta(days=2))[1]
+		timelimc[2] = parsers.strptime2(datetime.datetime.now()-datetime.timedelta(days=2))[2]
+	if 'Last 48 hours' in timec[4] or 'Yesterday only' in timec[4]::
+		timelimc[0] = parsers.strptime2(datetime.datetime.now()-datetime.timedelta(days=3))[1]
+		timelimc[2] = parsers.strptime2(datetime.datetime.now()-datetime.timedelta(days=3))[2]
+	if 'Last one week' in timec[4]:
+		timelimc[0] = parsers.strptime2(datetime.datetime.now()-datetime.timedelta(days=8))[1]
+		timelimc[2] = parsers.strptime2(datetime.datetime.now()-datetime.timedelta(days=8))[2]
+	if 'Last one month' in timec[4]:
+		timelimc[0] = parsers.strptime2(datetime.datetime.now()-datetime.timedelta(days=32))[1]
+		timelimc[2] = parsers.strptime2(datetime.datetime.now()-datetime.timedelta(days=32))[2]
+	if 'Last one year' in timec[4]:
+		timelimc[0] = parsers.strptime2(datetime.datetime.now()-datetime.timedelta(days=367))[1]
+		timelimc[2] = parsers.strptime2(datetime.datetime.now()-datetime.timedelta(days=367))[2]
+
 
 	if protocol == 'FTP':
 		if timec[4] == 'List':

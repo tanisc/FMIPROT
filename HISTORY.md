@@ -5,6 +5,7 @@ Bug fix (Minor): Latest one month temporal selection code.
 Setup report jquery link changed to Http to Https.
 Bug fix (Minor): Preview filename fix for temporarily added cameras.
 Exception on failures in "downloadas" enabled.
+Improvements and bug fixes in image fetching.
 
 Version 0.21.1 (Beta)
 Bug fix (Minor): Opening user manual and license from GUI in source-code mode fixed.
