@@ -572,7 +572,7 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 
 	if len(timec) == 4:	#old version
 		timec.append('Date and time intervals')
-	
+
 	if 'Earliest date' in timec[4]:
 		timec[1] = (datetime.datetime.today()+datetime.timedelta(days=1)).strftime('%d.%m.%Y')
 		timec[3] = '23:59'
@@ -583,7 +583,7 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 	if 'Last 24 hours' in timec[4] or 'Today only' in timec[4]:
 		timelimc[0] = parsers.strptime2(datetime.datetime.now()-datetime.timedelta(days=2))[1]
 		timelimc[2] = parsers.strptime2(datetime.datetime.now()-datetime.timedelta(days=2))[2]
-	if 'Last 48 hours' in timec[4] or 'Yesterday only' in timec[4]::
+	if 'Last 48 hours' in timec[4] or 'Yesterday only' in timec[4]:
 		timelimc[0] = parsers.strptime2(datetime.datetime.now()-datetime.timedelta(days=3))[1]
 		timelimc[2] = parsers.strptime2(datetime.datetime.now()-datetime.timedelta(days=3))[2]
 	if 'Last one week' in timec[4]:
