@@ -5109,8 +5109,8 @@ class monimet_gui(Tkinter.Tk):
 		scenario = self.setup[self.AnalysisNoVariable.get()-1]
 		pfn_ts = '-' + parsers.dTime2fTime(parsers.strptime2(fn,source['filenameformat'])[0])
 		if 'temporary' in source and source['temporary']:
-			pfn = validateName(source['network'])+'-'+source['protocol']+'-'+source['host']+'-'+validateName(source['username'])+'-'+validateName(source['path']) + pfn_ts + os.path.splitext(source['filenameformat'])[1]
-			pfn_prev = [validateName(source['network'])+'-'+source['protocol']+'-'+source['host']+'-'+validateName(source['username'])+'-'+validateName(source['path']), os.path.splitext(source['filenameformat'])[1]]
+			pfn = validateName(source['network'])+'-'+source['protocol']+'-'+source['host']+'-'+validateName(source['username'])+'-'+validateName(source['path'])+'-'+validateName(source['name']) + pfn_ts + os.path.splitext(source['filenameformat'])[1]
+			pfn_prev = [validateName(source['network'])+'-'+source['protocol']+'-'+source['host']+'-'+validateName(source['username'])+'-'+validateName(source['path'])+'-'+validateName(source['name']), os.path.splitext(source['filenameformat'])[1]]
 		else:
 			pfn = source['networkid']+'-'+validateName(source['network'])+'-'+validateName(source['name']) + pfn_ts + os.path.splitext(source['filenameformat'])[1]
 			pfn_prev = [source['networkid']+'-'+validateName(source['network'])+'-'+validateName(source['name']),os.path.splitext(source['filenameformat'])[1]]
@@ -5118,7 +5118,7 @@ class monimet_gui(Tkinter.Tk):
 			self.PictureFileName.set(os.path.join(source['path'],fn))
 		else:
 			if 'temporary' in source and source['temporary']:
-				self.PictureFileName.set(os.path.join(os.path.join(TmpDir,'tmp_images'),validateName(source['network'])+'-'+source['protocol']+'-'+source['host']+'-'+validateName(source['username'])+'-'+validateName(source['path']),fn))
+				self.PictureFileName.set(os.path.join(os.path.join(TmpDir,'tmp_images'),validateName(source['network'])+'-'+source['protocol']+'-'+source['host']+'-'+validateName(source['username'])+'-'+validateName(source['path'])+'-'+validateName(source['name']),fn))
 			else:
 				self.PictureFileName.set(os.path.join(self.imagespath.get(),source['networkid']+'-'+parsers.validateName(source['network']),parsers.validateName(source['name']),fn))
 		self.setup[self.AnalysisNoVariable.get()-1].update({'previewimagetime':parsers.strftime2(parsers.strptime2(fn,source['filenameformat'])[0])[0]})
@@ -5144,7 +5144,7 @@ class monimet_gui(Tkinter.Tk):
 			if 'previewimagetime' in source and source['previewimagetime'] != '' and source['previewimagetime'] is not None:
 				pfn_ts = '-' + parsers.sTime2fTime(source['previewimagetime'])
 		if 'temporary' in source and source['temporary']:
-			pfn = validateName(source['network'])+'-'+source['protocol']+'-'+source['host']+'-'+validateName(source['username'])+'-'+validateName(source['path']) + pfn_ts + os.path.splitext(source['filenameformat'])[1]
+			pfn = validateName(source['network'])+'-'+source['protocol']+'-'+source['host']+'-'+validateName(source['username'])+'-'+validateName(source['path'])+'-'+validateName(source['name']) + pfn_ts + os.path.splitext(source['filenameformat'])[1]
 		else:
 			pfn = source['networkid']+'-'+validateName(source['network'])+'-'+validateName(source['name']) + pfn_ts + os.path.splitext(source['filenameformat'])[1]
 		if pfn in os.listdir(PreviewsDir):
@@ -5216,7 +5216,7 @@ class monimet_gui(Tkinter.Tk):
 			if 'previewimagetime' in source and source['previewimagetime'] != '' and source['previewimagetime'] is not None:
 				pfn_ts = '-' + parsers.sTime2fTime(source['previewimagetime'])
 		if 'temporary' in source and source['temporary']:
-			pfn = validateName(source['network'])+'-'+source['protocol']+'-'+source['host']+'-'+validateName(source['username'])+'-'+validateName(source['path']) + pfn_ts + os.path.splitext(source['filenameformat'])[1]
+			pfn = validateName(source['network'])+'-'+source['protocol']+'-'+source['host']+'-'+validateName(source['username'])+'-'+validateName(source['path'])+'-'+validateName(source['name']) + pfn_ts + os.path.splitext(source['filenameformat'])[1]
 		else:
 			pfn = source['networkid']+'-'+validateName(source['network'])+'-'+validateName(source['name']) + pfn_ts + os.path.splitext(source['filenameformat'])[1]
 		if pfn in os.listdir(PreviewsDir):
@@ -5437,7 +5437,7 @@ class monimet_gui(Tkinter.Tk):
 					if 'previewimagetime' in source and source['previewimagetime'] != '' and source['previewimagetime'] is not None:
 						pfn_ts = '-' + parsers.sTime2fTime(source['previewimagetime'])
 				if 'temporary' in source and source['temporary']:
-					pfn = validateName(source['network'])+'-'+source['protocol']+'-'+source['host']+'-'+validateName(source['username'])+'-'+validateName(source['path']) + pfn_ts + os.path.splitext(source['filenameformat'])[1]
+					pfn = validateName(source['network'])+'-'+source['protocol']+'-'+source['host']+'-'+validateName(source['username'])+'-'+validateName(source['path']) +'-'+validateName(source['name']) + pfn_ts + os.path.splitext(source['filenameformat'])[1]
 				else:
 					pfn = source['networkid']+'-'+validateName(source['network'])+'-'+validateName(source['name']) + pfn_ts + os.path.splitext(source['filenameformat'])[1]
 				if not os.path.exists(maskdir):
