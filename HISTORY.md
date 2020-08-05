@@ -4,6 +4,7 @@ libglu added to linux requirements.
 Bug fix (Minor): Latest one month temporal selection code.
 Setup report jquery link changed to Http to Https.
 Bug fix (Minor): Preview filename fix for temporarily added cameras.
+Exception on failures in "downloadas" enabled.
 
 Version 0.21.1 (Beta)
 Bug fix (Minor): Opening user manual and license from GUI in source-code mode fixed.

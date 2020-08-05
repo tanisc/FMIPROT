@@ -686,45 +686,45 @@ def downloadAs(imglist,datetimelist,mask,settings,logger, filenameformat, resolu
 	flistout = []
 	fmoded = []
 	for i,fname in enumerate(imglist):
-		# try:
-		time = np.append(time,(str(datetimelist[i])))
-		if resolution == "" and blur == 0:
-			flist = np.append(flist,fname)
-		else:
-			newfname = str(uuid4()) + os.path.splitext(fname)[1]
-			while os.path.isfile(os.path.join(TmpDir,newfname)):
-					newfname = str(uuid4()) + os.path.splitext(fname)[1]
-			newfname = os.path.join(TmpDir,newfname)
-			img = mahotas.imread(fname)
-			if resolution != "":
-				if len(resolution) == 1:
-					nsize = (resolution[0],int(img.shape[1]*float(resolution[0])/float(img.shape[0])))
-				else:
-					nsize = tuple(resolution[::-1])
-				img = img.transpose(2,0,1)
-				img_ = np.zeros(tuple([img.shape[0]]+list(nsize)))
-				for c, color in enumerate(img):
-					img_[c] = mahotas.imresize(color,nsize)
-				img = img_.astype(np.uint8).transpose(1,2,0)
-			if blur != 0:
-				img = img.transpose(2,0,1).astype(np.float64)/255.0
-				for c, color in enumerate(img):
-					img[c] = mahotas.gaussian_filter(color, blur)
-				img = (img*255).astype(np.uint8).transpose(1,2,0)
-			mahotas.imsave(newfname,img)
-			flist = np.append(flist,newfname)
-		if filenameformat != "":
-			try:
-				fnameout = datetimelist[i].strftime(filenameformat)
-			except:
-				logger.set('Failed to change filename to new filename format. Keeping original value.')
+		try:
+			time = np.append(time,(str(datetimelist[i])))
+			if resolution == "" and blur == 0:
+				flist = np.append(flist,fname)
+			else:
+				newfname = str(uuid4()) + os.path.splitext(fname)[1]
+				while os.path.isfile(os.path.join(TmpDir,newfname)):
+						newfname = str(uuid4()) + os.path.splitext(fname)[1]
+				newfname = os.path.join(TmpDir,newfname)
+				img = mahotas.imread(fname)
+				if resolution != "":
+					if len(resolution) == 1:
+						nsize = (resolution[0],int(img.shape[1]*float(resolution[0])/float(img.shape[0])))
+					else:
+						nsize = tuple(resolution[::-1])
+					img = img.transpose(2,0,1)
+					img_ = np.zeros(tuple([img.shape[0]]+list(nsize)))
+					for c, color in enumerate(img):
+						img_[c] = mahotas.imresize(color,nsize)
+					img = img_.astype(np.uint8).transpose(1,2,0)
+				if blur != 0:
+					img = img.transpose(2,0,1).astype(np.float64)/255.0
+					for c, color in enumerate(img):
+						img[c] = mahotas.gaussian_filter(color, blur)
+					img = (img*255).astype(np.uint8).transpose(1,2,0)
+				mahotas.imsave(newfname,img)
+				flist = np.append(flist,newfname)
+			if filenameformat != "":
+				try:
+					fnameout = datetimelist[i].strftime(filenameformat)
+				except:
+					logger.set('Failed to change filename to new filename format. Keeping original value.')
+					fnameout = os.path.split(fname)[-1]
+			else:
 				fnameout = os.path.split(fname)[-1]
-		else:
-			fnameout = os.path.split(fname)[-1]
-		flistout = np.append(flistout,fnameout)
-		fmoded = np.append(fmoded,0)
-		# except:
-		# 	logger.set("Processing "+ fname+ " failed.")
+			flistout = np.append(flistout,fnameout)
+			fmoded = np.append(fmoded,0)
+		except:
+			logger.set("Processing "+ fname+ " failed.")
 		logger.set('Image: |progress:4|queue:'+str(i+1)+'|total:'+str(len(imglist)))
 	output = ["Time",time,"filetocopy",flist,"filemodified",fmoded,"Filename",flistout]
 	output = [["Download images",output]]
