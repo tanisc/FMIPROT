@@ -687,9 +687,8 @@ def downloadAs(imglist,datetimelist,mask,settings,logger, filenameformat, resolu
 	fmoded = []
 	for i,fname in enumerate(imglist):
 		try:
-			time = np.append(time,(str(datetimelist[i])))
 			if resolution == "" and blur == 0:
-				flist = np.append(flist,fname)
+				newfname = fname
 			else:
 				newfname = str(uuid4()) + os.path.splitext(fname)[1]
 				while os.path.isfile(os.path.join(TmpDir,newfname)):
@@ -712,7 +711,6 @@ def downloadAs(imglist,datetimelist,mask,settings,logger, filenameformat, resolu
 						img[c] = mahotas.gaussian_filter(color, blur)
 					img = (img*255).astype(np.uint8).transpose(1,2,0)
 				mahotas.imsave(newfname,img)
-				flist = np.append(flist,newfname)
 			if filenameformat != "":
 				try:
 					fnameout = datetimelist[i].strftime(filenameformat)
@@ -721,6 +719,8 @@ def downloadAs(imglist,datetimelist,mask,settings,logger, filenameformat, resolu
 					fnameout = os.path.split(fname)[-1]
 			else:
 				fnameout = os.path.split(fname)[-1]
+			time = np.append(time,(str(datetimelist[i])))
+			flist = np.append(flist,newfname)
 			flistout = np.append(flistout,fnameout)
 			fmoded = np.append(fmoded,0)
 		except:
