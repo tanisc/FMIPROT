@@ -288,11 +288,13 @@ def filterImageListTemporal(logger,imglistv,pathlistv,fnameconv,timec,count):
 		datestr = ' older than ' + str(date2)
 	elif timec[4] == 'Earliest date and time intervals':
 		datestr = ' newer than ' + str(date1)
+	elif timec[4] == 'Time of day':
+		datestr = ''
 	else:
 		datestr = ' between dates ' + str(date1) + ' - ' + str(date2)
 	timestr = ' between times of the day ' + str(time1) + ' - ' + str(time2)
 
-	if timec[4] in ['Date and time intervals','Today only','Yesterday only','Last one week','Last one year','Last one month','Latest one week','Latest one year','Latest one month','Latest date and time intervals','Earliest date and time intervals']:
+	if timec[4] in ['Date and time intervals','Today only','Yesterday only','Last one week','Last one year','Last one month','Latest one week','Latest one year','Latest one month','Time of day', 'Latest date and time intervals','Earliest date and time intervals']:
 		if count == 0:
 			logger.set('Listing images' + datestr +  timestr + '...')
 		else:
@@ -301,6 +303,14 @@ def filterImageListTemporal(logger,imglistv,pathlistv,fnameconv,timec,count):
 	imglistv = []
 	datetimelistv = []
 	pathlistv = []
+	if timec[4] == 'Time of day':
+		for i,img in enumerate(imglist):
+                        if timelist[i] <= time2 and timelist[i] >= time1:
+                                imglistv.append(img)
+                                datetimelistv.append(datetimelist[i])
+                                pathlistv.append(pathlist[i])
+                return (imglistv, datetimelistv, pathlistv)
+
 	if timec[4] == 'Earliest date and time intervals':
 		for i,img in enumerate(imglist):
 			if timelist[i] <= time2 and timelist[i] >= time1 and datelist[i] >= date1:
@@ -666,7 +676,7 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 							    logger.set('Latest image found. Ending crawling paths.')
 							    break
 							if len(pflist) != 0 and 'Latest ' in timec[4]:
-							    (pflist_all,pdlist_all,pplist_all) = filterImageListTemporal(logger,pflist,[p]*len(pflist),filenameformat,timec[0:4]+["All"],0)
+							    (pflist_all,pdlist_all,pplist_all) = filterImageListTemporal(logger,pflist,[p]*len(pflist),filenameformat,timec[0:4]+["Time of day"],0)
 							    (imglistv, datetimelistv, pathlistv) = filterImageListTemporal(logger,imglistv,pathlistv,filenameformat,timec,count)
 							    stopCrawl = False
 							    for pi in range(len(pflist_all)):
@@ -822,7 +832,7 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 						    logger.set('Latest image found. Ending crawling paths.')
 						    break
 						if len(pflist) != 0 and 'Latest ' in timec[4]:
-						    (pflist_all,pdlist_all,pplist_all) = filterImageListTemporal(logger,pflist,[p]*len(pflist),filenameformat,timec[0:4]+["All"],0)
+						    (pflist_all,pdlist_all,pplist_all) = filterImageListTemporal(logger,pflist,[p]*len(pflist),filenameformat,timec[0:4]+["Time of day"],0)
 						    (imglistv, datetimelistv, pathlistv) = filterImageListTemporal(logger,imglistv,pathlistv,filenameformat,timec,count)
 						    stopCrawl = False
 						    for pi in range(len(pflist_all)):
@@ -930,6 +940,8 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 				logger.set('Crawling through '+str(len(paths_to_crawl))+ ' paths...')
 			for p in paths_to_crawl:
 				try:
+					if not os.path.exists(p):
+						continue
 					pflist = os.listdir(p)
 					logger.set(str(len(pflist))+' possible files found.')
 					for img in pflist:
@@ -939,8 +951,9 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 					    logger.set('Latest image found. Ending crawling paths.')
 					    break
 					if len(pflist) != 0 and 'Latest ' in timec[4]:
-					    (pflist_all,pdlist_all,pplist_all) = filterImageListTemporal(logger,pflist,[p]*len(pflist),filenameformat,timec[0:4]+["All"],0)
+					    (pflist_all,pdlist_all,pplist_all) = filterImageListTemporal(logger,pflist,[p]*len(pflist),filenameformat,timec[0:4]+["Time of day"],0)
 					    (imglistv, datetimelistv, pathlistv) = filterImageListTemporal(logger,imglistv,pathlistv,filenameformat,timec,count)
+					    print p
 					    stopCrawl = False
 					    for pi in range(len(pflist_all)):
 							if pflist_all[pi] not in imglistv or (pflist_all[pi] in imglistv and pplist_all[pi] != pathlistv[imglistv.index(pflist_all[pi])]):
