@@ -213,15 +213,15 @@ def filterThresholds(imglist, datetimelist, mask, logger):
 	if isinstance(imglist,list):
 		#, th=[0.0,1.0,0.0,1.0,0.0,1.0,0.0,1.0,0.0,255.0,0.0,255.0,0.0,255.0,0.0,1.0]
 		mask, pgs, th = mask
+		imglisto = []
+                datetimelisto = []
 		if th[:8]==[0.0,1.0,0.0,1.0,0.0,1.0,0.0,1.0]:
-			return imglist, datetimelist
+			return imglist, datetimelist, imglisto, datetimelisto
 		logger.set('Number of images:'+str(len(imglist)))
 		logger.set('Number of unmasked pixels per image:'+str(np.sum(mask.transpose(2,0,1)[0])))
 		logger.set('Filtering files according to thresholds...')
 		imglistv = []
 		datetimelistv = []
-		imglisto = []
-		datetimelisto = []
 		for i,fname in enumerate(imglist):
 			try:
 				img = mahotas.imread(fname)
