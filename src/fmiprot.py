@@ -5702,6 +5702,7 @@ class monimet_gui(Tkinter.Tk):
 							else:
 								self.Message.set("No pictures are valid after filtering with thresholds. Scenario is skipped.")
 								self.Message.set('Scenario: |progress:10|queue:'+str(s+1)+'|total:'+str(len(self.setup)))
+						imglisto = []
 						if outputValid:
 							if analysis['id'] == 'TEMPO01':
 								mask = None
@@ -5716,7 +5717,7 @@ class monimet_gui(Tkinter.Tk):
 										self.Message.set("No valid images found. Scenario is skipped.")
 										self.Message.set('Scenario: |progress:10|queue:'+str(s+1)+'|total:'+str(len(self.setup)))
 								mask = (mask,scenario['polygonicmask'],scenario['thresholds'])
-								(imglist,datetimelist) = calculations.filterThresholds(imglist,datetimelist, mask,logger)
+								(imglist,datetimelist,imglisto,datetimelisto) = calculations.filterThresholds(imglist,datetimelist, mask,logger)
 						if imglist == []:
 							outputValid = False
 							if analysis['id'] != 'TEMPO01' and scenario['multiplerois'] and isinstance(scenario['polygonicmask'][0],list):
@@ -5742,6 +5743,13 @@ class monimet_gui(Tkinter.Tk):
 							else:
 								if outputtv != []:
 									output = [outputtv[0]]
+						if imglisto != [] and output is not False:
+							for i in range(len(output[0][1])/2):
+								if output[0][1][2*i] == "Time" or output[0][1][2*i] == "Date":
+									output[0][1][2*i+1] = np.hstack((output[0][1][2*i+1] , map(str,datetimelisto)))
+								else:
+									output[0][1][2*i+1] = np.hstack((output[0][1][2*i+1] , [np.nan]*len(imglisto)))
+						if self.outputmodevariable.get() == output_modes[2] or imglisto != []:
 							if output is not False and output[0] != [] and not isinstance(output[0][1][1],str):
 								isorted = np.argsort(output[0][1][1])
 								for i in range(len(output[0][1])/2)[::-1]:
@@ -5790,6 +5798,7 @@ class monimet_gui(Tkinter.Tk):
 									outputValid = False
 									self.Message.set("No pictures are valid after filtering with thresholds. ROI is skipped.")
 									self.Message.set('ROI: |progress:6|queue:'+str(r+2)+'|total:'+str(len(scenario['polygonicmask'])+1))
+								imglisto = []
 								if outputValid:
 									mask = maskers.polymask(imglist,[roi],self.Message)
 									if isinstance(mask,bool) and mask == False:
@@ -5797,7 +5806,7 @@ class monimet_gui(Tkinter.Tk):
 										self.Message.set("No valid images found. ROI is skipped.")
 										self.Message.set('ROI: |progress:6|queue:'+str(r+2)+'|total:'+str(len(scenario['polygonicmask'])+1))
 									mask = (mask,[roi],scenario['thresholds'])
-									(imglist,datetimelist) = calculations.filterThresholds(imglist,datetimelist, mask,logger)
+									(imglist,datetimelist,imglisto,datetimelisto) = calculations.filterThresholds(imglist,datetimelist, mask,logger)
 								if imglist == []:
 									outputValid = False
 									self.Message.set("No pictures are valid after filtering with thresholds. ROI is skipped.")
@@ -5818,6 +5827,13 @@ class monimet_gui(Tkinter.Tk):
 													break
 									else:
 										output = [outputtv[r+1]]
+								if imglisto != [] and output is not False:
+									for i in range(len(output[0][1])/2):
+										if output[0][1][2*i] == "Time" or output[0][1][2*i] == "Date":
+											output[0][1][2*i+1] = np.hstack((output[0][1][2*i+1] , map(str,datetimelisto)))
+										else:
+											output[0][1][2*i+1] = np.hstack((output[0][1][2*i+1] , [np.nan]*len(imglisto)))
+								if self.outputmodevariable.get() == output_modes[2] or imglisto != []:
 									if output[0] != []:
 										isorted = np.argsort(output[0][1][1])
 										for i in range(len(output[0][1])/2)[::-1]:

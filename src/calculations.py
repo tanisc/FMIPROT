@@ -220,6 +220,8 @@ def filterThresholds(imglist, datetimelist, mask, logger):
 		logger.set('Filtering files according to thresholds...')
 		imglistv = []
 		datetimelistv = []
+		imglisto = []
+		datetimelisto = []
 		for i,fname in enumerate(imglist):
 			try:
 				img = mahotas.imread(fname)
@@ -228,11 +230,14 @@ def filterThresholds(imglist, datetimelist, mask, logger):
 				if rfrac >= th[0] and gfrac >= th[2] and bfrac >= th[4] and wfrac >= th[6] and lfrac >= th[14] and rfrac <= th[1] and gfrac <= th[3] and bfrac <= th[5] and wfrac <= th[7] and lfrac <= th[15]:
 					imglistv.append(fname)
 					datetimelistv.append(datetimelist[i])
+				else:
+					imglisto.append(fname)
+					datetimelisto.append(datetimelist[i])
 			except:
 				pass
 			logger.set('Image: |progress:4|queue:'+str(i+1)+'|total:'+str(len(imglist)))
 		logger.set('Number of images:'+str(len(imglistv)))
-		return (imglistv,datetimelistv)
+		return (imglistv,datetimelistv,imglisto,datetimelisto)
 	else:
 		mask, pgs, th = mask
 		if th[:8]==[0.0,1.0,0.0,1.0,0.0,1.0,0.0,1.0]:
