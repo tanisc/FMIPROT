@@ -5717,7 +5717,10 @@ class monimet_gui(Tkinter.Tk):
 										self.Message.set("No valid images found. Scenario is skipped.")
 										self.Message.set('Scenario: |progress:10|queue:'+str(s+1)+'|total:'+str(len(self.setup)))
 								mask = (mask,scenario['polygonicmask'],scenario['thresholds'])
-								(imglist,datetimelist,imglisto,datetimelisto) = calculations.filterThresholds(imglist,datetimelist, mask,logger)
+								if mask[0] is False:
+									outputValid = False
+								else:
+									(imglist,datetimelist,imglisto,datetimelisto) = calculations.filterThresholds(imglist,datetimelist, mask,logger)
 						if imglist == []:
 							outputValid = False
 							if analysis['id'] != 'TEMPO01' and scenario['multiplerois'] and isinstance(scenario['polygonicmask'][0],list):
@@ -5806,7 +5809,10 @@ class monimet_gui(Tkinter.Tk):
 										self.Message.set("No valid images found. ROI is skipped.")
 										self.Message.set('ROI: |progress:6|queue:'+str(r+2)+'|total:'+str(len(scenario['polygonicmask'])+1))
 									mask = (mask,[roi],scenario['thresholds'])
-									(imglist,datetimelist,imglisto,datetimelisto) = calculations.filterThresholds(imglist,datetimelist, mask,logger)
+									if mask[0] is False:
+        	                                                                outputValid = False
+	                                                                else:
+										(imglist,datetimelist,imglisto,datetimelisto) = calculations.filterThresholds(imglist,datetimelist, mask,logger)
 								if imglist == []:
 									outputValid = False
 									self.Message.set("No pictures are valid after filtering with thresholds. ROI is skipped.")
