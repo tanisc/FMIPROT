@@ -827,7 +827,7 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 						logger.set(str(len(pflist))+' possible files found.')
 						for img in pflist:	#already includes full path to img
 							imglistv.append(img.split('/')[-1])
-							pathlistv.append(p)
+							pathlistv.append([img,p])
 						if len(pflist) != 0 and 'Latest image only' in timec[4] and len(filterImageListTemporal(logger,imglistv,pathlistv,filenameformat,timec,0)[0]) != 0:
 						    logger.set('Latest image found. Ending crawling paths.')
 						    break
@@ -897,7 +897,7 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 						imgfile.close()
 					except:
 						fail.append(i)
-						logger.set("Downloading " + f + " failed.")
+						logger.set("Downloading " + p + " failed.")
 						try:
 							imgfile.close()
 						except:
