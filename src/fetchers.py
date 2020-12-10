@@ -676,16 +676,18 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 							    logger.set('Latest image found. Ending crawling paths.')
 							    break
 							if len(pflist) != 0 and 'Latest ' in timec[4]:
-							    (pflist_all,pdlist_all,pplist_all) = filterImageListTemporal(logger,pflist,[p]*len(pflist),filenameformat,timec[0:4]+["Time of day"],0)
-							    (imglistv, datetimelistv, pathlistv) = filterImageListTemporal(logger,imglistv,pathlistv,filenameformat,timec,count)
-							    stopCrawl = False
-							    for pi in range(len(pflist_all)):
-									if pflist_all[pi] not in imglistv or (pflist_all[pi] in imglistv and pplist_all[pi] != pathlistv[imglistv.index(pflist_all[pi])]):
-										logger.set('Files in the temporal limit, ending crawling paths.')
-										stopCrawl = True
-										break
-							if stopCrawl:
-								break
+								stopCrawl = False
+								(pflist_all,pdlist_all,pplist_all) = filterImageListTemporal(logger,pflist,[p]*len(pflist),filenameformat,timec[0:4]+["Time of day"],0)
+								if len(pflist_all) > 1:
+									(imglistv, datetimelistv, pathlistv) = filterImageListTemporal(logger,imglistv,pathlistv,filenameformat,timec,count)
+									if len(imglistv) > 1:
+										for img in pflist_all:
+											if img not in imglistv:
+												logger.set('Files in the temporal limit, ending crawling paths.')
+												stopCrawl = True
+												break
+								if stopCrawl:
+									break
 						except:
 							continue
 
@@ -832,16 +834,18 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 						    logger.set('Latest image found. Ending crawling paths.')
 						    break
 						if len(pflist) != 0 and 'Latest ' in timec[4]:
-						    (pflist_all,pdlist_all,pplist_all) = filterImageListTemporal(logger,pflist,[p]*len(pflist),filenameformat,timec[0:4]+["Time of day"],0)
-						    (imglistv, datetimelistv, pathlistv) = filterImageListTemporal(logger,imglistv,pathlistv,filenameformat,timec,count)
-						    stopCrawl = False
-						    for pi in range(len(pflist_all)):
-								if pflist_all[pi] not in imglistv or (pflist_all[pi] in imglistv and pplist_all[pi] != pathlistv[imglistv.index(pflist_all[pi])]):
-									logger.set('Files in the temporal limit, ending crawling paths.')
-									stopCrawl = True
-									break
-						if stopCrawl:
-							break
+							stopCrawl = False
+							(pflist_all,pdlist_all,pplist_all) = filterImageListTemporal(logger,pflist,[p]*len(pflist),filenameformat,timec[0:4]+["Time of day"],0)
+							if len(pflist_all) > 1:
+								(imglistv, datetimelistv, pathlistv) = filterImageListTemporal(logger,imglistv,pathlistv,filenameformat,timec,count)
+								if len(imglistv) > 1:
+									for img in pflist_all:
+										if img not in imglistv:
+											logger.set('Files in the temporal limit, ending crawling paths.')
+											stopCrawl = True
+											break
+							if stopCrawl:
+								break
 					except:
 						pass
 
@@ -951,16 +955,18 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 					    logger.set('Latest image found. Ending crawling paths.')
 					    break
 					if len(pflist) != 0 and 'Latest ' in timec[4]:
-					    (pflist_all,pdlist_all,pplist_all) = filterImageListTemporal(logger,pflist,[p]*len(pflist),filenameformat,timec[0:4]+["Time of day"],0)
-					    (imglistv, datetimelistv, pathlistv) = filterImageListTemporal(logger,imglistv,pathlistv,filenameformat,timec,count)
-					    stopCrawl = False
-					    for pi in range(len(pflist_all)):
-							if pflist_all[pi] not in imglistv or (pflist_all[pi] in imglistv and pplist_all[pi] != pathlistv[imglistv.index(pflist_all[pi])]):
-								logger.set('Files in the temporal limit, ending crawling paths.')
-								stopCrawl = True
-								break
-					if stopCrawl:
-						break
+						stopCrawl = False
+						(pflist_all,pdlist_all,pplist_all) = filterImageListTemporal(logger,pflist,[p]*len(pflist),filenameformat,timec[0:4]+["Time of day"],0)
+						if len(pflist_all) > 1:
+							(imglistv, datetimelistv, pathlistv) = filterImageListTemporal(logger,imglistv,pathlistv,filenameformat,timec,count)
+							if len(imglistv) > 1:
+								for img in pflist_all:
+									if img not in imglistv:
+										logger.set('Files in the temporal limit, ending crawling paths.')
+										stopCrawl = True
+										break
+						if stopCrawl:
+							break
 				except:
 					pass
 
