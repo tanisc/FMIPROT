@@ -819,7 +819,7 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 						url = 'https://'+host+'/'+p
 
 					try:
-						response = urllib2.urlopen(url,timeout = 100).read()
+						response = urllib2.urlopen(url,timeout = 5).read()
 					except:
 						#logger.set('Connection failed.')
 						continue

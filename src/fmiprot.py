@@ -4110,9 +4110,9 @@ class monimet_gui(Tkinter.Tk):
 	def PlotExtentWrite(self,*args):
 		if self.ResultsCaptions[0] == "Time" or self.ResultsCaptions[0] == "Date":
 			if self.ResultsCaptions[0] == "Time":
-				dif = datetime.datetime.strptime2(self.PlotXStartVariable.get(),"%Y-%m-%d %H:%M:%S")[0]- self.XMin
+				dif = parsers.strptime2(self.PlotXStartVariable.get(),"%Y-%m-%d %H:%M:%S")[0]- self.XMin
 				self.PlotXStartFactor.set(float(dif.seconds+dif.days*86400)/self.XDist)
-				dif = self.XMax - datetime.datetime.strptime2(self.PlotXEndVariable.get(),"%Y-%m-%d %H:%M:%S")[0]
+				dif = self.XMax - parsers.strptime2(self.PlotXEndVariable.get(),"%Y-%m-%d %H:%M:%S")[0]
 				self.PlotXEndFactor.set(float(dif.seconds+dif.days*86400)/self.XDist)
 			else:
 				dif = parsers.strptime2(self.PlotXStartVariable.get(),"%Y-%m-%d")[1] - self.XMin
