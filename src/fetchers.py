@@ -147,7 +147,7 @@ def fetchFile(tkobj,logger,localdir, localfile, protocol,host, username, passwor
 				authhandler = urllib2.HTTPBasicAuthHandler(passman)
 				opener = urllib2.build_opener(authhandler)
 				urllib2.install_opener(opener)
-			cfg = urllib2.urlopen(inifile,timeout = 100)
+			cfg = urllib2.urlopen(inifile,timeout = 3)
 			cfg_loc = open(os.path.join(localdir,localfile),'wb')
 			cfg_loc.write(cfg.read())
 			cfg_loc.close()
