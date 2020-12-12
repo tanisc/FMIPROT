@@ -4585,8 +4585,8 @@ class monimet_gui(Tkinter.Tk):
 					self.XMax = self.ResultsData[1][1].max()
 					self.XMin = self.ResultsData[1][1].min()
 					self.XDist = self.XMax - self.XMin
-					self.YMax = np.nanmax(self.ResultsData[1][data_index])
-					self.YMin = np.nanmin(self.ResultsData[1][data_index])
+					self.YMax = np.nanmax(np.array(self.ResultsData[1][data_index],np.float))
+					self.YMin = np.nanmin(np.array(self.ResultsData[1][data_index],np.float))
 					if self.ResultVariableNameVariable.get() == "Merged Plot":
 						ymins = []
 						ymaxs = []
