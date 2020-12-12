@@ -420,8 +420,8 @@ def georectificationTool(tkobj, logger,imgfile,analysis,geoparams,geoopts,corrpa
 						# Wp[py][px] += 1
 					r = r_def
 						#r = img[py][px]
-					colors_proj.InsertNextTypedTuple(r)
-					colors.InsertNextTypedTuple(r_def)
+					colors_proj.InsertNextTuple(r)
+					colors.InsertNextTuple(r_def)
 				triangles.InsertNextCell(triangle)
 				surftriangles.InsertNextCell(triangle)
 
