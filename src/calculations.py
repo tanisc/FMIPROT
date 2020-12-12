@@ -245,7 +245,7 @@ def filterThresholds(imglist, datetimelist, mask, logger):
 		img = deepcopy(imglist)
 		rfrac, gfrac, bfrac = getFracs(img,mask)[:3]
 		wfrac,lfrac = getFracs(img,mask,True)[3:]
-		if rfrac >= th[0] and gfrac >= th[2] and bfrac >= th[4] and wfrac >= th[6] and lfrac >= th[14] and rfrac <= th[1] and gfrac <= th[3] and bfrac <= th[5] and wfrac <= th[7] and lfrac <= th[15]:
+		if ((rfrac >= th[0] and rfrac <= th[1]) if th[1] >= th[0] else (rfrac >= th[0] or rfrac <= th[1])) and ((gfrac >= th[2] and gfrac <= th[3]) if th[3] >= th[2] else (gfrac >= th[2] or gfrac <= th[3])) and ((bfrac >= th[4] and bfrac <= th[5]) if th[5] >= th[4] else (bfrac >= th[4] or bfrac <= th[5])) and ((wfrac >= th[6] and wfrac <= th[7]) if th[7] >= th[6] else (wfrac >= th[6] or wfrac <= th[7])) and ((lfrac >= th[14] and lfrac <= th[15]) if th[15] >= th[14] else (lfrac >= th[14] or lfrac <= th[15])):
 			return True
 		else:
 			return False
