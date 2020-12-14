@@ -159,6 +159,12 @@ class monimet_gui(Tkinter.Tk):
 		self.GreenFUTVariable = Tkinter.DoubleVar()
 		self.BlueFLTVariable = Tkinter.DoubleVar()
 		self.BlueFUTVariable = Tkinter.DoubleVar()
+		self.RedFILTVariable = Tkinter.DoubleVar()
+		self.RedFIUTVariable = Tkinter.DoubleVar()
+		self.GreenFILTVariable = Tkinter.DoubleVar()
+		self.GreenFIUTVariable = Tkinter.DoubleVar()
+		self.BlueFILTVariable = Tkinter.DoubleVar()
+		self.BlueFIUTVariable = Tkinter.DoubleVar()
 		self.BrightnessLTVariable = Tkinter.DoubleVar()
 		self.BrightnessUTVariable = Tkinter.DoubleVar()
 		self.LuminanceLTVariable = Tkinter.DoubleVar()
@@ -241,7 +247,7 @@ class monimet_gui(Tkinter.Tk):
 		(self.networklist,self.sourcelist,self.proxylist) = sources.readSources(self, self.proxy, self.connection, self.Message)
 		self.makeDirStorage()
 
-		scenario_def = {'source':self.sourcelist[0],'name':'Scenario-1','previewimagetime':'','temporal':['01.01.1970','31.12.2026','00:00','23:59','All'],'polygonicmask':[0,0,0,0,0,0,0,0],'multiplerois':1,'thresholds':[0.0,1.0,0.0,1.0,0.0,1.0,0.0,1.0,0.0,255.0,0.0,255.0,0.0,255.0,0.0,1.0,0.0,255.0],'analyses':['analysis-1'],'analysis-1':{'id':calcids[calcids.index("0")],'name':calcnames[calcids.index("0")]}}
+		scenario_def = {'source':self.sourcelist[0],'name':'Scenario-1','previewimagetime':'','temporal':['01.01.1970','31.12.2026','00:00','23:59','All'],'polygonicmask':[0,0,0,0,0,0,0,0],'multiplerois':1,'thresholds':[0.0,1.0,0.0,1.0,0.0,1.0,0.0,1.0,0.0,255.0,0.0,255.0,0.0,255.0,0.0,1.0,0.0,255.0,0.0,1.0,0.0,1.0,0.0,1.0,0.0,1.0],'analyses':['analysis-1'],'analysis-1':{'id':calcids[calcids.index("0")],'name':calcnames[calcids.index("0")]}}
 		for i,v in enumerate(paramnames[calcids.index("0")]):
 			scenario_def['analysis-1'].update({paramnames[calcids.index("0")][i]:paramdefs[calcids.index("0")][i]})
 		setup_def = [scenario_def]
@@ -3030,42 +3036,51 @@ class monimet_gui(Tkinter.Tk):
 		self.ClearMenu()
 		self.ActiveMenu.set("Thresholds")
 		self.Menu_Prev("Main Menu","self.Menu_Main")
-		NItems = 12
+		NItems = 15
 		space = 0.02
 		Item = 1
 		self.MenuItem8 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Image thresholds",anchor='c',bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor)
 		self.MenuItem8.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
-		Item = 2
+		Item += 1
 		self.MenuItem1 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="Brightness",anchor="c",command=self.Menu_Main_Thresholds_Brightness,activebackground='seashell',activeforeground='black')
 		self.MenuItem1.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
-		Item = 3
+		Item += 1
 		self.MenuItem2 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="Luminance",anchor="c",command=self.Menu_Main_Thresholds_Luminance,activebackground='beige',activeforeground='black')
 		self.MenuItem2.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
-		Item = 4
+		Item += 1
+		self.MenuItem13 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="Red Fraction",anchor="c",command=self.Menu_Main_Thresholds_RedFI,activebackground='red3',activeforeground='white')
+		self.MenuItem13.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+		Item += 1
+		self.MenuItem14 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="Green Fraction",anchor="c",command=self.Menu_Main_Thresholds_GreenFI,activebackground='green4',activeforeground='white')
+		self.MenuItem14.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+		Item += 1
+		self.MenuItem15 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="Blue Fraction",anchor="c",command=self.Menu_Main_Thresholds_BlueFI,activebackground='blue2',activeforeground='white')
+		self.MenuItem15.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+		Item += 1
 		self.MenuItem9 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="ROI thresholds",anchor='c',bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor)
 		self.MenuItem9.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
-		Item = 5
+		Item += 1
 		self.MenuItem11 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="Red Fraction",anchor="c",command=self.Menu_Main_Thresholds_RedF,activebackground='red3',activeforeground='white')
 		self.MenuItem11.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
-		Item = 6
+		Item += 1
 		self.MenuItem3 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="Green Fraction",anchor="c",command=self.Menu_Main_Thresholds_GreenF,activebackground='green4',activeforeground='white')
 		self.MenuItem3.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
-		Item = 7
+		Item += 1
 		self.MenuItem4 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="Blue Fraction",anchor="c",command=self.Menu_Main_Thresholds_BlueF,activebackground='blue2',activeforeground='white')
 		self.MenuItem4.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
-		Item = 8
+		Item += 1
 		self.MenuItem10 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Pixel thresholds",anchor='c',bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor)
 		self.MenuItem10.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
-		Item = 9
+		Item += 1
 		self.MenuItem5 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="Red Channel",anchor="c",command=self.Menu_Main_Thresholds_Red,activebackground='red3',activeforeground='white')
 		self.MenuItem5.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
-		Item = 10
+		Item += 1
 		self.MenuItem6 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="Green Channel",anchor="c",command=self.Menu_Main_Thresholds_Green,activebackground='green4',activeforeground='white')
 		self.MenuItem6.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
-		Item = 11
+		Item += 1
 		self.MenuItem7 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="Blue Channel",anchor="c",command=self.Menu_Main_Thresholds_Blue,activebackground='blue2',activeforeground='white')
 		self.MenuItem7.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
-		Item = 12
+		Item += 1
 		self.MenuItem12 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="Grey Composite",anchor="c",command=self.Menu_Main_Thresholds_Grey,activebackground='seashell',activeforeground='black')
 		self.MenuItem12.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 
@@ -3079,13 +3094,13 @@ class monimet_gui(Tkinter.Tk):
 		self.MenuItem1 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Minimum:",anchor='c',bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor)
 		self.MenuItem1.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 4
-		self.MenuItem3 = Tkinter.Scale(self, from_=0, to=1,orient="horizontal",resolution=0.01, width=self.CheckButtonY,variable=self.BrightnessLTVariable)
+		self.MenuItem3 = Tkinter.Scale(self, from_=0, to=1,orient="horizontal",resolution=0.005, width=self.CheckButtonY,variable=self.BrightnessLTVariable)
 		self.MenuItem3.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 6
 		self.MenuItem4 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Maximum:",anchor='c',bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor)
 		self.MenuItem4.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 7
-		self.MenuItem6 = Tkinter.Scale(self, from_=0, to=1,orient="horizontal",resolution=0.01, width=self.CheckButtonY,variable=self.BrightnessUTVariable)
+		self.MenuItem6 = Tkinter.Scale(self, from_=0, to=1,orient="horizontal",resolution=0.005, width=self.CheckButtonY,variable=self.BrightnessUTVariable)
 		self.MenuItem6.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 
 	def Menu_Main_Thresholds_Luminance(self):
@@ -3098,13 +3113,13 @@ class monimet_gui(Tkinter.Tk):
 		self.MenuItem1 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Minimum:",anchor='c',bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor)
 		self.MenuItem1.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 4
-		self.MenuItem3 = Tkinter.Scale(self, from_=0, to=1,orient="horizontal",resolution=0.01, width=self.CheckButtonY,variable=self.LuminanceLTVariable)
+		self.MenuItem3 = Tkinter.Scale(self, from_=0, to=1,orient="horizontal",resolution=0.005, width=self.CheckButtonY,variable=self.LuminanceLTVariable)
 		self.MenuItem3.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 6
 		self.MenuItem4 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Maximum:",anchor='c',bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor)
 		self.MenuItem4.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 7
-		self.MenuItem6 = Tkinter.Scale(self, from_=0, to=1,orient="horizontal",resolution=0.01, width=self.CheckButtonY,variable=self.LuminanceUTVariable)
+		self.MenuItem6 = Tkinter.Scale(self, from_=0, to=1,orient="horizontal",resolution=0.005, width=self.CheckButtonY,variable=self.LuminanceUTVariable)
 		self.MenuItem6.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 
 	def Menu_Main_Thresholds_Red(self):
@@ -3193,13 +3208,13 @@ class monimet_gui(Tkinter.Tk):
 		self.MenuItem1 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Minimum:",anchor='c',bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor)
 		self.MenuItem1.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 4
-		self.MenuItem3 = Tkinter.Scale(self, from_=0, to=1,orient="horizontal",resolution=0.01, width=self.CheckButtonY,variable=self.RedFLTVariable)
+		self.MenuItem3 = Tkinter.Scale(self, from_=0, to=1,orient="horizontal",resolution=0.005, width=self.CheckButtonY,variable=self.RedFLTVariable)
 		self.MenuItem3.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 6
 		self.MenuItem4 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Maximum:",anchor='c',bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor)
 		self.MenuItem4.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 7
-		self.MenuItem6 = Tkinter.Scale(self, from_=0, to=1,orient="horizontal",resolution=0.01, width=self.CheckButtonY,variable=self.RedFUTVariable)
+		self.MenuItem6 = Tkinter.Scale(self, from_=0, to=1,orient="horizontal",resolution=0.005, width=self.CheckButtonY,variable=self.RedFUTVariable)
 		self.MenuItem6.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 
 	def Menu_Main_Thresholds_GreenF(self):
@@ -3212,13 +3227,13 @@ class monimet_gui(Tkinter.Tk):
 		self.MenuItem1 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Minimum:",anchor='c',bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor)
 		self.MenuItem1.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 4
-		self.MenuItem3 = Tkinter.Scale(self, from_=0, to=1,orient="horizontal",resolution=0.01, width=self.CheckButtonY,variable=self.GreenFLTVariable)
+		self.MenuItem3 = Tkinter.Scale(self, from_=0, to=1,orient="horizontal",resolution=0.005, width=self.CheckButtonY,variable=self.GreenFLTVariable)
 		self.MenuItem3.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 6
 		self.MenuItem4 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Maximum:",anchor='c',bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor)
 		self.MenuItem4.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 7
-		self.MenuItem6 = Tkinter.Scale(self, from_=0, to=1,orient="horizontal",resolution=0.01, width=self.CheckButtonY,variable=self.GreenFUTVariable)
+		self.MenuItem6 = Tkinter.Scale(self, from_=0, to=1,orient="horizontal",resolution=0.005, width=self.CheckButtonY,variable=self.GreenFUTVariable)
 		self.MenuItem6.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 
 	def Menu_Main_Thresholds_BlueF(self):
@@ -3231,13 +3246,70 @@ class monimet_gui(Tkinter.Tk):
 		self.MenuItem1 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Minimum:",anchor='c',bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor)
 		self.MenuItem1.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 4
-		self.MenuItem3 = Tkinter.Scale(self, from_=0, to=1,orient="horizontal",resolution=0.01, width=self.CheckButtonY,variable=self.BlueFLTVariable)
+		self.MenuItem3 = Tkinter.Scale(self, from_=0, to=1,orient="horizontal",resolution=0.005, width=self.CheckButtonY,variable=self.BlueFLTVariable)
 		self.MenuItem3.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 6
 		self.MenuItem4 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Maximum:",anchor='c',bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor)
 		self.MenuItem4.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 7
-		self.MenuItem6 = Tkinter.Scale(self, from_=0, to=1,orient="horizontal",resolution=0.01, width=self.CheckButtonY,variable=self.BlueFUTVariable)
+		self.MenuItem6 = Tkinter.Scale(self, from_=0, to=1,orient="horizontal",resolution=0.005, width=self.CheckButtonY,variable=self.BlueFUTVariable)
+		self.MenuItem6.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+
+	def Menu_Main_Thresholds_RedFI(self):
+		self.ClearMenu()
+		self.ActiveMenu.set("Red Fraction")
+		self.Menu_Prev("Thresholds","self.Menu_Main_Thresholds")
+		NItems = 10
+		space = 0.02
+		Item = 3
+		self.MenuItem1 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Minimum:",anchor='c',bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor)
+		self.MenuItem1.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+		Item = 4
+		self.MenuItem3 = Tkinter.Scale(self, from_=0, to=1,orient="horizontal",resolution=0.005, width=self.CheckButtonY,variable=self.RedFILTVariable)
+		self.MenuItem3.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+		Item = 6
+		self.MenuItem4 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Maximum:",anchor='c',bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor)
+		self.MenuItem4.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+		Item = 7
+		self.MenuItem6 = Tkinter.Scale(self, from_=0, to=1,orient="horizontal",resolution=0.005, width=self.CheckButtonY,variable=self.RedFIUTVariable)
+		self.MenuItem6.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+
+	def Menu_Main_Thresholds_GreenFI(self):
+		self.ClearMenu()
+		self.ActiveMenu.set("Green Fraction")
+		self.Menu_Prev("Thresholds","self.Menu_Main_Thresholds")
+		NItems = 10
+		space = 0.02
+		Item = 3
+		self.MenuItem1 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Minimum:",anchor='c',bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor)
+		self.MenuItem1.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+		Item = 4
+		self.MenuItem3 = Tkinter.Scale(self, from_=0, to=1,orient="horizontal",resolution=0.005, width=self.CheckButtonY,variable=self.GreenFILTVariable)
+		self.MenuItem3.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+		Item = 6
+		self.MenuItem4 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Maximum:",anchor='c',bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor)
+		self.MenuItem4.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+		Item = 7
+		self.MenuItem6 = Tkinter.Scale(self, from_=0, to=1,orient="horizontal",resolution=0.005, width=self.CheckButtonY,variable=self.GreenFIUTVariable)
+		self.MenuItem6.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+
+	def Menu_Main_Thresholds_BlueFI(self):
+		self.ClearMenu()
+		self.ActiveMenu.set("Blue Fraction")
+		self.Menu_Prev("Thresholds","self.Menu_Main_Thresholds")
+		NItems = 10
+		space = 0.02
+		Item = 3
+		self.MenuItem1 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Minimum:",anchor='c',bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor)
+		self.MenuItem1.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+		Item = 4
+		self.MenuItem3 = Tkinter.Scale(self, from_=0, to=1,orient="horizontal",resolution=0.005, width=self.CheckButtonY,variable=self.BlueFILTVariable)
+		self.MenuItem3.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+		Item = 6
+		self.MenuItem4 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Maximum:",anchor='c',bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor)
+		self.MenuItem4.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+		Item = 7
+		self.MenuItem6 = Tkinter.Scale(self, from_=0, to=1,orient="horizontal",resolution=0.005, width=self.CheckButtonY,variable=self.BlueFIUTVariable)
 		self.MenuItem6.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 
 	def Menu_Main_Masking(self):
@@ -4899,6 +4971,12 @@ class monimet_gui(Tkinter.Tk):
 		self.GreenFUTVariable.set(self.setup[self.AnalysisNoVariable.get()-1]['thresholds'][3])
 		self.BlueFLTVariable.set(self.setup[self.AnalysisNoVariable.get()-1]['thresholds'][4])
 		self.BlueFUTVariable.set(self.setup[self.AnalysisNoVariable.get()-1]['thresholds'][5])
+		self.RedFILTVariable.set(self.setup[self.AnalysisNoVariable.get()-1]['thresholds'][18])
+		self.RedFIUTVariable.set(self.setup[self.AnalysisNoVariable.get()-1]['thresholds'][19])
+		self.GreenFILTVariable.set(self.setup[self.AnalysisNoVariable.get()-1]['thresholds'][20])
+		self.GreenFIUTVariable.set(self.setup[self.AnalysisNoVariable.get()-1]['thresholds'][21])
+		self.BlueFILTVariable.set(self.setup[self.AnalysisNoVariable.get()-1]['thresholds'][22])
+		self.BlueFIUTVariable.set(self.setup[self.AnalysisNoVariable.get()-1]['thresholds'][23])
 		self.RedLTVariable.set(self.setup[self.AnalysisNoVariable.get()-1]['thresholds'][8])
 		self.RedUTVariable.set(self.setup[self.AnalysisNoVariable.get()-1]['thresholds'][9])
 		self.GreenLTVariable.set(self.setup[self.AnalysisNoVariable.get()-1]['thresholds'][10])
@@ -5006,6 +5084,12 @@ class monimet_gui(Tkinter.Tk):
 		self.setup[self.AnalysisNoVariable.get()-1]['thresholds'][3] = self.GreenFUTVariable.get()
 		self.setup[self.AnalysisNoVariable.get()-1]['thresholds'][4] = self.BlueFLTVariable.get()
 		self.setup[self.AnalysisNoVariable.get()-1]['thresholds'][5] = self.BlueFUTVariable.get()
+		self.setup[self.AnalysisNoVariable.get()-1]['thresholds'][18] = self.RedFILTVariable.get()
+		self.setup[self.AnalysisNoVariable.get()-1]['thresholds'][19] = self.RedFIUTVariable.get()
+		self.setup[self.AnalysisNoVariable.get()-1]['thresholds'][20] = self.GreenFILTVariable.get()
+		self.setup[self.AnalysisNoVariable.get()-1]['thresholds'][21] = self.GreenFIUTVariable.get()
+		self.setup[self.AnalysisNoVariable.get()-1]['thresholds'][22] = self.BlueFILTVariable.get()
+		self.setup[self.AnalysisNoVariable.get()-1]['thresholds'][23] = self.BlueFIUTVariable.get()
 		self.setup[self.AnalysisNoVariable.get()-1]['thresholds'][8] = self.RedLTVariable.get()
 		self.setup[self.AnalysisNoVariable.get()-1]['thresholds'][9] = self.RedUTVariable.get()
 		self.setup[self.AnalysisNoVariable.get()-1]['thresholds'][10] = self.GreenLTVariable.get()
