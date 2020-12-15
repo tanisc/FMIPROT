@@ -585,10 +585,10 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 
 	if 'Earliest date' in timec[4]:
 		timec[1] = (datetime.datetime.today()+datetime.timedelta(days=1)).strftime('%d.%m.%Y')
-		timec[3] = '23:59'
+		# timec[3] = '23:59'
 	if 'Latest date' in timec[4]:
 		timec[0] = '01.01.1970'
-		timec[2] = '00:00'
+		# timec[2] = '00:00'
 
 	if 'Last 24 hours' in timec[4] or 'Today only' in timec[4]:
 		timelimc[0] = parsers.strptime2(datetime.datetime.now()-datetime.timedelta(days=2))[1]
