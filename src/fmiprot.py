@@ -2972,18 +2972,34 @@ class monimet_gui(Tkinter.Tk):
 
 	def callbackTemporalMode(self,*args):
 		if self.TemporalModeVariable.get() in ['All','Latest 1 hour','Latest image only','Latest 48 hours','Latest 24 hours','Last 48 hours','Last 24 hours']:
+			self.DateStartVariable.set(scenario_def['temporal'][0])
+			self.DateEndVariable.set(scenario_def['temporal'][1])
+			self.TimeStartVariable.set(scenario_def['temporal'][2])
+			self.TimeEndVariable.set(scenario_def['temporal'][3])
 			if self.ActiveMenu.get() == "Temporal":
 				self.MenuItem3.config(state='disabled')
 				self.MenuItem4.config(state='disabled')
 			if (self.ActiveMenu.get() == "Dates" or self.ActiveMenu.get() == "Time of the day"):
 				self.Menu_Main_Temporal()
-		if self.TemporalModeVariable.get() in ['Yesterday only','Today only','Last one year','Last one week','Last one month','Latest one year','Latest one week','Latest one month']:
+		if self.TemporalModeVariable.get() in ['Time of day','Yesterday only','Today only','Last one year','Last one week','Last one month','Latest one year','Latest one week','Latest one month']:
+			self.DateStartVariable.set(scenario_def['temporal'][0])
+			self.DateEndVariable.set(scenario_def['temporal'][1])
 			if self.ActiveMenu.get() == "Temporal":
 				self.MenuItem3.config(state='disabled')
 				self.MenuItem4.config(state='normal')
 			if self.ActiveMenu.get() == "Dates":
 				self.Menu_Main_Temporal_Dates()
-		if self.TemporalModeVariable.get() in ['Date and time intervals','Earliest date and time intervals','Latest date and time intervals']:
+		if self.TemporalModeVariable.get() in ['Date and time intervals']:
+			if self.ActiveMenu.get() == "Temporal":
+				self.MenuItem3.config(state='normal')
+				self.MenuItem4.config(state='normal')
+		if self.TemporalModeVariable.get() in ['Earliest date and time intervals']:
+			self.DateEndVariable.set(scenario_def['temporal'][1])
+			if self.ActiveMenu.get() == "Temporal":
+				self.MenuItem3.config(state='normal')
+				self.MenuItem4.config(state='normal')
+		if self.TemporalModeVariable.get() in ['Latest date and time intervals']:
+			self.DateStartVariable.set(scenario_def['temporal'][0])
 			if self.ActiveMenu.get() == "Temporal":
 				self.MenuItem3.config(state='normal')
 				self.MenuItem4.config(state='normal')
