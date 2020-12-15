@@ -4962,9 +4962,6 @@ class monimet_gui(Tkinter.Tk):
 
 	def LoadValues(self):
 		self.ScenarioNameVariable.set(self.setup[self.AnalysisNoVariable.get()-1]['name'])
-		#fill missing thresholds
-		for i in range(len(self.setup[self.AnalysisNoVariable.get()-1]['thresholds']),len(scenario_def['thresholds'])):
-			self.setup[self.AnalysisNoVariable.get()-1]['thresholds'].append(deepcopy(scenario_def['thresholds'][i]))
 		self.RedFLTVariable.set(self.setup[self.AnalysisNoVariable.get()-1]['thresholds'][0])
 		self.RedFUTVariable.set(self.setup[self.AnalysisNoVariable.get()-1]['thresholds'][1])
 		self.GreenFLTVariable.set(self.setup[self.AnalysisNoVariable.get()-1]['thresholds'][2])
@@ -5415,6 +5412,12 @@ class monimet_gui(Tkinter.Tk):
 			if 'timezone' in scenario['source'] and scenario['source']['timezone'] is not None:
 				if ':' not in scenario['source']['timezone']:
 					setup[i]['source']['timezone'] = scenario['source']['timezone'][:-2] + ':' + scenario['source']['timezone'][-2:]
+		#fix Thresholds
+		for i,scenario in enumerate(setup):
+			if len(scenario['thresholds']) == 18:
+				setup[i]['thresholds'] = scenario['thresholds'] + [0.0,1.0,0.0,1.0,0.0,1.0,0.0,1.0]
+			if len(scenario['thresholds']) == 8:
+				setup[i]['thresholds'] = scenario['thresholds'] + [0.0,255.0,0.0,255.0,0.0,255.0,0.0,1.0,0.0,255.0,0.0,1.0,0.0,1.0,0.0,1.0,0.0,1.0]
 		return setup
 
 

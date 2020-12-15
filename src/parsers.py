@@ -219,8 +219,11 @@ def config2Setup(logger,config,sourcelist):
 		source = sources.getSource(logger,sources.getSources(logger, sourcelist, 'MONIMET','network'),sourcename)
 		scenario.update({'source':source})
 		#complete missing thresholds
-		if len(conf[4]) != 16:
-			conf[4] = conf[4] + [0.0,255.0,0.0,255.0,0.0,255.0,0.0,1.0]
+		if len(conf[4]) == 18:
+			conf[4] = conf[4] + [0.0,1.0,0.0,1.0,0.0,1.0,0.0,1.0]
+			logger.set("New thresholds parameters are missing in the scenario. The setup file may be from an earlier version of the toolbox. Missing parameters are replaced with default values.")
+		if len(conf[4]) == 8:
+			conf[4] = conf[4] + [0.0,255.0,0.0,255.0,0.0,255.0,0.0,1.0,0.0,255.0,0.0,1.0,0.0,1.0,0.0,1.0,0.0,1.0]
 			logger.set("New thresholds parameters are missing in the scenario. The setup file may be from an earlier version of the toolbox. Missing parameters are replaced with default values.")
 		picsize = (2592,1944)
 		if sourcename == 'Hyytiala Pine Crown-2':
