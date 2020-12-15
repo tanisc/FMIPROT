@@ -252,7 +252,7 @@ class monimet_gui(Tkinter.Tk):
 			scenario_def['analysis-1'].update({paramnames[calcids.index("0")][i]:paramdefs[calcids.index("0")][i]})
 		setup_def = [scenario_def]
 
-		temporal_modes = ['All','Date and time intervals','Earliest date and time intervals','Latest date and time intervals','Yesterday only','Today only','Latest 1 hour','Latest image only','Latest one year','Latest one month','Latest one week','Latest 48 hours','Latest 24 hours','Last one year','Last one month','Last one week','Last 48 hours','Last 24 hours']
+		temporal_modes = ['All','Date and time intervals','Time of day','Earliest date and time intervals','Latest date and time intervals','Yesterday only','Today only','Latest 1 hour','Latest image only','Latest one year','Latest one month','Latest one week','Latest 48 hours','Latest 24 hours','Last one year','Last one month','Last one week','Last 48 hours','Last 24 hours']
 		output_modes = ['New directory in results directory','Existing empty directory','Merge with existing results']
 		if sysargv['resultdir'] is not None:
 			sysargv['resultdir'] = os.path.realpath(sysargv['resultdir'])
