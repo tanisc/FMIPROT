@@ -191,7 +191,12 @@ def salvatoriSnowCover(img_imglist,datetimelist,mask,settings,logger,red,green,b
 			auxF.close()
 		Wp = Wp[::-1]
 	else:
-		Wp = np.ones(mahotas.imread(img_imglist[0]).shape[:2])
+		for img in img_imglist:
+			try:
+				Wp = np.ones(mahotas.imread(img_imglist[0]).shape[:2])
+				break
+			except:
+				pass
 	mask, pgs, th = mask
 	mask = LensCorrRadial(mask,'0',logger,origin,ax,ay,0)[0][1][1]
 	Wp *= (mask.transpose(2,0,1)[0]==1)
