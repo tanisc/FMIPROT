@@ -215,7 +215,7 @@ def filterThresholds(imglist, datetimelist, mask, logger):
 		mask, pgs, th = mask
 		imglisto = []
                 datetimelisto = []
-		if th[:8]==[0.0,1.0,0.0,1.0,0.0,1.0,0.0,1.0] and th[14:] == [0.0,1.0,0.0,1.0,0.0,1.0,0.0,1.0]:
+		if th[:8]==[0.0,1.0,0.0,1.0,0.0,1.0,0.0,1.0] and th[14:16] == [0.0,1.0] and th[18:] == [0.0,1.0,0.0,1.0,0.0,1.0,0.0,1.0]:
 			return imglist, datetimelist, imglisto, datetimelisto
 		logger.set('Number of images:'+str(len(imglist)))
 		logger.set('Number of unmasked pixels per image:'+str(np.sum(mask.transpose(2,0,1)[0])))
