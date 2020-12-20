@@ -3010,18 +3010,15 @@ class monimet_gui(Tkinter.Tk):
 		self.Menu_Prev("Temporal","self.Menu_Main_Temporal")
 		NItems = 10
 		space = 0.02
-		if self.TemporalModeVariable.get() == temporal_modes[1]:
-			Item = 3
-		else:
-			Item = 4
-		if self.TemporalModeVariable.get() != temporal_modes[3]:
+		Item = 3
+		if self.TemporalModeVariable.get() != 'Latest date and time intervals':
 			Item += 1
 			self.MenuItem1 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Start:",anchor='c',bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor)
 			self.MenuItem1.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 			Item += 1
 			self.MenuItem3 = Tkinter.Entry(self,justify="center",width=10,textvariable=self.DateStartVariable)
 			self.MenuItem3.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
-		if self.TemporalModeVariable.get() != temporal_modes[2]:
+		if self.TemporalModeVariable.get() != 'Earliest date and time intervals':
 			Item += 1
 			self.MenuItem4 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="End:",anchor='c',bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor)
 			self.MenuItem4.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
