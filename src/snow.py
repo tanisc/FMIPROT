@@ -131,6 +131,17 @@ def salvatoriSnowMask(imglist,datetimelist,mask,settings,logger,red,green,blue):
 def salvatoriSnowCover(img_imglist,datetimelist,mask,settings,logger,red,green,blue,middata,rectsw,extent,extent_proj,res,dem,C,C_proj,Cz,hd,td,vd,f,w,interpolate,flat,origin,ax,ay):
 	rectsw = bool(float(rectsw))
 	middata = bool(float(middata))
+	dummyImg = False
+	for img in img_imglist:
+		try:
+			mahotas.imread(img)
+			dummyImg = img
+			break
+		except:
+			pass
+	if not dummyImg:
+		logger.set("All images invalid.")
+		return False
 	if rectsw:
 		logger.set("Obtaining weight mask...")
 		params = map(np.copy,[extent,extent_proj,res,dem,C,C_proj,Cz,hd,td,vd,f,w,interpolate,flat,origin,ax,ay])
@@ -176,7 +187,7 @@ def salvatoriSnowCover(img_imglist,datetimelist,mask,settings,logger,red,green,b
 					except:
 						continue
 		if not readydata:
-			Wp = Georectify1([img_imglist[0]],[datetimelist[0]],mask,settings,logger,extent,extent_proj,res,dem,C,C_proj,Cz,hd,td,vd,f,w,interpolate,flat,origin,ax,ay)[0][1][5]
+			Wp = Georectify1([dummyImg],[datetimelist[0]],mask,settings,logger,extent,extent_proj,res,dem,C,C_proj,Cz,hd,td,vd,f,w,interpolate,flat,origin,ax,ay)[0][1][5]
 			logger.set('Writing results for next run...')
 			auxfilename = 'SNOWCOV001_' + str(uuid4()) +  '.h5'
 			auxF = h5py.File(os.path.join(AuxDir,auxfilename),'w')
@@ -191,12 +202,7 @@ def salvatoriSnowCover(img_imglist,datetimelist,mask,settings,logger,red,green,b
 			auxF.close()
 		Wp = Wp[::-1]
 	else:
-		for img in img_imglist:
-			try:
-				Wp = np.ones(mahotas.imread(img_imglist[0]).shape[:2])
-				break
-			except:
-				pass
+		Wp = np.ones(mahotas.imread(dummyImg).shape[:2])
 	mask, pgs, th = mask
 	mask = LensCorrRadial(mask,'0',logger,origin,ax,ay,0)[0][1][1]
 	Wp *= (mask.transpose(2,0,1)[0]==1)
