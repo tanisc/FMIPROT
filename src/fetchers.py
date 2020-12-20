@@ -229,22 +229,14 @@ def filterImageListTemporal(logger,imglistv,pathlistv,fnameconv,timec,count):
 	if timec[4] == 'Yesterday only':
 		date1 =	yesterday
 		date2 = yesterday
-		time1 = parsers.strptime2('00:00','%H:%M')[2]
-		time2 = parsers.strptime2('23:59','%H:%M')[2]
-		time2 = time2.replace(second=59)
 
 	if timec[4] == 'Today only':
 		date1 =	today
 		date2 = today
-		time1 = parsers.strptime2('00:00','%H:%M')[2]
-		time2 = parsers.strptime2('23:59','%H:%M')[2]
-		time2 = time2.replace(second=59)
 
 	if timec[4] == 'Last one week':
 		date1 = today - (datetime.date(today.year,1,7)-datetime.date(today.year,1,1))
 		date2 = today
-		time1 = parsers.strptime2(timec[2],'%H:%M')[2]
-		time2 = parsers.strptime2(timec[3],'%H:%M')[2]
 
 	if timec[4] == 'Last one month':
 		if today.month == 1:
@@ -252,21 +244,15 @@ def filterImageListTemporal(logger,imglistv,pathlistv,fnameconv,timec,count):
 		else:
 			date1 = datetime.date(today.year,today.month-1,today.day)
 		date2 = today
-		time1 = parsers.strptime2(timec[2],'%H:%M')[2]
-		time2 = parsers.strptime2(timec[3],'%H:%M')[2]
 
 	if timec[4] == 'Last one year':
 		date1 = datetime.date(today.year-1,today.month,today.day)
 		date2 = today
-		time1 = parsers.strptime2(timec[2],'%H:%M')[2]
-		time2 = parsers.strptime2(timec[3],'%H:%M')[2]
 
 	lastimageday = datetime.date(lastimagetime.year,lastimagetime.month,lastimagetime.day)
 	if timec[4] == 'Latest one week':
 		date1 = lastimageday - (datetime.date(lastimageday.year,1,7)-datetime.date(lastimageday.year,1,1))
 		date2 = lastimageday
-		time1 = parsers.strptime2(timec[2],'%H:%M')[2]
-		time2 = parsers.strptime2(timec[3],'%H:%M')[2]
 
 	if timec[4] == 'Latest one month':
 		if lastimageday.month == 1:
@@ -275,14 +261,10 @@ def filterImageListTemporal(logger,imglistv,pathlistv,fnameconv,timec,count):
 			daysinmonth = datetime.date(lastimageday.year,lastimageday.month,15) - datetime.date(lastimageday.year,lastimageday.month-1,15)
 		date1 = lastimageday - daysinmonth
 		date2 = lastimageday
-		time1 = parsers.strptime2(timec[2],'%H:%M')[2]
-		time2 = parsers.strptime2(timec[3],'%H:%M')[2]
 
 	if timec[4] == 'Latest one year':
 		date1 = datetime.date(lastimageday.year-1,lastimageday.month,lastimageday.day)
 		date2 = lastimageday
-		time1 = parsers.strptime2(timec[2],'%H:%M')[2]
-		time2 = parsers.strptime2(timec[3],'%H:%M')[2]
 
 	if timec[4] == 'Latest date and time intervals':
 		datestr = ' older than ' + str(date2)
