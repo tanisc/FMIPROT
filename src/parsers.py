@@ -346,26 +346,43 @@ def writeSetupReport(filename,setup,logger):
 		to_write = to_write.replace('<replace:name>',scenario['source']['name'])
 
 		to_write = to_write.replace('<replace:temporal4>',scenario['temporal'][4])
-		if scenario['temporal'][4] == 'Date and time intervals' or scenario['temporal'][4] == 'Earliest date and time intervals' or scenario['temporal'][4] == 'Latest date and time intervals':
-			start = str(strptime2(scenario['temporal'][0],'%d.%m.%Y')[1])
-			end = str(strptime2(scenario['temporal'][1],'%d.%m.%Y')[1])
-			if scenario['temporal'][4] == 'Latest date and time intervals':
-				to_write = to_write.replace('<replace:temporal0>','None')
-			else:
-				to_write = to_write.replace('<replace:temporal0>',start)
-			if scenario['temporal'][4] == 'Earliest date and time intervals':
-				to_write = to_write.replace('<replace:temporal1>','None')
-			else:
-				to_write = to_write.replace('<replace:temporal1>',end)
-			start = str(strptime2(scenario['temporal'][2],'%H:%M')[2])
-			end = str(strptime2(scenario['temporal'][3],'%H:%M')[2])
-			to_write = to_write.replace('<replace:temporal2>',start)
-			to_write = to_write.replace('<replace:temporal3>',end)
-		else:
+		if scenario['temporal'][4] in ['All','Latest 1 hour','Latest image only','Latest 48 hours','Latest 24 hours','Last 48 hours','Last 24 hours']:
 			to_write = to_write.replace('<replace:temporal0>','N/A')
 			to_write = to_write.replace('<replace:temporal1>','N/A')
 			to_write = to_write.replace('<replace:temporal2>','N/A')
 			to_write = to_write.replace('<replace:temporal3>','N/A')
+		if scenario['temporal'][4] in ['Time of day','Yesterday only','Today only','Last one year','Last one week','Last one month','Latest one year','Latest one week','Latest one month']:
+			to_write = to_write.replace('<replace:temporal0>','N/A')
+			to_write = to_write.replace('<replace:temporal1>','N/A')
+			start = str(strptime2(scenario['temporal'][2],'%H:%M')[2])
+			end = str(strptime2(scenario['temporal'][3],'%H:%M')[2])
+			to_write = to_write.replace('<replace:temporal2>',start)
+			to_write = to_write.replace('<replace:temporal3>',end)
+		if scenario['temporal'][4] in ['Date and time intervals']:
+			start = str(strptime2(scenario['temporal'][0],'%d.%m.%Y')[1])
+			end = str(strptime2(scenario['temporal'][1],'%d.%m.%Y')[1])
+			to_write = to_write.replace('<replace:temporal0>',start)
+			to_write = to_write.replace('<replace:temporal1>',end)
+			start = str(strptime2(scenario['temporal'][2],'%H:%M')[2])
+			end = str(strptime2(scenario['temporal'][3],'%H:%M')[2])
+			to_write = to_write.replace('<replace:temporal2>',start)
+			to_write = to_write.replace('<replace:temporal3>',end)
+		if scenario['temporal'][4] in ['Earliest date and time intervals']:
+			start = str(strptime2(scenario['temporal'][0],'%d.%m.%Y')[1])
+			to_write = to_write.replace('<replace:temporal0>',start)
+			to_write = to_write.replace('<replace:temporal1>','N/A')
+			start = str(strptime2(scenario['temporal'][2],'%H:%M')[2])
+			end = str(strptime2(scenario['temporal'][3],'%H:%M')[2])
+			to_write = to_write.replace('<replace:temporal2>',start)
+			to_write = to_write.replace('<replace:temporal3>',end)
+		if scenario['temporal'][4] in ['Latest date and time intervals']:
+			end = str(strptime2(scenario['temporal'][1],'%d.%m.%Y')[1])
+			to_write = to_write.replace('<replace:temporal0>','N/A')
+			to_write = to_write.replace('<replace:temporal1>',end)
+			start = str(strptime2(scenario['temporal'][2],'%H:%M')[2])
+			end = str(strptime2(scenario['temporal'][3],'%H:%M')[2])
+			to_write = to_write.replace('<replace:temporal2>',start)
+			to_write = to_write.replace('<replace:temporal3>',end)
 
 		to_write = to_write.replace('<replace:multiplerois>',str(bool(float(scenario['multiplerois']))))
 		to_write_substr = ''
