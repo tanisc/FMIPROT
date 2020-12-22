@@ -32,10 +32,10 @@ def readResultsData(fname,logger):
 			rlist.append(r)
 			metalist.append(metadatafname)
 			datalist.append(datafname)
-                elif os.path.isfile(metadatafname  + '.tsvx') and os.path.isfile(datafname  + '.mp4'):
-                        rlist.append(r)
-                        metalist.append(metadatafname)
-                        datalist.append(datafname)
+		elif os.path.isfile(metadatafname  + '.tsvx') and os.path.isfile(datafname  + '.mp4'):
+			rlist.append(r)
+			metalist.append(metadatafname)
+			datalist.append(datafname)
 
 	if rlist == []:
 		return (analysis_captions,[])
@@ -137,7 +137,7 @@ def storeData(fname, analysis_captions, data_captions,logger,visout=False):
 				datatype = 2
 
 		#File results (e.g. animations)
- 		if datatype == 0:
+		if datatype == 0:
 			metadata = deepcopy(analysis_captions)
 			metadata.update({'result':data_caption_title})
 			for c,caption in enumerate(captions):
@@ -313,11 +313,11 @@ def tileData(dshape,numarrays = 1, maxsize = 4096, dtype='float'):	#dtype string
 		elemnum = np.prod(dshape)
 		if len(dshape) != 1:
 			if np.prod(dshape) > 100:
-				print '\tArray size (MB): ', elemnum*elemsize*numarrays
+				print(('\tArray size (MB): ', elemnum*elemsize*numarrays))
 			if elemnum*elemsize > 0 and elemnum*elemsize < maxsize:
 				extentlist = [[0,0,dshape[0],dshape[1]]]
 				if np.prod(dshape) > 100:
-					print '\tArrays are not tiled.'
+					print('\tArrays are not tiled.')
 			else:
 				arraysize = int(np.sqrt(maxsize/elemsize))
 				extentlist = []
@@ -326,23 +326,23 @@ def tileData(dshape,numarrays = 1, maxsize = 4096, dtype='float'):	#dtype string
 				for m in range(1,len(mlist)):
 					for n in range(1,len(nlist)):
 						extentlist.append([mlist[m-1],nlist[n-1],mlist[m],nlist[n]])
-				print '\tArrays are tiled as ', m , " x ",  n, " x ",  arraysize, " x ",  arraysize
-				print '\tSize of one tile (MB): ', arraysize*arraysize*numarrays*elemsize
+				print(('\tArrays are tiled as ', m , " x ",  n, " x ",  arraysize, " x ",  arraysize))
+				print(('\tSize of one tile (MB): ', arraysize*arraysize*numarrays*elemsize))
 		else:
 			if np.prod(dshape) > 10:
-				print '\tArray size (MB): ', elemnum*elemsize*numarrays
+				print(('\tArray size (MB): ', elemnum*elemsize*numarrays))
 			if elemnum*elemsize > 0 and elemnum*elemsize < maxsize:
 				extentlist = [[0,dshape[0]]]
 				if np.prod(dshape) > 100:
-					print '\tArrays are not tiled.'
+					print('\tArrays are not tiled.')
 			else:
 				arraysize = int((maxsize/elemsize))
 				extentlist = []
 				mlist = np.append(np.arange(0,dshape[0],arraysize),dshape[0])
 				for m in range(1,len(mlist)):
 					extentlist.append([mlist[m-1],mlist[m]])
-				print 'Arrays are tiled as ', m , " x ",  arraysize
-				print 'Size of one tile (MB): ', arraysize*numarrays*elemsize
+				print(('Arrays are tiled as ', m , " x ",  arraysize))
+				print(('Size of one tile (MB): ', arraysize*numarrays*elemsize))
 		return extentlist
 
 def removeData(name):
@@ -364,7 +364,7 @@ def readData(name,extent=False):
 	extentlist = []
 	dsetnamelist = []
 	for dsetname in datafile:
-		extentlist.append(map(int,dsetname.split('-')))
+		extentlist.append(list(map(int,dsetname.split('-'))))
 		dsetnamelist.append(dsetname)
 
 	if not bigdata:
@@ -395,7 +395,7 @@ def writeData(data,name=False,extent=False):
 	extentlist = []
 	dsetnamelist = []
 	for dsetname in datafile:
-		extentlist.append(map(int,dsetname.split('-')))
+		extentlist.append(list(map(int,dsetname.split('-'))))
 		dsetnamelist.append(dsetname)
 	if extent not in extentlist:
 		extentlist.append(extent)

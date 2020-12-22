@@ -99,8 +99,8 @@ class CallWrapper:
             if self.subst:
                 args = self.subst(*args)
             return self.func(*args)
-        except SystemExit, msg:
-            raise SystemExit, msg
+        except SystemExit as msg:
+            raise SystemExit(msg)
         except:
             self.widget._report_exception()
 
@@ -171,43 +171,43 @@ class DoubleVar(object):
         return False
 
 def showinfo(title,message):
-  print '| ' +"INFO: "+title+' |'
-  print message
+  print('| ' +"INFO: "+title+' |')
+  print(message)
   if sysargv['prompt']:
-      raw_input('Press any key to continue...')
+      input('Press any key to continue...')
 
 def showwarning(title,message):
-  print '| ' +"WARNING: "+title+' |'
-  print message
+  print('| ' +"WARNING: "+title+' |')
+  print(message)
   if sysargv['prompt']:
-      raw_input('Press any key to continue...')
+      input('Press any key to continue...')
 
 def showerror(title,message):
-  print '| ' +"ERROR: "+title+' |'
-  print message
+  print('| ' +"ERROR: "+title+' |')
+  print(message)
   if sysargv['prompt']:
-      raw_input('Press any key to continue...')
+      input('Press any key to continue...')
 
 def askyesno(title,message):
-  print '| ' + title +' |'
-  print message
+  print('| ' + title +' |')
+  print(message)
   ans = ""
   while ans not in ['y','n','Y','N']:
-      ans = raw_input('(y)es/(n)o?')
+      ans = input('(y)es/(n)o?')
       if ans not in ['y','n','Y','N']:
-          print 'Incorrect answer. ',
+          print('Incorrect answer. ', end=' ')
   if ans in ['y','Y']:
       return True
   else:
       return False
 
 def askstring(title,message,initialvalue=''):
-  print '| ' +title+' |'
-  print message + ' ['+initialvalue+']'
-  return raw_input() or initialvalue
+  print('| ' +title+' |')
+  print(message + ' ['+initialvalue+']')
+  return input() or initialvalue
 
 def open(file,new=2):
-    import __builtin__
-    f = __builtin__.open(file,'r')
-    print f.read()
+    import builtins
+    f = builtins.open(file,'r')
+    print(f.read())
     f.close()

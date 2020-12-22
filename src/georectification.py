@@ -17,7 +17,7 @@ import os
 from definitions import AuxDir, TmpDir
 from definitions import sysargv
 if sysargv['gui']:
-	import Tkinter, tkMessageBox,tkSimpleDialog
+	import tkinter, tkinter.messagebox,tkinter.simpledialog
 #np.set_printoptions(threshold=np.nan)
 
 def makeColor(value,offset,scale):
@@ -26,7 +26,7 @@ def makeColor(value,offset,scale):
 	hue = (1 - ((value - offset)/float(scale)))/1.0
 	color = list(hsv_to_rgb(hue,1,0.9))
 	(color[0],color[1],color[2]) = (255*color[0],255*color[1],255*color[2])
-	color = map(int,color)
+	color = list(map(int,color))
 	return color
 
 class InteractorStyleClass(vtk.vtkInteractorStyle):
@@ -63,12 +63,12 @@ class InteractorStyleClass(vtk.vtkInteractorStyle):
 		camera.Zoom(1./self.s)
 		camera.Zoom(s)
 		self.GetCurrentRenderer().ResetCameraClippingRange()
-		print "\tC: ", ["%.6f"%item for item in camera.GetPosition()]
-		print "\tF: ", ["%.6f"%item for item in camera.GetFocalPoint()]
-		print "\tf: ", "%.6f"%camera.GetDistance()
-		print "\tA: ", ["%.2f"%item for item in camera.GetOrientation()]
-		print "\tN: ", ["%.2f"%item for item in camera.GetDirectionOfProjection()]
-		print "\tU: ", ["%.2f"%item for item in camera.GetViewUp()]
+		print(("\tC: ", ["%.6f"%item for item in camera.GetPosition()]))
+		print(("\tF: ", ["%.6f"%item for item in camera.GetFocalPoint()]))
+		print(("\tf: ", "%.6f"%camera.GetDistance()))
+		print(("\tA: ", ["%.2f"%item for item in camera.GetOrientation()]))
+		print(("\tN: ", ["%.2f"%item for item in camera.GetDirectionOfProjection()]))
+		print(("\tU: ", ["%.2f"%item for item in camera.GetViewUp()]))
 
 		self.C = C
 		self.Cz = Cz
@@ -148,29 +148,29 @@ class InteractorStyleClass(vtk.vtkInteractorStyle):
 		except:
 			pass
 
-		self.edit_window = Tkinter.Toplevel(self.tkobj,padx=10,pady=10)
+		self.edit_window = tkinter.Toplevel(self.tkobj,padx=10,pady=10)
 		self.edit_window.wm_title('Edit camera parameters')
 		self.edit_window.columnconfigure(2, minsize=100)
 		self.edit_window.columnconfigure(3, minsize=100)
 		self.edit_window.columnconfigure(4, minsize=100)
 
-		self.edit_Cx = Tkinter.DoubleVar()
+		self.edit_Cx = tkinter.DoubleVar()
 		self.edit_Cx.set(self.C[0])
-		self.edit_Cy = Tkinter.DoubleVar()
+		self.edit_Cy = tkinter.DoubleVar()
 		self.edit_Cy.set(self.C[1])
-		self.edit_Cz = Tkinter.DoubleVar()
+		self.edit_Cz = tkinter.DoubleVar()
 		self.edit_Cz.set(self.Cz)
-		self.edit_hd = Tkinter.DoubleVar()
+		self.edit_hd = tkinter.DoubleVar()
 		self.edit_hd.set(self.hd)
-		self.edit_td = Tkinter.DoubleVar()
+		self.edit_td = tkinter.DoubleVar()
 		self.edit_td.set(self.td)
-		self.edit_vd = Tkinter.DoubleVar()
+		self.edit_vd = tkinter.DoubleVar()
 		self.edit_vd.set(self.vd)
-		self.edit_f = Tkinter.DoubleVar()
+		self.edit_f = tkinter.DoubleVar()
 		self.edit_f.set(self.f*1000)
-		self.edit_s = Tkinter.DoubleVar()
+		self.edit_s = tkinter.DoubleVar()
 		self.edit_s.set(self.s)
-		self.edit_opac = Tkinter.DoubleVar()
+		self.edit_opac = tkinter.DoubleVar()
 		self.edit_opac.set(self.opac)
 
 		vect = np.array((Pwx,Pwy)) - np.array(self.C)[:2]
@@ -179,54 +179,54 @@ class InteractorStyleClass(vtk.vtkInteractorStyle):
 
 		r = 0
 		r += 1
-		Tkinter.Label(self.edit_window,bg="RoyalBlue4",fg='white',anchor='w',text='Clicked point').grid(sticky='w'+'e',row=r,column=1,columnspan=4)
+		tkinter.Label(self.edit_window,bg="RoyalBlue4",fg='white',anchor='w',text='Clicked point').grid(sticky='w'+'e',row=r,column=1,columnspan=4)
 		r += 1
-		Tkinter.Label(self.edit_window,anchor='w',text="World coordinate X").grid(sticky='w'+'e',row=r,column=1)
-		Tkinter.Label(self.edit_window,anchor='w',text=str(Pwx)).grid(sticky='w'+'e',row=r,column=2)
-		Tkinter.Label(self.edit_window,anchor='w',text="World coordinate Y").grid(sticky='w'+'e',row=r,column=3)
-		Tkinter.Label(self.edit_window,anchor='w',text=str(Pwy)).grid(sticky='w'+'e',row=r,column=4)
+		tkinter.Label(self.edit_window,anchor='w',text="World coordinate X").grid(sticky='w'+'e',row=r,column=1)
+		tkinter.Label(self.edit_window,anchor='w',text=str(Pwx)).grid(sticky='w'+'e',row=r,column=2)
+		tkinter.Label(self.edit_window,anchor='w',text="World coordinate Y").grid(sticky='w'+'e',row=r,column=3)
+		tkinter.Label(self.edit_window,anchor='w',text=str(Pwy)).grid(sticky='w'+'e',row=r,column=4)
 		r += 1
-		Tkinter.Label(self.edit_window,anchor='w',text="Distance to the camera").grid(sticky='w'+'e',row=r,column=1)
-		Tkinter.Label(self.edit_window,anchor='w',text=str(dist)).grid(sticky='w'+'e',row=r,column=2)
-		Tkinter.Label(self.edit_window,anchor='w',text="Heading from the camera").grid(sticky='w'+'e',row=r,column=3)
-		Tkinter.Label(self.edit_window,anchor='w',text=str(head)).grid(sticky='w'+'e',row=r,column=4)
+		tkinter.Label(self.edit_window,anchor='w',text="Distance to the camera").grid(sticky='w'+'e',row=r,column=1)
+		tkinter.Label(self.edit_window,anchor='w',text=str(dist)).grid(sticky='w'+'e',row=r,column=2)
+		tkinter.Label(self.edit_window,anchor='w',text="Heading from the camera").grid(sticky='w'+'e',row=r,column=3)
+		tkinter.Label(self.edit_window,anchor='w',text=str(head)).grid(sticky='w'+'e',row=r,column=4)
 		r += 1
-		Tkinter.Label(self.edit_window,anchor='w',text="World coordinate Z").grid(sticky='w'+'e',row=r,column=1)
-		Tkinter.Label(self.edit_window,anchor='w',text=str(Pwz)).grid(sticky='w'+'e',row=r,column=2)
+		tkinter.Label(self.edit_window,anchor='w',text="World coordinate Z").grid(sticky='w'+'e',row=r,column=1)
+		tkinter.Label(self.edit_window,anchor='w',text=str(Pwz)).grid(sticky='w'+'e',row=r,column=2)
 		r += 1
-		Tkinter.Label(self.edit_window,anchor='w',text="Picture coordinate X").grid(sticky='w'+'e',row=r,column=1)
-		Tkinter.Label(self.edit_window,anchor='w',text=str(int(Ppx))).grid(sticky='w'+'e',row=r,column=2)
-		Tkinter.Label(self.edit_window,anchor='w',text="Picture coordinate Y").grid(sticky='w'+'e',row=r,column=3)
-		Tkinter.Label(self.edit_window,anchor='w',text=str(int(Ppy))).grid(sticky='w'+'e',row=r,column=4)
+		tkinter.Label(self.edit_window,anchor='w',text="Picture coordinate X").grid(sticky='w'+'e',row=r,column=1)
+		tkinter.Label(self.edit_window,anchor='w',text=str(int(Ppx))).grid(sticky='w'+'e',row=r,column=2)
+		tkinter.Label(self.edit_window,anchor='w',text="Picture coordinate Y").grid(sticky='w'+'e',row=r,column=3)
+		tkinter.Label(self.edit_window,anchor='w',text=str(int(Ppy))).grid(sticky='w'+'e',row=r,column=4)
 		r += 1
-		Tkinter.Label(self.edit_window,bg="RoyalBlue4",fg='white',anchor='w',text='Camera parameters').grid(sticky='w'+'e',row=r,column=1,columnspan=4)
+		tkinter.Label(self.edit_window,bg="RoyalBlue4",fg='white',anchor='w',text='Camera parameters').grid(sticky='w'+'e',row=r,column=1,columnspan=4)
 		r += 1
-		Tkinter.Label(self.edit_window,anchor='w',text="Camera Coordinate X").grid(sticky='w'+'e',row=r,column=1)
-		Tkinter.Entry(self.edit_window,textvariable=self.edit_Cx).grid(sticky='w'+'e',row=r,column=2)
-		Tkinter.Label(self.edit_window,anchor='w',text="Camera Coordinate Y").grid(sticky='w'+'e',row=r,column=3)
-		Tkinter.Entry(self.edit_window,textvariable=self.edit_Cy).grid(sticky='w'+'e',row=r,column=4)
+		tkinter.Label(self.edit_window,anchor='w',text="Camera Coordinate X").grid(sticky='w'+'e',row=r,column=1)
+		tkinter.Entry(self.edit_window,textvariable=self.edit_Cx).grid(sticky='w'+'e',row=r,column=2)
+		tkinter.Label(self.edit_window,anchor='w',text="Camera Coordinate Y").grid(sticky='w'+'e',row=r,column=3)
+		tkinter.Entry(self.edit_window,textvariable=self.edit_Cy).grid(sticky='w'+'e',row=r,column=4)
 		r += 1
-		Tkinter.Label(self.edit_window,anchor='w',text="Camera height").grid(sticky='w'+'e',row=r,column=1)
-		Tkinter.Entry(self.edit_window,textvariable=self.edit_Cz).grid(sticky='w'+'e',row=r,column=2)
-		Tkinter.Label(self.edit_window,anchor='w',text="Horizontal position").grid(sticky='w'+'e',row=r,column=3)
-		Tkinter.Entry(self.edit_window,textvariable=self.edit_hd).grid(sticky='w'+'e',row=r,column=4)
+		tkinter.Label(self.edit_window,anchor='w',text="Camera height").grid(sticky='w'+'e',row=r,column=1)
+		tkinter.Entry(self.edit_window,textvariable=self.edit_Cz).grid(sticky='w'+'e',row=r,column=2)
+		tkinter.Label(self.edit_window,anchor='w',text="Horizontal position").grid(sticky='w'+'e',row=r,column=3)
+		tkinter.Entry(self.edit_window,textvariable=self.edit_hd).grid(sticky='w'+'e',row=r,column=4)
 		r += 1
-		Tkinter.Label(self.edit_window,anchor='w',text="Target direction").grid(sticky='w'+'e',row=r,column=1)
-		Tkinter.Entry(self.edit_window,textvariable=self.edit_td).grid(sticky='w'+'e',row=r,column=2)
-		Tkinter.Label(self.edit_window,anchor='w',text="Vertical position").grid(sticky='w'+'e',row=r,column=3)
-		Tkinter.Entry(self.edit_window,textvariable=self.edit_vd).grid(sticky='w'+'e',row=r,column=4)
+		tkinter.Label(self.edit_window,anchor='w',text="Target direction").grid(sticky='w'+'e',row=r,column=1)
+		tkinter.Entry(self.edit_window,textvariable=self.edit_td).grid(sticky='w'+'e',row=r,column=2)
+		tkinter.Label(self.edit_window,anchor='w',text="Vertical position").grid(sticky='w'+'e',row=r,column=3)
+		tkinter.Entry(self.edit_window,textvariable=self.edit_vd).grid(sticky='w'+'e',row=r,column=4)
 		r += 1
-		Tkinter.Label(self.edit_window,anchor='w',text="Focal length").grid(sticky='w'+'e',row=r,column=1)
-		Tkinter.Entry(self.edit_window,textvariable=self.edit_f).grid(sticky='w'+'e',row=r,column=2)
-		Tkinter.Label(self.edit_window,anchor='w',text="Scale factor").grid(sticky='w'+'e',row=r,column=3)
-		Tkinter.Entry(self.edit_window,textvariable=self.edit_s).grid(sticky='w'+'e',row=r,column=4)
+		tkinter.Label(self.edit_window,anchor='w',text="Focal length").grid(sticky='w'+'e',row=r,column=1)
+		tkinter.Entry(self.edit_window,textvariable=self.edit_f).grid(sticky='w'+'e',row=r,column=2)
+		tkinter.Label(self.edit_window,anchor='w',text="Scale factor").grid(sticky='w'+'e',row=r,column=3)
+		tkinter.Entry(self.edit_window,textvariable=self.edit_s).grid(sticky='w'+'e',row=r,column=4)
 		r += 1
-		Tkinter.Label(self.edit_window,bg="RoyalBlue4",fg='white',anchor='w',text='Tool settings').grid(sticky='w'+'e',row=r,column=1,columnspan=4)
+		tkinter.Label(self.edit_window,bg="RoyalBlue4",fg='white',anchor='w',text='Tool settings').grid(sticky='w'+'e',row=r,column=1,columnspan=4)
 		r += 1
-		Tkinter.Label(self.edit_window,anchor='w',text="Preview image opacity").grid(sticky='w'+'e',row=r,column=1)
-		Tkinter.Entry(self.edit_window,textvariable=self.edit_opac).grid(sticky='w'+'e',row=r,column=2)
+		tkinter.Label(self.edit_window,anchor='w',text="Preview image opacity").grid(sticky='w'+'e',row=r,column=1)
+		tkinter.Entry(self.edit_window,textvariable=self.edit_opac).grid(sticky='w'+'e',row=r,column=2)
 		r += 1
-		Tkinter.Button(self.edit_window,bg="darkgreen",fg='white',text='Apply',command=self.ApplyParameters).grid(sticky='w'+'e'+'s'+'n',row=r,column=1,columnspan=4)
+		tkinter.Button(self.edit_window,bg="darkgreen",fg='white',text='Apply',command=self.ApplyParameters).grid(sticky='w'+'e'+'s'+'n',row=r,column=1,columnspan=4)
 		self.tkobj.centerWindow(self.edit_window)
 		self.edit_window.wait_window()
 
@@ -281,8 +281,8 @@ def georectificationTool(tkobj, logger,imgfile,analysis,geoparams,geoopts,corrpa
 	h,w = img.shape[:2]
 	# Wp = np.zeros((h,w),np.float64)
 
-	extent = map(float,extent.split(';'))
-	C = map(float,C.split(';'))
+	extent = list(map(float,extent.split(';')))
+	C = list(map(float,C.split(';')))
 	C = transSingle(C,C_proj)
 	C = np.append(C,0.0)
 
@@ -320,7 +320,7 @@ def georectificationTool(tkobj, logger,imgfile,analysis,geoparams,geoopts,corrpa
 	renderWindow.Render()
 	(w_r,h_r) = renderWindow.GetSize()
 	zoom = min(w_r/float(w),h_r/float(h))
-	[w_r,h_r] = map(int,[w*zoom,h*zoom])
+	[w_r,h_r] = list(map(int,[w*zoom,h*zoom]))
 	img_r = np.zeros((3,h_r,w_r),img.dtype)
 	for c in range(img.shape[2]):
 		img_r[c] = mahotas.imresize(img.transpose(2,0,1)[c],(h_r,w_r))
@@ -366,7 +366,7 @@ def georectificationTool(tkobj, logger,imgfile,analysis,geoparams,geoopts,corrpa
 		for j in range(4):
 			ctm.append(camera.GetCompositeProjectionTransformMatrix(aspect,1,1).GetElement(i,j))
 	ctm = np.matrix(np.array(ctm).reshape(4,4))
-	print "\tCPM: ", ctm
+	print(("\tCPM: ", ctm))
 
 	# txt.SetInput("Calculating shades...")#%"+str(int(100*(0)/float(w*h))))
 	# logger.set('Calculating shades...')
@@ -458,10 +458,10 @@ def Georectify1(img_imglist,datetimelist,mask,settings,logger,extent,extent_proj
 	else:
 		flat = True
 
-	extent = map(float,extent.split(';'))
+	extent = list(map(float,extent.split(';')))
 	res = float(res)
 
-	C = map(float,C.split(';'))
+	C = list(map(float,C.split(';')))
 	C = transSingle(C,C_proj)
 	C = np.append(C,float(Cz))
 
@@ -481,7 +481,7 @@ def Georectify1(img_imglist,datetimelist,mask,settings,logger,extent,extent_proj
 	ax = float(ax)
 	ay = float(ay)
 	(td,vd,hd) = (float(td),float(vd),float(hd))
-	params = map(np.copy,[extent,extent_proj,res,dem,C,C_proj,Cz,hd,td,vd,f,w,interpolate,flat])
+	params = list(map(np.copy,[extent,extent_proj,res,dem,C,C_proj,Cz,hd,td,vd,f,w,interpolate,flat]))
 
 	auxfilename = False
 	from definitions import AuxDir, TmpDir
@@ -814,12 +814,12 @@ def georeferenceVTK(logger,settings,extent,C,hd,td,vd,f,s,h,w,dem,interpolate,fl
 	camera.Zoom(s)
 
 	if np.prod(readData(Pw)[0].shape) > 20:
-		print "\tC: ", ["%.6f"%item for item in camera.GetPosition()]
-		print "\tF: ", ["%.6f"%item for item in camera.GetFocalPoint()]
-		print "\tf: ", "%.6f"%camera.GetDistance()
-		print "\tA: ", ["%.2f"%item for item in camera.GetOrientation()]
-		print "\tN: ", ["%.2f"%item for item in camera.GetDirectionOfProjection()]
-		print "\tU: ", ["%.2f"%item for item in camera.GetViewUp()]
+		print(("\tC: ", ["%.6f"%item for item in camera.GetPosition()]))
+		print(("\tF: ", ["%.6f"%item for item in camera.GetFocalPoint()]))
+		print(("\tf: ", "%.6f"%camera.GetDistance()))
+		print(("\tA: ", ["%.2f"%item for item in camera.GetOrientation()]))
+		print(("\tN: ", ["%.2f"%item for item in camera.GetDirectionOfProjection()]))
+		print(("\tU: ", ["%.2f"%item for item in camera.GetViewUp()]))
 
 	aspect = w/float(h)
 	M = []
@@ -1073,7 +1073,7 @@ def viewShedWang(logger,data,Cp,dem,flat,interpolate): #dem data, ref point (cam
 						[1,+1,-1,[+1,-1],[+1,0]],
 						[0,-1,+1,[0,-1],[+1,-1]]]
 						# 0:iterate col (x), 1:iterate row (y) (first elem) - coef for series(2nd ele) - r1 coefs - r2 coefs
-			series = range(1,ir)
+			series = list(range(1,ir))
 			(cx,cy) = (cx.astype(float),cy.astype(float))
 			for a in list:
 					for b in series:

@@ -17,7 +17,7 @@ def lowestCountourSnowDepth(imglist,datetimelist,mask,settings,logger,objsize,li
 	if len(imglist) == 0:
 		return False
 	mask, pgs, th = mask
-	if (isinstance(pgs[0],list) and len(pgs) != 1) or (not isinstance(pgs[0],list) and map(sum,[pgs]) == 0.0):
+	if (isinstance(pgs[0],list) and len(pgs) != 1) or (not isinstance(pgs[0],list) and list(map(sum,[pgs])) == 0.0):
 		logger.set('Only and only one polygon should be defined for this analysis. Aborting.')
 		return False
 	pgsx = []
@@ -34,7 +34,7 @@ def lowestCountourSnowDepth(imglist,datetimelist,mask,settings,logger,objsize,li
 		try:
 			img = mahotas.imread(imgf,as_grey = True)
 			mbox = [pbox[0]*img.shape[0],pbox[1]*img.shape[0],pbox[2]*img.shape[1],pbox[3]*img.shape[1]]
-			mbox = map(int,map(np.rint,mbox))
+			mbox = list(map(int,list(map(np.rint,mbox))))
 			# mahotas.imsave(path.join('/home/tanisc',str(datetimelist[i].day)+str(datetimelist[i].hour)+str(datetimelist[i].minute)+'1.jpg'),(img[mbox[0]:mbox[1],mbox[2]:mbox[3]]).astype(np.uint8))
 			if sigma != 0:
 				img = mahotas.gaussian_filter(img, sigma)
@@ -144,7 +144,7 @@ def salvatoriSnowCover(img_imglist,datetimelist,mask,settings,logger,red,green,b
 		return False
 	if rectsw:
 		logger.set("Obtaining weight mask...")
-		params = map(np.copy,[extent,extent_proj,res,dem,C,C_proj,Cz,hd,td,vd,f,w,interpolate,flat,origin,ax,ay])
+		params = list(map(np.copy,[extent,extent_proj,res,dem,C,C_proj,Cz,hd,td,vd,f,w,interpolate,flat,origin,ax,ay]))
 		auxfilename = False
 		from definitions import AuxDir, TmpDir
 		readydata = False

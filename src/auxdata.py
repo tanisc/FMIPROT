@@ -178,7 +178,7 @@ def listFiles(pname,pdir,logger):
 
     if flistr != []:
         flistrv = [ilist for dlist, ilist in sorted(zip(dlistr, flistr))]
-    	dlistrv = [dlist for dlist, ilist in sorted(zip(dlistr, flistr))]
+        dlistrv = [dlist for dlist, ilist in sorted(zip(dlistr, flistr))]
         flistr = flistrv
         dlistr = dlistrv
     return (flistr,dlistr)
@@ -317,8 +317,8 @@ def readFile(pname,fname,latrange,lonrange,logger):
             source = pyproj.Proj(source)
             target = pyproj.Proj(init='epsg:4326')
 
-            latrange_ = map(float,latrange.split('/'))
-            lonrange_ = map(float,lonrange.split('/'))
+            latrange_ = list(map(float,latrange.split('/')))
+            lonrange_ = list(map(float,lonrange.split('/')))
 
             if latrange_ != [-90,90] or lonrange_ != [-180,180]:
                 raster_shape = (3 + int((latrange_[1] - latrange_[0])/abs(yres)), 3 + int((lonrange_[1] - lonrange_[0])/abs(xres)))
@@ -416,8 +416,8 @@ def readFile(pname,fname,latrange,lonrange,logger):
 
 
 def cropDataSingle(lat,lon,value,latrange,lonrange):
-    latrange = map(float,latrange.split('/'))
-    lonrange = map(float,lonrange.split('/'))
+    latrange = list(map(float,latrange.split('/')))
+    lonrange = list(map(float,lonrange.split('/')))
     if lat[1][1] <= latrange[1] and lat[1][1] >= latrange[0] and lon[1][1] <= lonrange[1] and lon[1][1] >= lonrange[0]:
         return (lat,lon,value)
     else:
@@ -425,8 +425,8 @@ def cropDataSingle(lat,lon,value,latrange,lonrange):
 
 
 def cropData(lat,lon,value,latrange,lonrange):
-    latrange = map(float,latrange.split('/'))
-    lonrange = map(float,lonrange.split('/'))
+    latrange = list(map(float,latrange.split('/')))
+    lonrange = list(map(float,lonrange.split('/')))
 
     if latrange == [-90,90] and lonrange == [-180,180]:
         return (lat,lon,value)

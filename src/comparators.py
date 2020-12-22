@@ -54,15 +54,15 @@ def compareBinary(ProdName,ProdDir,ProdVals,RefrName,RefrDir,RefrVals,ClsdName,C
             clsv = ClsdVals[c]
             if ',' in clsv: #multiclass
                 if '.' in clsv:
-                    clsv = map(float,clsv.split(','))
+                    clsv = list(map(float,clsv.split(',')))
                     for v in clsv:
                         cdatas[c] += np.abs(cdata - v) < np.abs(v*0.000001)
                 else:
-                    clsv = map(int,clsv.split(','))
+                    clsv = list(map(int,clsv.split(',')))
                     for v in clsv:
                         cdatas[c] += cdata == v
             elif '/' in clsv:   #range
-                clsv = map(float,clsv.split('/'))
+                clsv = list(map(float,clsv.split('/')))
                 cdatas[c] = (cdata>=clsv[0])*(cdata<=clsv[1])
             else:   #single value
                 if '.' in clsv:
@@ -323,15 +323,15 @@ def compareContinuous(ProdName,ProdDir,ProdVals,RefrName,RefrDir,RefrVals,ClsdNa
             clsv = ClsdVals[c]
             if ',' in clsv: #multiclass
                 if '.' in clsv:
-                    clsv = map(float,clsv.split(','))
+                    clsv = list(map(float,clsv.split(',')))
                     for v in clsv:
                         cdatas[c] += np.abs(cdata - v) < np.abs(v*0.000001)
                 else:
-                    clsv = map(int,clsv.split(','))
+                    clsv = list(map(int,clsv.split(',')))
                     for v in clsv:
                         cdatas[c] += cdata == v
             elif '/' in clsv:   #range
-                clsv = map(float,clsv.split('/'))
+                clsv = list(map(float,clsv.split('/')))
                 cdatas[c] = (cdata>=clsv[0])*(cdata<=clsv[1])
             else:   #single value
                 if '.' in clsv:

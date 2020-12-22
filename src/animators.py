@@ -15,7 +15,7 @@ def animateImagesFromResults(imglist, datetimelist, mask, settings, logger, temp
             return False
     if mask is not None:
         mask, pgs, th = mask
-    (duration,fps,resolution,barwidth) = map(float,(duration,fps,resolution[:-1],barwidth))
+    (duration,fps,resolution,barwidth) = list(map(float,(duration,fps,resolution[:-1],barwidth)))
     barwidth = barwidth/100.0
     resolution = int(resolution)
     temporalthreshold = datetime.timedelta(hours=float(temporalthreshold))
@@ -181,7 +181,7 @@ def animateImages(imglist, datetimelist, mask, settings,logger, duration, fps, r
             return False
     mask, pgs, th = mask
 
-    (duration,fps,resolution) = map(float,(duration,fps,resolution[:-1]))
+    (duration,fps,resolution) = list(map(float,(duration,fps,resolution[:-1])))
     resolution = int(resolution)
 
     if fps == 0 and duration != 0:

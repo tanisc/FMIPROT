@@ -22,7 +22,7 @@ def getAoiFracs(imglist, datetimelist, mask, settings,logger, green, red, blue, 
 	blue_stat = bool(int(blue_stat))
 	green_stat = bool(int(green_stat))
 	try:
-		escs_pg = map(int,escs_pg.split(','))
+		escs_pg = list(map(int,escs_pg.split(',')))
 	except:
 		#print "Incorrent input for polygon numbers to mask out. Including all polygons for masking out snow/cloud/sky."
 		escs_pg = [0]

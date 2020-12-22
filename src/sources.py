@@ -9,7 +9,7 @@ if not sysargv['gui']:
 	import noTk as tkMessageBox
 	import noTk as tkSimpleDialog
 else:
-	import tkMessageBox, tkFileDialog
+	import tkinter.messagebox, tkinter.filedialog
 
 #read sources from network file #remember exceptions same name and cross ref
 def readSources(tkobj,proxy,connection, logger):
@@ -147,7 +147,7 @@ def fixSourcesBySetup(logger,networklist,sourcelist,setup):
 			setup[sc]['source'].update({'temporary':True})
 			scenarios_to_save.append(sc)
 	if warn != '':
-		if sysargv['prompt'] and tkMessageBox.askyesno('Changes in networks',warn+'Do you want to make changes permanent?'):
+		if sysargv['prompt'] and tkinter.messagebox.askyesno('Changes in networks',warn+'Do you want to make changes permanent?'):
 			for n,network in enumerate(networklist):
 				if 'temporary' in network and network['temporary']:
 					del networklist[n]['temporary']
@@ -159,15 +159,15 @@ def fixSourcesBySetup(logger,networklist,sourcelist,setup):
 				sourcedict = getSources(logger,sourcelist,network,'network')
 				network = getSource(logger,networklist,network)
 				if network['protocol'] == 'LOCAL':
-					if tkMessageBox.askyesno('Save changes','Changes in be saved to the file: ' + network['file'] + '. Are you sure?'):
+					if tkinter.messagebox.askyesno('Save changes','Changes in be saved to the file: ' + network['file'] + '. Are you sure?'):
 						writeTSVx(network['file'],sourcedict)
 				else:
-					tkMessageBox.showinfo('Save changes','Program now will export the CNIF. Upload it to the host \''+network['host']+'\' under directory \'' +path.split(network['file'])[0]+ ' \'with the name \''+path.split(network['file'])[1]+'\'. Mind that for HTTP connections, it might take some time until the updated file is readable.')
+					tkinter.messagebox.showinfo('Save changes','Program now will export the CNIF. Upload it to the host \''+network['host']+'\' under directory \'' +path.split(network['file'])[0]+ ' \'with the name \''+path.split(network['file'])[1]+'\'. Mind that for HTTP connections, it might take some time until the updated file is readable.')
 					file_opt = options = {}
 					options['defaultextension'] = '.tsvx'
 					options['filetypes'] = [ ('Extended tab seperated value files', '.tsvx'),('all files', '.*')]
 					options['title'] = 'Set filename to export CNIF to...'
-					ans = path.normpath(tkFileDialog.asksaveasfilename(**file_opt))
+					ans = path.normpath(tkinter.filedialog.asksaveasfilename(**file_opt))
 					if ans != '' and ans != '.':
 						writeTSVx(ans,sourcedict)
 			for sc in scenarios_to_save:
@@ -249,11 +249,11 @@ def sortSources(logger,dictlist):
 
 	#get sources parameters by prop
 def getSources(logger,dictlist,propvalue,prop='name'):
-	return filter(lambda dictlist: dictlist[prop] == propvalue, dictlist)
+	return [dictlist for dictlist in dictlist if dictlist[prop] == propvalue]
 
 #get source parameters by prop
 def getSource(logger,dictlist,propvalue,prop='name'):
-	return filter(lambda dictlist: dictlist[prop] == propvalue, dictlist)[0]
+	return [dictlist for dictlist in dictlist if dictlist[prop] == propvalue][0]
 
 #get source property from sourcelist
 def getSourceProp(logger,dictlist,source,prop):

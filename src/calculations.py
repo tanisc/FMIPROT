@@ -214,7 +214,7 @@ def filterThresholds(imglist, datetimelist, mask, logger):
 		#, th=[0.0,1.0,0.0,1.0,0.0,1.0,0.0,1.0,0.0,255.0,0.0,255.0,0.0,255.0,0.0,1.0,0.0,1.0,0.0,1.0,0.0,1.0]
 		mask, pgs, th = mask
 		imglisto = []
-                datetimelisto = []
+		datetimelisto = []
 		if th[:8]==[0.0,1.0,0.0,1.0,0.0,1.0,0.0,1.0] and th[14:16] == [0.0,1.0] and th[18:] == [0.0,1.0,0.0,1.0,0.0,1.0,0.0,1.0]:
 			return imglist, datetimelist, imglisto, datetimelisto
 		logger.set('Number of images:'+str(len(imglist)))
@@ -340,20 +340,20 @@ def getDEM(x1,y1,x2,y2,xres,yres,dem='NLS-DEM2',flat=False,interpolate=True,maxm
 		ys = (y2 - y1)/yres + 1
 		(xs,ys) = (int(xs),int(ys))
 		if xs*ys > 10:
-			print "\tObtaining DEM Data for extent ", x1,y1,x2,y2, " resolutions ", xres,yres, " on a grid sized ", xs,ys, " (Interpolation: ", bool(float(interpolate)), ")..."
+			print(("\tObtaining DEM Data for extent ", x1,y1,x2,y2, " resolutions ", xres,yres, " on a grid sized ", xs,ys, " (Interpolation: ", bool(float(interpolate)), ")..."))
 	else:
 		if len(x1.shape) == 1:
 			(ys,xs) = (1,x1.shape[0])
 		else:
 			(ys,xs) = x1.shape
 		if xs*ys > 10:
-			print "\tObtaining DEM Data for custom coordinates on a grid sized ", xs,ys, " (Interpolation: ", bool(float(interpolate)), ")..."
+			print(("\tObtaining DEM Data for custom coordinates on a grid sized ", xs,ys, " (Interpolation: ", bool(float(interpolate)), ")..."))
 
 	tiles = tileData((xs,ys),60, maxmem-300)
 	tilen = str(uuid4())
 	for tile in tiles:
 		if len(tiles) > 1:
-			print 'Tile ', tiles.index(tile)+1, ' of ' , len(tiles)
+			print(('Tile ', tiles.index(tile)+1, ' of ' , len(tiles)))
 		(toy,tox) = (tile[1],tile[0])
 		xs = tile[2]-tile[0]
 		ys = tile[3]-tile[1]
@@ -382,17 +382,17 @@ def getDEM(x1,y1,x2,y2,xres,yres,dem='NLS-DEM2',flat=False,interpolate=True,maxm
 		try:
 			d = TM35FIN.tile_of_xy(x.reshape((x.size,)),y.reshape((y.size,)),8)
 		except:
-			print "\tCoordinates out of TM35FIN Grid. Switching to flat terrain..."
+			print("\tCoordinates out of TM35FIN Grid. Switching to flat terrain...")
 			return getDEM(x1,y1,x2,y2,xres,yres,dem,True,interpolate,maxmem)
-		import urllib
+		import urllib.request, urllib.parse, urllib.error
 		import zipfile
 		if xs*ys > 10:
 			if len(d) > 1:
-				print "\tUsed grids for DEM Data on ETRS:", d
+				print(("\tUsed grids for DEM Data on ETRS:", d))
 		for m in d:
 			hfile = os.path.join(DEMDir,dem+m+'.h5')
 			if not os.path.exists(hfile):
-				print "Parsed DEM Data not found in local drive."
+				print("Parsed DEM Data not found in local drive.")
 				zfile = os.path.join(DEMDir,dem+m+'.zip')
 				afile = os.path.join(DEMDir,m+'.asc')
 				xfile = os.path.join(DEMDir,m+'.xyz')
@@ -400,29 +400,29 @@ def getDEM(x1,y1,x2,y2,xres,yres,dem='NLS-DEM2',flat=False,interpolate=True,maxm
 				if dem=='NLS-DEM2':
 					try:
 						if not os.path.exists(zfile):
-							print "Nonparsed DEM Data not found in local drive, downloading from dataset ", dem, "..."
-							print 'http://kartat.kapsi.fi/files/korkeusmalli_2m/kaikki/etrs89/ascii_grid/'+m[0:2]+'/'+m[0:3]+'/'+m+'.zip',zfile
-							urllib.urlretrieve('http://kartat.kapsi.fi/files/korkeusmalli_2m/kaikki/etrs89/ascii_grid/'+m[0:2]+'/'+m[0:3]+'/'+m+'.zip',zfile)
+							print(("Nonparsed DEM Data not found in local drive, downloading from dataset ", dem, "..."))
+							print(('http://kartat.kapsi.fi/files/korkeusmalli_2m/kaikki/etrs89/ascii_grid/'+m[0:2]+'/'+m[0:3]+'/'+m+'.zip',zfile))
+							urllib.request.urlretrieve('http://kartat.kapsi.fi/files/korkeusmalli_2m/kaikki/etrs89/ascii_grid/'+m[0:2]+'/'+m[0:3]+'/'+m+'.zip',zfile)
 						try:
 							with zipfile.ZipFile(zfile, "r") as fz:
 								fz.extractall(DEMDir)
 						except:
-							print "Unexpected error:", os.sys.exc_info()
-							print "DEM file is not found. Switching to flat terrain..."
+							print(("Unexpected error:", os.sys.exc_info()))
+							print("DEM file is not found. Switching to flat terrain...")
 							return getDEM(x1,y1,x2,y2,xres,yres,dem,True,interpolate,maxmem)
 					except:
-						print "Unexpected error:", os.sys.exc_info()
-						print "DEM file is not found. Switching to flat terrain..."
+						print(("Unexpected error:", os.sys.exc_info()))
+						print("DEM file is not found. Switching to flat terrain...")
 						return getDEM(x1,y1,x2,y2,xres,yres,dem,True,interpolate,maxmem)
 					if os.path.exists(afile):
-						print "Parsing DEM tile..."
+						print("Parsing DEM tile...")
 						f = open(afile,'r')
 						header = []
 						headerinf = []
 						for i in range(6):
 							line =  f.readline().split()
 							header.append(line[1])
-						header = np.array(map(float,header))
+						header = np.array(list(map(float,header)))
 						dataz = np.array(np.array(f.readline().split()).astype(float))
 						for l,line in enumerate(f):
 							dataz = np.vstack((dataz,np.array(line.split()).astype(float)))
@@ -437,28 +437,28 @@ def getDEM(x1,y1,x2,y2,xres,yres,dem='NLS-DEM2',flat=False,interpolate=True,maxm
 						if os.path.isfile(afile):
 							os.remove(afile)
 					else:
-						print "DEM file problem. Switching to flat terrain..."
+						print("DEM file problem. Switching to flat terrain...")
 						return getDEM(x1,y1,x2,y2,xres,yres,dem,True,interpolate,maxmem)
 
 				elif dem=='NLS-DEM10':
 					try:
 						if not os.path.exists(zfile):
-							print "Nonparsed DEM Data not found in local drive, downloading from dataset ", dem, "..."
-							urllib.urlretrieve('http://kartat.kapsi.fi/files/korkeusmalli_10m/kaikki/etrs89/ascii_xyz/'+m[0:2]+'/'+m[0:3]+'/'+m+'.zip',zfile)
+							print(("Nonparsed DEM Data not found in local drive, downloading from dataset ", dem, "..."))
+							urllib.request.urlretrieve('http://kartat.kapsi.fi/files/korkeusmalli_10m/kaikki/etrs89/ascii_xyz/'+m[0:2]+'/'+m[0:3]+'/'+m+'.zip',zfile)
 						try:
 							with zipfile.ZipFile(zfile, "r") as fz:
 								fz.extractall(DEMDir)
 						except:
-							print "Unexpected error:", os.sys.exc_info()[0]
-							print "DEM file is not found. Switching to flat terrain..."
+							print(("Unexpected error:", os.sys.exc_info()[0]))
+							print("DEM file is not found. Switching to flat terrain...")
 							return getDEM(x1,y1,x2,y2,xres,yres,dem,True,interpolate,maxmem)
 					except:
-						print "Unexpected error:", os.sys.exc_info()[0]
-						print "DEM file is not found. Switching to flat terrain..."
+						print(("Unexpected error:", os.sys.exc_info()[0]))
+						print("DEM file is not found. Switching to flat terrain...")
 						return getDEM(x1,y1,x2,y2,xres,yres,dem,True,interpolate,maxmem)
 
 					if os.path.exists(xfile):
-						print "Parsing DEM tile..."
+						print("Parsing DEM tile...")
 						num_lines = sum(1 for line in open(xfile))
 						f = open(xfile,'r')
 						header = [0,0,0,0,0,0]
@@ -472,11 +472,11 @@ def getDEM(x1,y1,x2,y2,xres,yres,dem='NLS-DEM2',flat=False,interpolate=True,maxm
 						header[0] = np.where(datax[1:]==datax[0])[0][0]+1
 						header[4] = datay[0]-datay[header[0]]
 						header[5] = -999.999
-						header = np.array(map(float,header))
+						header = np.array(list(map(float,header)))
 						f.close()
 						datax = None
 						datay = None
-						dataz = dataz.reshape(map(int,(header[0],header[1])))[::-1]
+						dataz = dataz.reshape(list(map(int,(header[0],header[1]))))[::-1]
 						hdf_f = h5py.File(hfile,'w')
 						hdf_dset = hdf_f.create_dataset('header',header.shape,header.dtype,data=header)
 						hdf_dset = hdf_f.create_dataset('data',dataz.shape,dataz.dtype,data=dataz)
@@ -488,7 +488,7 @@ def getDEM(x1,y1,x2,y2,xres,yres,dem='NLS-DEM2',flat=False,interpolate=True,maxm
 						if os.path.isfile(lfile):
 							os.remove(lfile)
 					else:
-						print "DEM file problem. Switching to flat terrain..."
+						print("DEM file problem. Switching to flat terrain...")
 						return getDEM(x1,y1,x2,y2,xres,yres,dem,True,interpolate,maxmem)
 				else:
 					return getDEM(x1,y1,x2,y2,xres,yres,dem,True,interpolate,maxmem)
@@ -530,7 +530,7 @@ def getDEM(x1,y1,x2,y2,xres,yres,dem='NLS-DEM2',flat=False,interpolate=True,maxm
 
 def LensCorrRadial(imglist,datetimelist,logger,origin,ax,ay,inverse):
 	output = []
-	origin = map(float,origin.split(';'))
+	origin = list(map(float,origin.split(';')))
 	origin = np.array(origin)
 	inverse = bool(float(inverse))
 	ax = float(ax)
@@ -619,7 +619,7 @@ def RadDistTrans(Pp,origin,ax,ay,inverse=False):	#PP is normalized  and pp[0] = 
 def temporalAnalysis(imglist,datetimelist,mask,settings,logger, daily):#, latency, average):	#only daily num of images correct. others need discarding invlaid times from temporal selection
 	latency = False
 	average = False
-	[daily, latency, average] = map(bool,[daily,latency,average])
+	[daily, latency, average] = list(map(bool,[daily,latency,average]))
 	if datetimelist == []:
 		return False
 	output = []
@@ -680,7 +680,7 @@ def downloadAs(imglist,datetimelist,mask,settings,logger, filenameformat, resolu
 		return False
 	if resolution != "":
 		try:
-			resolution = map(int,resolution.split('x'))
+			resolution = list(map(int,resolution.split('x')))
 		except:
 			logger.set('Incorrect resolution value.')
 			return False

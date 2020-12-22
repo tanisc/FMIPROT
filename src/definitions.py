@@ -1,4 +1,4 @@
-version = '0.21.2 (Beta)'
+version = '0.22.0 (Beta)'
 #sysargv
 import argparse
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -30,8 +30,8 @@ for i in range(7):
         for k in range(1,3):
             color = list(hsv_to_rgb(i/7.0,j/2.0,k/2.0))
             (color[0],color[1],color[2]) = (255*color[0],255*color[1],255*color[2])
-            color = map(int,color)
-            color = map(hex,color)
+            color = list(map(int,color))
+            color = list(map(hex,color))
             COLORS.append('#'+str(color[0])[2:].zfill(2)+str(color[1])[2:].zfill(2)+str(color[2])[2:].zfill(2))
 COLORS.append('#000000')
 #used in plotting
@@ -102,21 +102,21 @@ if sysargv['dev']:
 
 #clean temporary files
 if sysargv['cleantemp']:
-    print 'Cleaning temporary files. DO NOT USE THAT OPTION IF ANY INSTANCE OF THE PROGRAM IS RUNNING. These files also include images downloaded for temporarily added cameras and camera networks. Exits after cleaning.'
-    print 'Are you sure?'
+    print('Cleaning temporary files. DO NOT USE THAT OPTION IF ANY INSTANCE OF THE PROGRAM IS RUNNING. These files also include images downloaded for temporarily added cameras and camera networks. Exits after cleaning.')
+    print('Are you sure?')
     ans = ''
     while ans not in ['y','n','Y','N']:
-        ans = raw_input('(y)es/(n)o?')
+        ans = input('(y)es/(n)o?')
         if ans not in ['y','n','Y','N']:
-            print 'Incorrect answer.'
+            print('Incorrect answer.')
     if ans in ['y','Y']:
         if os.path.exists(TmpDir):
             shutil.rmtree(TmpDir)
         if not os.path.exists(TmpDir):
             os.makedirs(TmpDir)
-        print 'Done.'
+        print('Done.')
     else:
-        print 'Cancelled.'
+        print('Cancelled.')
     os._exit(1)
 #definitions, labels, keys for sources
 settings = ['http_proxy','https_proxy','ftp_proxy','ftp_passive','ftp_numberofconnections','results_path','images_path','images_download','timezone','convert_timezone','generate_report','memory_limit']

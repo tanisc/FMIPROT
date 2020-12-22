@@ -193,7 +193,7 @@ def readConfig(filename,logger):
 def readSetup(filename,sourcelist,logger):
 	logger.set('Reading setup file...')
 	try:
-		f = open(filename,'rb')
+		f = open(filename,'r')
 		line = f.readline()
 		f.close()
 
@@ -549,8 +549,8 @@ def writeSetupReport(filename,setup,logger):
 		g"+str(i)+str(j)+str(k)+str(l)+" = new Dygraph(\n\
 			document.getElementById(\"graphdiv"+str(i)+str(j)+str(k)+str(l)+"\"),\n\
 	  		\"")
-	  								plt_f.write(path.split(csvf)[1])
-	  								plt_f.write("\",\n\
+									plt_f.write(path.split(csvf)[1])
+									plt_f.write("\",\n\
 			{title: '"+csvt+"', xlabel:'Time"+tzoffset+"',legend: 'onmouseover',legendFormatter: legendFormatter, labelsUTC:false, digitsAfterDecimal:3, showRangeSelector: true,rollPeriod: 1,showRoller: true,highlightCircleSize: 3,drawPoints:false,pointSize: 1,strokeWidth: 1,strokeBorderWidth:1,highlightSeriesOpts: {drawPoints:true,pointSize:2,strokeWidth: 2,strokeBorderWidth: 1,highlightCircleSize: 5},\n\
 			interactionModel : {'mousedown' : downV3,'mousemove' : moveV3,'mouseup' : upV3,'click' : clickV3,'dblclick' : dblClickV3,'mousewheel' : scrollV3}\n\
 		});\n\
@@ -618,7 +618,7 @@ def writeSetupReport(filename,setup,logger):
 	logger.set("Report is saved as " + filename)
 
 def readTSVx(tsvxfile):
-	f = open(tsvxfile,'rb')
+	f = open(tsvxfile,'r')
 	dictlist = []
 	keys = []
 	ne = 0
@@ -843,8 +843,8 @@ def debugDict(dic):
 				for key1 in dic[key]:
 					if isinstance(dic[key][key1],dict):
 						for key2 in dic[key][key1]:
-							print key,' : ', key1,' : ', key2,' : ', dic[key][key1][key2]
+							print((key,' : ', key1,' : ', key2,' : ', dic[key][key1][key2]))
 					else:
-						print key,' : ', key1,' : ', dic[key][key1]
+						print((key,' : ', key1,' : ', dic[key][key1]))
 			else:
-				print key,' : ', dic[key]
+				print((key,' : ', dic[key]))

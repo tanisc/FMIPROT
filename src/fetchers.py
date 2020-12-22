@@ -10,8 +10,9 @@ import numpy as np
 from definitions import BinDir, source_metadata_names,sysargv
 import parsers
 from shutil import copyfile, copystat
+import importlib
 if sysargv['gui']:
-	import Tkinter, tkMessageBox,tkSimpleDialog
+	import tkinter, tkinter.messagebox,tkinter.simpledialog
 import socket
 from uuid import uuid4
 from time import mktime
@@ -119,8 +120,8 @@ def fetchFile(tkobj,logger,localdir, localfile, protocol,host, username, passwor
 			return False
 
 	if protocol == 'HTTP' or protocol == 'HTTPS':
-		import urllib2
-		urllib2 = reload(urllib2)
+		import urllib.request, urllib.error, urllib.parse
+		urllib = importlib.reload(urllib)
 		if 'http_proxy' in proxy:
 			proxy.update({'http':proxy['http_proxy']})
 			del proxy['http_proxy']
@@ -130,9 +131,9 @@ def fetchFile(tkobj,logger,localdir, localfile, protocol,host, username, passwor
 		if 'ftp_proxy' in proxy:
 			proxy.update({'ftp':proxy['ftp_proxy']})
 			del proxy['ftp_proxy']
-		proxyhl = urllib2.ProxyHandler(proxy)
-		opener = urllib2.build_opener(proxyhl)
-		urllib2.install_opener(opener)
+		proxyhl = urllib.request.ProxyHandler(proxy)
+		opener = urllib.request.build_opener(proxyhl)
+		urllib.request.install_opener(opener)
 		try:
 			logger.set('Fetching file...')
 			if protocol == 'HTTP':
@@ -142,12 +143,12 @@ def fetchFile(tkobj,logger,localdir, localfile, protocol,host, username, passwor
 			if username != '':
 				if password == '':
 					password = None
-				passman = urllib2.HTTPPasswordMgrWithDefaultRealm()
+				passman = urllib.request.HTTPPasswordMgrWithDefaultRealm()
 				passman.add_password(None, inifile, username, password)
-				authhandler = urllib2.HTTPBasicAuthHandler(passman)
-				opener = urllib2.build_opener(authhandler)
-				urllib2.install_opener(opener)
-			cfg = urllib2.urlopen(inifile,timeout = 3)
+				authhandler = urllib.request.HTTPBasicAuthHandler(passman)
+				opener = urllib.request.build_opener(authhandler)
+				urllib.request.install_opener(opener)
+			cfg = urllib.request.urlopen(inifile,timeout = 3)
 			cfg_loc = open(os.path.join(localdir,localfile),'wb')
 			cfg_loc.write(cfg.read())
 			cfg_loc.close()
@@ -287,11 +288,11 @@ def filterImageListTemporal(logger,imglistv,pathlistv,fnameconv,timec,count):
 	pathlistv = []
 	if timec[4] == 'Time of day':
 		for i,img in enumerate(imglist):
-                        if timelist[i] <= time2 and timelist[i] >= time1:
-                                imglistv.append(img)
-                                datetimelistv.append(datetimelist[i])
-                                pathlistv.append(pathlist[i])
-                return (imglistv, datetimelistv, pathlistv)
+			if timelist[i] <= time2 and timelist[i] >= time1:
+				imglistv.append(img)
+				datetimelistv.append(datetimelist[i])
+				pathlistv.append(pathlist[i])
+		return (imglistv, datetimelistv, pathlistv)
 
 	if timec[4] == 'Earliest date and time intervals':
 		for i,img in enumerate(imglist):
@@ -388,13 +389,13 @@ def listPathCrawl(remote_path,timec,timelimc):
 		return [remote_path]
 	else:
 		paths_to_crawl = []
-		ys = range(min(date1.year,date2.year),max(date1.year,date2.year)+1)
+		ys = list(range(min(date1.year,date2.year),max(date1.year,date2.year)+1))
 		for y in ys:
 			if '%m' in keys:
-				ms = range(1,13)
+				ms = list(range(1,13))
 				for m in ms:
 					if '%d' in keys:
-						ds = range(1,32)
+						ds = list(range(1,32))
 						for d in ds:
 							try:
 								datetime.date(y,m,d)
@@ -430,16 +431,16 @@ def getPassword(tkobj,logger,protocol,host,renew=False):
 				exec("tkobj."+parsers.validateName(protocol+host).lower()+"password.set('')")
 				exec('tkobj.'+parsers.validateName(protocol+host).lower()+'username = Tkinter.StringVar()')
 				exec("tkobj."+parsers.validateName(protocol+host).lower()+"username.set('')")
-				tkMessageBox.showwarning('Enter username and password','The password and/or the username on the host \''+protocol+'://'+host+'\' is incorrect. Please try again in the next dialog. The username and the password will be remembered for this session.')
-				eval('tkobj.'+parsers.validateName(protocol+host).lower()+'username.set')(tkSimpleDialog.askstring('Enter username and password','Enter username on the host \''+protocol+'://'+host+'\'',initialvalue=eval('tkobj.'+parsers.validateName(protocol+host).lower()+'username.get()')))
-				eval('tkobj.'+parsers.validateName(protocol+host).lower()+'password.set')(tkSimpleDialog.askstring('Enter username and password','Enter password on the host \''+protocol+'://'+host+'\'',initialvalue=eval('tkobj.'+parsers.validateName(protocol+host).lower()+'password.get()')))
+				tkinter.messagebox.showwarning('Enter username and password','The password and/or the username on the host \''+protocol+'://'+host+'\' is incorrect. Please try again in the next dialog. The username and the password will be remembered for this session.')
+				eval('tkobj.'+parsers.validateName(protocol+host).lower()+'username.set')(tkinter.simpledialog.askstring('Enter username and password','Enter username on the host \''+protocol+'://'+host+'\'',initialvalue=eval('tkobj.'+parsers.validateName(protocol+host).lower()+'username.get()')))
+				eval('tkobj.'+parsers.validateName(protocol+host).lower()+'password.set')(tkinter.simpledialog.askstring('Enter username and password','Enter password on the host \''+protocol+'://'+host+'\'',initialvalue=eval('tkobj.'+parsers.validateName(protocol+host).lower()+'password.get()')))
 
 		except:
 			exec('tkobj.'+parsers.validateName(protocol+host).lower()+'password = Tkinter.StringVar()')
 			exec('tkobj.'+parsers.validateName(protocol+host).lower()+'username = Tkinter.StringVar()')
-			tkMessageBox.showwarning('Enter username and password','Enter the username and the password for the username on the host \''+protocol+'://'+host+'\'. The username and the password will be remembered for this session.')
-			eval('tkobj.'+parsers.validateName(protocol+host).lower()+'username.set')(tkSimpleDialog.askstring('Enter username and password','Enter username on the host \''+protocol+'://'+host+'\'',initialvalue=eval('tkobj.'+parsers.validateName(protocol+host).lower()+'username.get()')))
-			eval('tkobj.'+parsers.validateName(protocol+host).lower()+'password.set')(tkSimpleDialog.askstring('Enter username and password','Enter password on the host \''+protocol+'://'+host+'\'',initialvalue=eval('tkobj.'+parsers.validateName(protocol+host).lower()+'password.get()')))
+			tkinter.messagebox.showwarning('Enter username and password','Enter the username and the password for the username on the host \''+protocol+'://'+host+'\'. The username and the password will be remembered for this session.')
+			eval('tkobj.'+parsers.validateName(protocol+host).lower()+'username.set')(tkinter.simpledialog.askstring('Enter username and password','Enter username on the host \''+protocol+'://'+host+'\'',initialvalue=eval('tkobj.'+parsers.validateName(protocol+host).lower()+'username.get()')))
+			eval('tkobj.'+parsers.validateName(protocol+host).lower()+'password.set')(tkinter.simpledialog.askstring('Enter username and password','Enter password on the host \''+protocol+'://'+host+'\'',initialvalue=eval('tkobj.'+parsers.validateName(protocol+host).lower()+'password.get()')))
 	if eval('tkobj.'+parsers.validateName(protocol+host).lower()+'username.get')() == 'None' or eval('tkobj.'+parsers.validateName(protocol+host).lower()+'password.get')() == 'None':
 		exec('tkobj.'+parsers.validateName(protocol+host).lower()+'username = None')
 		exec('tkobj.'+parsers.validateName(protocol+host).lower()+'password = None')
@@ -753,7 +754,7 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 
 
 	if protocol == 'HTTP' or protocol == 'HTTPS':
-		import urllib2
+		import urllib.request, urllib.error, urllib.parse
 		if timec[4] == 'List':
 			datetimelist = deepcopy(timec[6])
 			pathlist = deepcopy(timec[7])
@@ -764,7 +765,7 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 		else:
 			if online:
 				import re
-				urllib2 = reload(urllib2)
+				urllib = importlib.reload(urllib)
 				if 'http_proxy' in proxy:
 					proxy.update({'http':proxy['http_proxy']})
 					del proxy['http_proxy']
@@ -774,19 +775,19 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 				if 'ftp_proxy' in proxy:
 					proxy.update({'ftp':proxy['ftp_proxy']})
 					del proxy['ftp_proxy']
-				proxyhl = urllib2.ProxyHandler(proxy)
-				opener = urllib2.build_opener(proxyhl)
+				proxyhl = urllib.request.ProxyHandler(proxy)
+				opener = urllib.request.build_opener(proxyhl)
 				if (protocol == 'HTTP'  and 'http' in proxy) or (protocol == 'HTTPS'  and 'https' in proxy):
-					urllib2.install_opener(opener)
+					urllib.request.install_opener(opener)
 
 				if username != '':
 					if password == '':
 						password = None
-					passman = urllib2.HTTPPasswordMgrWithDefaultRealm()
+					passman = urllib.request.HTTPPasswordMgrWithDefaultRealm()
 					passman.add_password(None, inifile, username, password)
-					authhandler = urllib2.HTTPBasicAuthHandler(passman)
-					opener = urllib2.build_opener(authhandler)
-					urllib2.install_opener(opener)
+					authhandler = urllib.request.HTTPBasicAuthHandler(passman)
+					opener = urllib.request.build_opener(authhandler)
+					urllib.request.install_opener(opener)
 				logger.set('Establishing connection(s)...')
 				pattern = re.compile('href=[\'"]?([^\'" >]+)')
 				paths_to_crawl = listPathCrawl(remote_path,timec,timelimc)
@@ -801,7 +802,7 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 						url = 'https://'+host+'/'+p
 
 					try:
-						response = urllib2.urlopen(url,timeout = 5).read()
+						response = urllib.request.urlopen(url,timeout = 5).read()
 					except:
 						#logger.set('Connection failed.')
 						continue
@@ -878,7 +879,7 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 
 					try:
 						imgfile = open(os.path.join(local_path, f),'wb')
-						imgfile.write(urllib2.urlopen(p).read())
+						imgfile.write(urllib.request.urlopen(p).read())
 						success += 1
 						imgfile.close()
 					except:
