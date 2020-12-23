@@ -2719,13 +2719,19 @@ class monimet_gui(Tkinter.Tk):
 		[x1,y1,x2,y2] = extent
 		size = int(((y2-y1)/res)*((x2-x1)/res))
 
-		message += '\nThere are over ' + str(size) + ' points in the real world to be simulated for the preview. It is adviced to keep the number of points under half million, otherwise the process may take too long.\n'
-		message += '\nThe spatial resolution or the spatial extent can be decreased to decrease number of points.\n'
-		message += '\nDo you wish the continue?'
+		goodsize = 1000000.
+		res = res*size/goodsize
+		size = goodsize
+		analysis[geoparams[2]] = res
+		georectificationTool(self,self.Message,self.PictureFileName.get(),analysis,geoparams,geoopts,corrparams,self.memorylimit.get())
 
-
-		if tkMessageBox.askyesno('Georectification preview',message):
-			georectificationTool(self,self.Message,self.PictureFileName.get(),analysis,geoparams,geoopts,corrparams,self.memorylimit.get())
+		# message += '\nThere are over ' + str(size) + ' points in the real world to be simulated for the preview. It is adviced to keep the number of points under half million, otherwise the process may take too long.\n'
+		# message += '\nThe spatial resolution or the spatial extent can be decreased to decrease number of points.\n'
+		# message += '\nDo you wish the continue?'
+		#
+		#
+		# if tkMessageBox.askyesno('Georectification preview',message):
+		# 	georectificationTool(self,self.Message,self.PictureFileName.get(),analysis,geoparams,geoopts,corrparams,self.memorylimit.get())
 
 	def Menu_Base(self):
 		greentexture = Tkinter.PhotoImage(file=os.path.join(ResourcesDir,'green_grad_inv.gif'))
