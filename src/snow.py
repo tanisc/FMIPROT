@@ -62,7 +62,8 @@ def lowestCountourSnowDepth(imglist,datetimelist,mask,settings,logger,objsize,li
 			time = np.append(time,(str(datetimelist[i])))
 			sd = np.append(sd,height)
 			logger.set('Image: |progress:4|queue:'+str(i+1)+'|total:'+str(len(imglist)))
-		except:
+		except Exception as e:
+			print(e)
 			logger.set("Processing " + imgf + " failed.")
 
 	output = [["Snow Depth",["Time",time,"Snow Depth",sd]]]
@@ -112,6 +113,8 @@ def salvatoriSnowMask(imglist,datetimelist,mask,settings,logger,red,green,blue):
 	thb = []
 	for i,img in enumerate(imglist):
 		img = mahotas.imread(img)
+		if mask.shape != img.shape:
+			mask = maskers.polymask(img,pgs,logger)
 		sc_img,thv = salvatoriSnowDetect(img,mask*maskers.thmask(img,th),settings,logger,red,green,blue)
 		sc_img = np.dstack(((sc_img==0)*255,(sc_img==1)*255,(sc_img==2)*255))
 		sc_img = sc_img.astype('uint8')
@@ -226,13 +229,17 @@ def salvatoriSnowCover(img_imglist,datetimelist,mask,settings,logger,red,green,b
 	thg = []
 	thb = []
 
+	Wp_full = deepcopy(Wp)
 	for i_img,imgf in enumerate(img_imglist):
 		try:
 			snow = 0
 			nosnow = 0
 			img = mahotas.imread(imgf)
+			if mask.shape != img.shape:
+				mask = maskers.polymask(img,pgs,logger)
+				Wp = mahotas.imresize(Wp_full, img.shape[:2])
 			(img,thv) = salvatoriSnowDetect(img,mask*maskers.thmask(img,th),settings,logger,red,green,blue)
-			mimg = np.dstack((img==1,img==0,img==2)).astype(np.uint8)*255
+			# mimg = np.dstack((img==1,img==0,img==2)).astype(np.uint8)*255
 			if -1 in thv:
 				continue
 			time = np.append(time,(str(datetimelist[i_img])))
@@ -255,7 +262,8 @@ def salvatoriSnowCover(img_imglist,datetimelist,mask,settings,logger,red,green,b
 				thr = np.append(thr,thv[0])
 				thg = np.append(thg,thv[1])
 				thb = np.append(thb,thv[2])
-		except:
+		except Exception as e:
+			print(e)
 			logger.set("Processing " + imgf + " failed.")
 		logger.set('Image: |progress:4|queue:'+str(i_img+1)+'|total:'+str(len(img_imglist)))
 	scr = np.round(scr*100).astype(np.int32)
@@ -283,6 +291,8 @@ def salvatoriSnowOnCanopy(img_imglist,datetimelist,mask,settings,logger,threshol
 			snow = 0
 			nosnow = 0
 			img = mahotas.imread(imgf)
+			if mask.shape != img.shape:
+				mask = maskers.polymask(img,pgs,logger)
 			(img,thv) = salvatoriSnowDetect2(img,mask*maskers.thmask(img,th),settings,logger)
 			mimg = np.dstack((img==1,img==0,img==2)).astype(np.uint8)*255
 			if thv is -1:
@@ -297,7 +307,8 @@ def salvatoriSnowOnCanopy(img_imglist,datetimelist,mask,settings,logger,threshol
 				snr = np.append(snr,nosnow)
 				mar = np.append(mar,masked)
 				thb = np.append(thb,thv)
-		except:
+		except Exception as e:
+			print(e)
 			logger.set("Processing " + imgf + " failed.")
 		logger.set('Image: |progress:4|queue:'+str(i_img+1)+'|total:'+str(len(img_imglist)))
 	scr = np.round(scr*100).astype(np.int32)
@@ -314,6 +325,8 @@ def salvatoriSnowMap(img_imglist,datetimelist,mask,settings,logger,red,green,blu
 	sc = []
 	for i,img in enumerate(imglist):
 		img = mahotas.imread(img)
+		if mask.shape != img.shape:
+			mask = maskers.polymask(img,pgs,logger)
 		sc_img = salvatoriSnowDetect(img,mask*maskers.thmask(img,th),settings,logger,red,green,blue)[0]
 		sc.append(str(datetimelist[i])+' Snow Map')
 		sc_img = Georectify1(sc_img,None,mask,settings,logger,extent,extent_proj,res,dem,C,C_proj,Cz,hd,td,vd,f,w,interpolate,flat,origin,ax,ay)[0][1][1]
