@@ -225,6 +225,8 @@ def filterThresholds(imglist, datetimelist, mask, logger):
 		for i,fname in enumerate(imglist):
 			try:
 				img = mahotas.imread(fname)
+				if mask.shape != img.shape:
+					mask = maskers.polymask(img,pgs,logger)
 				rfrac, gfrac, bfrac = getFracs(img,mask)[:3]
 				rfraci,gfraci,bfraci, wfrac,lfrac = getFracs(img,mask,True)
 				if ((rfrac >= th[0] and rfrac <= th[1]) if th[1] >= th[0] else (rfrac >= th[0] or rfrac <= th[1])) and ((gfrac >= th[2] and gfrac <= th[3]) if th[3] >= th[2] else (gfrac >= th[2] or gfrac <= th[3])) and ((bfrac >= th[4] and bfrac <= th[5]) if th[5] >= th[4] else (bfrac >= th[4] or bfrac <= th[5])) and ((wfrac >= th[6] and wfrac <= th[7]) if th[7] >= th[6] else (wfrac >= th[6] or wfrac <= th[7])) and ((lfrac >= th[14] and lfrac <= th[15]) if th[15] >= th[14] else (lfrac >= th[14] or lfrac <= th[15])) and ((rfraci >= th[18] and rfraci <= th[19]) if th[19] >= th[18] else (rfraci >= th[18] or rfraci <= th[19])) and ((gfraci >= th[20] and gfraci <= th[21]) if th[21] >= th[20] else (gfraci >= th[20] or gfraci <= th[21])) and ((bfraci >= th[22] and bfraci <= th[23]) if th[23] >= th[22] else (bfraci >= th[22] or bfraci <= th[23])):
@@ -233,8 +235,9 @@ def filterThresholds(imglist, datetimelist, mask, logger):
 				else:
 					imglisto.append(fname)
 					datetimelisto.append(datetimelist[i])
-			except:
-				pass
+			except Exception as e:
+				print(e)
+				logger.set("Processing " + fname + " failed.")
 			logger.set('Image: |progress:4|queue:'+str(i+1)+'|total:'+str(len(imglist)))
 		logger.set('Number of images:'+str(len(imglistv)))
 		return (imglistv,datetimelistv,imglisto,datetimelisto)
