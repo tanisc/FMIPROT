@@ -1,4 +1,4 @@
-from pyresample import image, geometry, kd_tree, utils
+# from pyresample import image, geometry, kd_tree, utils     #temporarily disable for current operations (library conflict)
 import numpy as np
 import auxdata
 from auxdata import auxlist

@@ -17,11 +17,11 @@ for source in auxlist:
 import os
 import h5py
 import gzip
-from netCDF4 import Dataset
+# from netCDF4 import Dataset       #temporarily disable for current operations (library conflict)
 import subprocess
 import numpy as np
-#from osgeo import gdal, ogr, osr    #temporarily disable for current server operations (gdal not installed)
-import pyproj
+# from osgeo import gdal, ogr, osr  #temporarily disable for current operations (library conflict)
+# import pyproj                     #temporarily disable for current operations (library conflict)
 import datetime
 from definitions import TmpDir
 import data
