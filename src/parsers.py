@@ -30,7 +30,7 @@ def strptime2(text,conv="%Y-%m-%dT%H:%M:%S"):
 	try:
 		d = datetime.date(year=dt.year,month=dt.month,day=dt.day)
 	except:
-		d = datetime.date(year=1970)
+		d = datetime.date(year=1970,month=1,day=1)
 	dt = datetime.datetime(year=d.year,month=d.month,day=d.day,hour=t.hour,minute=t.minute,second=t.second,microsecond=t.microsecond)
 	return [dt,d,t]
 
