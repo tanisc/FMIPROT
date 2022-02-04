@@ -57,16 +57,7 @@ BinDir = os.path.split(os.path.realpath(os.sys.argv[0]))[0]
 #developing mode for directories and settings
 #dirs that requires hdd space
 if sysargv['dev']:
-    if os.path.sep == '/':
-        if os.path.exists('/home/tanisc/FMIPROT/dev_ext'):
-            BinDir = '/home/tanisc/FMIPROT/dev_ext'
-        elif os.path.exists('/home/tanisc/FMIPROT/dev'):
-            BinDir = '/home/tanisc/FMIPROT/dev'
-    else:    #Windows developers set that up for yourself, or use a common one.
-        if os.path.exists('D:\\FMIPROT_dev'):
-            BinDir = 'D:\\FMIPROT_dev'
-        elif os.path.exists('C:\\FMIPROT_dev'):
-            BinDir = 'C:\\FMIPROT_dev'
+    BinDir = os.path.join(BinDir,'..','dev')
     ImagesDownload = False
     FTPNumCon = 10
 else:
@@ -80,12 +71,7 @@ ImagesDir = os.path.join(BinDir,'images')
 
 #dirs that does not require hdd space
 if sysargv['dev']:
-    if os.path.sep == '/':
-        if os.path.exists('/home/tanisc/FMIPROT/dev'):
-            BinDir = '/home/tanisc/FMIPROT/dev'
-    else:
-        if os.path.exists('C:\\FMIPROT_dev'):  #Windows developers set that up for yourself, or use a common one.
-            BinDir = 'C:\\FMIPROT_dev'
+    BinDir = os.path.join(BinDir,'..','dev')
 
 DEMDir = os.path.join(BinDir,'DEMData')
 LogDir = os.path.join(BinDir,'log')
