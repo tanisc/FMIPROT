@@ -126,6 +126,7 @@ class monimet_gui(Tkinter.Tk):
 		self.Message.set("Initializing GUI...")
 		self.ActiveMenu = Tkinter.StringVar()
 		self.MenuEnablerFunc = Tkinter.StringVar()
+		self.MenuEnablerFunc2 = Tkinter.StringVar()
 		self.ActiveMenu.set("Main Menu")
 		self.AnalysisNoVariable = Tkinter.IntVar()
 		self.AnalysisNoVariable.trace_variable('w',self.callbackAnalysisNo)
@@ -181,6 +182,11 @@ class monimet_gui(Tkinter.Tk):
 		self.PolygonMultiRoiVariable.set(True)
 		self.MaskingPolygonPen = Tkinter.IntVar()
 		self.MaskingPolygonPen.set(0)
+		self.GeomaskModeVariable = Tkinter.BooleanVar()
+		self.GeomaskModeVariable.set(False)
+		self.GeomaskCoordinatesVariable = Tkinter.StringVar()
+		self.GeomaskCoordinatesVariable.set('')
+		self.GeomaskProjVariable = Tkinter.StringVar()
 		self.PictureID = Tkinter.IntVar()
 		self.PictureID.set(99)
 		self.NumResultsVariable = Tkinter.IntVar()
@@ -243,14 +249,17 @@ class monimet_gui(Tkinter.Tk):
 		self.initSettings()
 		self.ActiveMenu.trace('w',self.callbackActiveMenu)
 
-		global  scenario_def, setup_def ,temporal_modes, output_modes
+		global  scenario_def, setup_def ,temporal_modes, output_modes, proj_list
 		(self.networklist,self.sourcelist,self.proxylist) = sources.readSources(self, self.proxy, self.connection, self.Message)
 		self.makeDirStorage()
 
-		scenario_def = {'source':self.sourcelist[0],'name':'Scenario-1','previewimagetime':'','temporal':['01.01.1970','31.12.2026','00:00','23:59','All'],'polygonicmask':[0,0,0,0,0,0,0,0],'multiplerois':1,'thresholds':[0.0,1.0,0.0,1.0,0.0,1.0,0.0,1.0,0.0,255.0,0.0,255.0,0.0,255.0,0.0,1.0,0.0,255.0,0.0,1.0,0.0,1.0,0.0,1.0,0.0,1.0],'analyses':['analysis-1'],'analysis-1':{'id':calcids[calcids.index("0")],'name':calcnames[calcids.index("0")]}}
+		scenario_def = {'source':self.sourcelist[0],'name':'Scenario-1','previewimagetime':'','temporal':['01.01.1970','31.12.2026','00:00','23:59','All'],'polygonicmask':[0,0,0,0,0,0,0,0],'geomaskmode':0,'geomaskproj':'WGS84(EPSG:4326)','geomask':'','multiplerois':1,'thresholds':[0.0,1.0,0.0,1.0,0.0,1.0,0.0,1.0,0.0,255.0,0.0,255.0,0.0,255.0,0.0,1.0,0.0,255.0,0.0,1.0,0.0,1.0,0.0,1.0,0.0,1.0],'analyses':['analysis-1'],'analysis-1':{'id':calcids[calcids.index("0")],'name':calcnames[calcids.index("0")]}}
 		for i,v in enumerate(paramnames[calcids.index("0")]):
 			scenario_def['analysis-1'].update({paramnames[calcids.index("0")][i]:paramdefs[calcids.index("0")][i]})
 		setup_def = [scenario_def]
+
+		proj_list = ["WGS84(EPSG:4326)","ETRS-TM35FIN(EPSG:3067)","KKJ / Finland Uniform Coordinate System(EPSG:2393)"]
+		self.GeomaskProjVariable.set(proj_list[0])
 
 		temporal_modes = ['All','Date and time intervals','Time of day','Earliest date and time intervals','Latest date and time intervals','Yesterday only','Today only','Latest 1 hour','Latest image only','Latest one year','Latest one month','Latest one week','Latest 48 hours','Latest 24 hours','Last one year','Last one month','Last one week','Last 48 hours','Last 24 hours']
 		output_modes = ['New directory in results directory','Existing empty directory','Merge with existing results']
@@ -494,6 +503,7 @@ class monimet_gui(Tkinter.Tk):
 
 	def ClearMenu(self):
 		self.MenuEnablerFunc.set('')
+		self.MenuEnablerFunc2.set('')
 		for i in range(self.MenuItemMax*100):
 			try:
 				exec("self.MenuItem"+str(i)+".destroy()")
@@ -506,7 +516,7 @@ class monimet_gui(Tkinter.Tk):
 		except:
 			pass
 		#enablervars
-		for i in range(self.MenuItemMax):
+		for i in range(self.MenuItemMax*100):
 			exec("self.MenuItem"+str(i)+"Switch = Tkinter.IntVar()")
 			exec("self.MenuItem"+str(i)+"Switch.set(2)")
 			exec("self.MenuItem"+str(i)+"Switch.trace_variable('w',self.callbackMenuItemSwitch)")
@@ -3345,8 +3355,8 @@ class monimet_gui(Tkinter.Tk):
 		self.ClearMenu()
 		self.ActiveMenu.set("Polygonic Masking")
 		self.Menu_Prev("Main Menu","self.Menu_Main")
-		NItems = 15
-		space = 0.02
+		NItems = 19
+		space = 0.01
 		Item = 1
 		self.PreviewCanvasSwitch.set(self.PreviewCanvasSwitch.get())
 		self.MenuItem1 = Tkinter.Checkbutton(self,variable=self.MenuItem1Switch,wraplength=self.MenuX*0.7,height=self.CheckButtonY,width=self.CheckButtonX,text="Display preview with polygons")
@@ -3354,7 +3364,6 @@ class monimet_gui(Tkinter.Tk):
 		Item = 7
 		self.MenuItem2 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="Pick Points",command=self.PolygonPick,activebackground='green4',activeforeground='white')
 		self.MenuItem2.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.4,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
-		#Item = 6
 		self.MenuItem17 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="Remove Points",command=self.PolygonRemove,activebackground='red3',activeforeground='white')
 		self.MenuItem17.place(x=self.MenuOSX+self.MenuX*0.5,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.4,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 8
@@ -3370,7 +3379,7 @@ class monimet_gui(Tkinter.Tk):
 		self.MenuItem7 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text=" + ",command=self.SensPlus)
 		self.MenuItem7.place(x=self.MenuOSX+self.MenuX*0.7,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.2,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 10
-		self.MenuItem9 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Coordinates:",anchor='c')
+		self.MenuItem9 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Image Coordinates:",anchor='c')
 		self.MenuItem9.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 11
 		self.MenuItem10 = Tkinter.Entry(self,justify="center",width=10,textvariable=self.PolygonCoordinatesVariable,state="readonly")
@@ -3423,8 +3432,25 @@ class monimet_gui(Tkinter.Tk):
 		self.MenuItem22.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.6,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		self.MenuItem23 = Tkinter.OptionMenu(self,self.PolygonWidth,*[1,2,3,4,5,6,7,8,9])
 		self.MenuItem23.place(x=self.MenuOSX+self.MenuX*0.7,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.2,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
-		self.MenuEnablerFunc.set("self.MenuEnabler([1,[3,18,19,20,21,22,23],['self.PreviewCanvasSwitch'],['0'],['self.PreviewCanvasSwitch.set(self.MenuItem1Switch.get())']])")
+		self.MenuEnablerFunc.set("self.MenuEnabler([1,[3,18,19,20,21,22,23],['self.PreviewCanvasSwitch'],['False'],['self.PreviewCanvasSwitch.set(self.MenuItem1Switch.get())']])")
 		exec(self.MenuEnablerFunc.get())
+		Item = 16
+		self.MenuItem27 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Geographical Coordinates:",anchor='c')
+		self.MenuItem27.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+		Item = 17
+		self.MenuItem26Switch.set(self.GeomaskModeVariable.get())
+		self.MenuItem26 = Tkinter.Checkbutton(self,variable=self.MenuItem26Switch,wraplength=self.MenuX*0.9,height=self.CheckButtonY,width=self.CheckButtonX,text="Enter coordinates manually")
+		self.MenuItem26.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+		Item = 18
+		self.MenuItem28 = Tkinter.Entry(self,justify="center",width=10,textvariable=self.GeomaskCoordinatesVariable,state="readonly")
+		self.MenuItem28.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+		self.MenuEnablerFunc2.set("self.MenuEnabler2([26,[28],['self.GeomaskModeVariable.set(self.MenuItem26Switch.get())','self.GeomaskCoordinatesVariable.set((self.GeomaskCoordinatesVariable.get() if self.GeomaskCoordinatesVariable.get() != \"Use analysis parameters or metadata\" else \"\") if self.GeomaskModeVariable.get() else \"Use analysis parameters or metadata\")']])")
+		exec(self.MenuEnablerFunc2.get())
+		Item = 19
+		self.MenuItem29 = Tkinter.Label(self,wraplength=self.MenuX*0.4,text="Geolocation projection: ",anchor='c')
+		self.MenuItem29.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.4,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+		self.MenuItem30 = Tkinter.OptionMenu(self,self.GeomaskProjVariable,*proj_list)
+		self.MenuItem30.place(x=self.MenuOSX+self.MenuX*0.5,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.4,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 
 	def Menu_Main_Masking_Polygonic_Copy(self):
 		self.copypolygonfiledialog = Tkinter.Toplevel(self,padx=10,pady=10)
@@ -4381,6 +4407,20 @@ class monimet_gui(Tkinter.Tk):
 				for com in arg[4]:
 					exec(com)
 
+	def MenuEnabler2(self,*args):	#[sw,[menuitems],func]
+		if self.MenuEnablerFunc2.get() != '':
+			for arg in args:
+				swi = arg[0]
+				list = arg[1]
+				exec("sw = self.MenuItem"+str(swi)+"Switch.get()")
+				for item in list:
+					if sw:
+						exec("self.MenuItem"+str(item)+".config(state='normal')")
+					else:
+						exec("self.MenuItem"+str(item)+".config(state='disabled')")
+				for com in arg[2]:
+					exec(com)
+
 	def callbackActiveMenu(self,*args):
 		if self.ActiveMenu.get() not in self.prevonlist:
 			self.PreviewCanvasSwitch.set(False)
@@ -4390,6 +4430,7 @@ class monimet_gui(Tkinter.Tk):
 
 	def callbackMenuItemSwitch(self,*args):
 		exec(self.MenuEnablerFunc.get())
+		exec(self.MenuEnablerFunc2.get())
 
 	def callbackPreviewCanvasSwitch(self,event,*args):
 		self.UpdatePictureFileName()
@@ -5017,6 +5058,20 @@ class monimet_gui(Tkinter.Tk):
 			self.PolygonNoVariable.set(1)
 		self.PolygonCoordinatesVariable.set(self.polygonicmask2PolygonCoordinatesVariable(self.setup[self.AnalysisNoVariable.get()-1]['polygonicmask']))
 
+		if bool(int(self.setup[self.AnalysisNoVariable.get()-1]['geomaskmode'])):
+			try:
+				self.GeomaskCoordinatesVariable.set(self.polygonicmask2PolygonCoordinatesVariable(self.setup[self.AnalysisNoVariable.get()-1]['geomask']))
+			except:
+				self.Message.set('Incorrect format in ROI geolocation coordinates. Returned to default.')
+				self.setup[self.AnalysisNoVariable.get()-1]['geomask'] = scenario_def['geomask']
+				self.setup[self.AnalysisNoVariable.get()-1]['geomaskmode'] = scenario_def['geomaskmode']
+				self.setup[self.AnalysisNoVariable.get()-1]['geomaskproj'] = scenario_def['geomaskproj']
+				self.GeomaskCoordinatesVariable.set(scenario_def['geomask'])
+		else:
+			self.GeomaskCoordinatesVariable.set(scenario_def['geomask'])
+		self.GeomaskModeVariable.set(bool(int(self.setup[self.AnalysisNoVariable.get()-1]['geomaskmode'])))
+		self.GeomaskProjVariable.set(self.setup[self.AnalysisNoVariable.get()-1]['geomaskproj'])
+
 		if self.ActiveMenu.get() == "Set parameters":
 			calcindex = calcnames.index(self.CalculationNameVariable.get())
 			for i in range(len(paramnames[calcindex])):
@@ -5034,6 +5089,8 @@ class monimet_gui(Tkinter.Tk):
 		self.Message.set("Switched to scenario " + str(self.AnalysisNoVariable.get()))
 
 	def PolygonCoordinatesVariable2polygonicmask(self,var):
+		if var == '':
+			raise ValueError
 		line = var
 		jlist = []
 		for j in line.split():
@@ -5125,6 +5182,26 @@ class monimet_gui(Tkinter.Tk):
 		self.setup[self.AnalysisNoVariable.get()-1]['temporal'][4] = self.TemporalModeVariable.get()
 		self.setup[self.AnalysisNoVariable.get()-1]['multiplerois'] = self.PolygonMultiRoiVariable.get()
 		self.setup[self.AnalysisNoVariable.get()-1]['polygonicmask'] = self.PolygonCoordinatesVariable2polygonicmask(self.PolygonCoordinatesVariable.get())
+
+		if self.GeomaskModeVariable.get():
+			try:
+				self.setup[self.AnalysisNoVariable.get()-1]['geomask'] = self.PolygonCoordinatesVariable2polygonicmask(self.GeomaskCoordinatesVariable.get())
+			except:
+				self.Message.set('Incorrect format in ROI geolocation coordinates. Trying to restore previous value.')
+				try:
+					self.GeomaskCoordinatesVariable.set(self.polygonicmask2PolygonCoordinatesVariable(self.setup[self.AnalysisNoVariable.get()-1]['geomask']))
+					self.Message.set('Previous value restored.')
+				except:
+					self.Message.set('Incorrect previous value. Returned to default.')
+					self.GeomaskCoordinatesVariable.set(scenario_def['geomask'])
+					self.GeomaskModeVariable.set(bool(int(scenario_def['geomaskmode'])))
+					self.GeomaskProjVariable.set(scenario_def['geomaskproj'])
+					self.setup[self.AnalysisNoVariable.get()-1]['geomask'] = scenario_def['geomask']
+		else:
+			self.setup[self.AnalysisNoVariable.get()-1]['geomask'] = scenario_def['geomask']
+		self.setup[self.AnalysisNoVariable.get()-1]['geomaskmode'] = str(int(self.GeomaskModeVariable.get()))
+		self.setup[self.AnalysisNoVariable.get()-1]['geomaskproj'] = self.GeomaskProjVariable.get()
+
 		self.setup[self.AnalysisNoVariable.get()-1]['analysis-'+str(self.CalculationNoVariable.get())]['id'] = calcids[calcnames.index(self.CalculationNameVariable.get())]
 		if self.ActiveMenu.get() == "Set parameters":
 			params = {}
@@ -5393,6 +5470,12 @@ class monimet_gui(Tkinter.Tk):
 					scenario.update({'analyses':['analysis-1']})
 					warning += 'It was the only analysis in the scenario, thus the default analysis is added to the scenario.'
 				warning += '\n'
+
+			#add params added later (e.g. geomask)
+			for param in scenario_def:
+				if param not in scenario:
+					scenario.update({param:scenario_def[param]})
+
 			setup[s] = scenario
 		if showwarning:
 			tkMessageBox.showwarning('Setup problem',warning)
