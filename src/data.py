@@ -101,6 +101,17 @@ def readResultsData(fname,logger):
 							data_captions[r][1][i*2+1] = np.array(data_captions[r][1][i*2+1],dtype='float64')
 					except:
 							data_captions[r][1][i*2+1] = np.array(data_captions[r][1][i*2+1])
+
+	# convert lists - dicts
+	for i,analysis_caption in enumerate(analysis_captions):
+		for param in ['image_roi_coordinates','geo_roi_coordinates']:
+			if isinstance(analysis_caption[param],dict):
+				coordict = analysis_caption[param]
+				coordlist = []
+				for j in range(len(coordict)):
+					coordlist.append(coordict[str(j)])
+				analysis_captions[i][param] = coordlist
+
 	return (analysis_captions, data_captions)
 
 
@@ -135,6 +146,15 @@ def storeData(fname, analysis_captions, data_captions,logger,visout=False):
 				datatype = 3
 			if len(d) == 2 and captions[0] == "R-Channel" and len(captions) == 3:
 				datatype = 2
+
+		# convert lists - dicts
+		for param in ['image_roi_coordinates','geo_roi_coordinates']:
+			if isinstance(analysis_captions[param][0],list):
+				coordlist = analysis_captions[param]
+				coordict = {}
+				for j, coord in enumerate(coordlist):
+					coordict.update({str(j):coord})
+				analysis_captions[param] = coordict
 
 		#File results (e.g. animations)
  		if datatype == 0:

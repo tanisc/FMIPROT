@@ -3444,13 +3444,13 @@ class monimet_gui(Tkinter.Tk):
 		Item = 18
 		self.MenuItem28 = Tkinter.Entry(self,justify="center",width=10,textvariable=self.GeomaskCoordinatesVariable,state="readonly")
 		self.MenuItem28.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
-		self.MenuEnablerFunc2.set("self.MenuEnabler2([26,[28],['self.GeomaskModeVariable.set(self.MenuItem26Switch.get())','self.GeomaskCoordinatesVariable.set((self.GeomaskCoordinatesVariable.get() if self.GeomaskCoordinatesVariable.get() != \"Use analysis parameters or metadata\" else \"\") if self.GeomaskModeVariable.get() else \"Use analysis parameters or metadata\")']])")
-		exec(self.MenuEnablerFunc2.get())
 		Item = 19
 		self.MenuItem29 = Tkinter.Label(self,wraplength=self.MenuX*0.4,text="Geolocation projection: ",anchor='c')
 		self.MenuItem29.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.4,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		self.MenuItem30 = Tkinter.OptionMenu(self,self.GeomaskProjVariable,*proj_list)
 		self.MenuItem30.place(x=self.MenuOSX+self.MenuX*0.5,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.4,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+		self.MenuEnablerFunc2.set("self.MenuEnabler2([26,[28,29,30],['self.GeomaskModeVariable.set(self.MenuItem26Switch.get())','self.GeomaskProjVariable.set(scenario_def[\"geomaskproj\"])','self.GeomaskCoordinatesVariable.set((self.GeomaskCoordinatesVariable.get() if self.GeomaskCoordinatesVariable.get() != \"Use analysis parameters or metadata\" else \"\") if self.GeomaskModeVariable.get() else \"Use analysis parameters or metadata\")']])")
+		exec(self.MenuEnablerFunc2.get())
 
 	def Menu_Main_Masking_Polygonic_Copy(self):
 		self.copypolygonfiledialog = Tkinter.Toplevel(self,padx=10,pady=10)
@@ -5482,12 +5482,13 @@ class monimet_gui(Tkinter.Tk):
 
 		#fix polygons
 		for i,scenario in enumerate(setup):
-			if isinstance(scenario['polygonicmask'],dict):
-				coordict = scenario['polygonicmask']
-				coordlist = []
-				for j in range(len(coordict)):
-					coordlist.append(coordict[str(j)])
-				setup[i].update({'polygonicmask':coordlist})
+			for param in ['polygonicmask','geomask']:
+				if isinstance(scenario[param],dict):
+					coordict = scenario[param]
+					coordlist = []
+					for j in range(len(coordict)):
+						coordlist.append(coordict[str(j)])
+					setup[i].update({param:coordlist})
 		#fix missing  multiplerois
 		for i,scenario in enumerate(setup):
 			if 'multiplerois' not in scenario:
@@ -5573,13 +5574,14 @@ class monimet_gui(Tkinter.Tk):
 					del scenario['temporary']
 					setuptowrite.append(scenario)
 
-		for i,scenario in enumerate(setuptowrite):
-			if isinstance(scenario['polygonicmask'][0],list):
-				coordlist = scenario['polygonicmask']
-				coordict = {}
-				for j, coord in enumerate(coordlist):
-					coordict.update({str(j):coord})
-				setuptowrite[i].update({'polygonicmask':coordict})
+		for param in ['polygonicmask','geomask']:
+			for i,scenario in enumerate(setuptowrite):
+				if isinstance(scenario[param][0],list):
+					coordlist = scenario[param]
+					coordict = {}
+					for j, coord in enumerate(coordlist):
+						coordict.update({str(j):coord})
+					setuptowrite[i].update({param:coordict})
 
 		return setuptowrite
 
@@ -5818,7 +5820,23 @@ class monimet_gui(Tkinter.Tk):
 					analysis = scenario[analysis]
 					filelabel = os.path.join(resultspath, 'S' + str(s+1).zfill(3) + 'A' + str(a+1).zfill(3))
 					if scn == None or scn == s:
+						# Get general analysis captions to store in results metadata
 						analysis_captions = {'scenario':scenario['name'],'analysis':str(a)+'-'+calcnames[calcids.index(analysis['id'])],'network':source['network'],'source':source['name']}
+						# Get ROI coordinates applicable to analysis to store in results metadata
+						analysis_captions.update({'image_roi_coordinates':'' if scenario['polygonicmask'] == scenario_def['polygonicmask'] else scenario['polygonicmask']})
+						if not bool(int(scenario['geomaskmode'])):
+							# auto mode : use metadata and/or calculate: 1) no data 2) lat lon point LATER -> 3) lat lon area 4) calculated polygon (use id in dif.roi mode)
+							if 'lat' in source and 'lon' in source:
+								analysis_captions.update({'geo_roi_coordinates':map(float,[source['lat'],source['lon']])})
+								analysis_captions.update({'geo_roi_projection':scenario['geomaskproj']})
+							else:
+								analysis_captions.update({'geo_roi_coordinates':''})
+								analysis_captions.update({'geo_roi_projection':''})
+						else:
+							# manual mode: 2) lat,lon point == 4) polygon (do not use id in dif.roi mode) LATER -> 3) lat,lon area
+							analysis_captions.update({'geo_roi_coordinates':scenario['geomask']})
+							analysis_captions.update({'geo_roi_projection':scenario['geomaskproj']})
+
 						self.Message.set('Running analysis ' + str(a+1) + ': ' + analysis['name'] + '...')
 						commandstring = "output = calcfuncs." + calccommands[calcids.index(analysis['id'])]
 						if "params" in commandstring:
@@ -5836,7 +5854,7 @@ class monimet_gui(Tkinter.Tk):
 							for i,param in enumerate(paramnames[calcids.index(analysis['id'])]):
 								exec("commandstring = commandstring.replace('p"+str(i)+"','"+str(analysis[param])+"')")
 						if scenario['multiplerois'] and isinstance(scenario['polygonicmask'][0],list):
-								self.Message.set('ROI: |progress:6|queue:'+str(0)+'|total:'+str(len(scenario['polygonicmask'])+1))
+							self.Message.set('ROI: |progress:6|queue:'+str(0)+'|total:'+str(len(scenario['polygonicmask'])+1))
 						(imglist,datetimelist,pathlist) = (deepcopy(imglist_uf),deepcopy(datetimelist_uf),deepcopy(pathlist_uf))
 						if self.outputmodevariable.get() == output_modes[2]:
 							self.Message.set('Reading results of image that are already processed...')
@@ -5999,8 +6017,8 @@ class monimet_gui(Tkinter.Tk):
 										self.Message.set('ROI: |progress:6|queue:'+str(r+2)+'|total:'+str(len(scenario['polygonicmask'])+1))
 									mask = (mask,[roi],scenario['thresholds'])
 									if mask[0] is False:
-        	                                                                outputValid = False
-	                                                                else:
+										outputValid = False
+									else:
 										(imglist,datetimelist,imglisto,datetimelisto) = calculations.filterThresholds(imglist,datetimelist, mask,logger)
 								if imglist == []:
 									outputValid = False
