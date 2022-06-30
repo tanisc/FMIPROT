@@ -149,7 +149,7 @@ def storeData(fname, analysis_captions, data_captions,logger,visout=False):
 
 		# convert lists - dicts
 		for param in ['image_roi_coordinates','geo_roi_coordinates']:
-			if isinstance(analysis_captions[param][0],list):
+			if analysis_captions[param] is not None and isinstance(analysis_captions[param][0],list):
 				coordlist = analysis_captions[param]
 				coordict = {}
 				for j, coord in enumerate(coordlist):

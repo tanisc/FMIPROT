@@ -185,7 +185,7 @@ class monimet_gui(Tkinter.Tk):
 		self.GeomaskModeVariable = Tkinter.BooleanVar()
 		self.GeomaskModeVariable.set(False)
 		self.GeomaskCoordinatesVariable = Tkinter.StringVar()
-		self.GeomaskCoordinatesVariable.set('')
+		# self.GeomaskCoordinatesVariable.set('')
 		self.GeomaskProjVariable = Tkinter.StringVar()
 		self.PictureID = Tkinter.IntVar()
 		self.PictureID.set(99)
@@ -253,7 +253,7 @@ class monimet_gui(Tkinter.Tk):
 		(self.networklist,self.sourcelist,self.proxylist) = sources.readSources(self, self.proxy, self.connection, self.Message)
 		self.makeDirStorage()
 
-		scenario_def = {'source':self.sourcelist[0],'name':'Scenario-1','previewimagetime':'','temporal':['01.01.1970','31.12.2026','00:00','23:59','All'],'polygonicmask':[0,0,0,0,0,0,0,0],'geomaskmode':0,'geomaskproj':'WGS84(EPSG:4326)','geomask':'','multiplerois':1,'thresholds':[0.0,1.0,0.0,1.0,0.0,1.0,0.0,1.0,0.0,255.0,0.0,255.0,0.0,255.0,0.0,1.0,0.0,255.0,0.0,1.0,0.0,1.0,0.0,1.0,0.0,1.0],'analyses':['analysis-1'],'analysis-1':{'id':calcids[calcids.index("0")],'name':calcnames[calcids.index("0")]}}
+		scenario_def = {'source':self.sourcelist[0],'name':'Scenario-1','previewimagetime':'','temporal':['01.01.1970','31.12.2026','00:00','23:59','All'],'polygonicmask':[0,0,0,0,0,0,0,0],'geomaskmode':0,'geomaskproj':'WGS84(EPSG:4326)','geomask':[0,0,0,0,0,0,0,0],'multiplerois':1,'thresholds':[0.0,1.0,0.0,1.0,0.0,1.0,0.0,1.0,0.0,255.0,0.0,255.0,0.0,255.0,0.0,1.0,0.0,255.0,0.0,1.0,0.0,1.0,0.0,1.0,0.0,1.0],'analyses':['analysis-1'],'analysis-1':{'id':calcids[calcids.index("0")],'name':calcnames[calcids.index("0")]}}
 		for i,v in enumerate(paramnames[calcids.index("0")]):
 			scenario_def['analysis-1'].update({paramnames[calcids.index("0")][i]:paramdefs[calcids.index("0")][i]})
 		setup_def = [scenario_def]
@@ -5823,15 +5823,15 @@ class monimet_gui(Tkinter.Tk):
 						# Get general analysis captions to store in results metadata
 						analysis_captions = {'scenario':scenario['name'],'analysis':str(a)+'-'+calcnames[calcids.index(analysis['id'])],'network':source['network'],'source':source['name']}
 						# Get ROI coordinates applicable to analysis to store in results metadata
-						analysis_captions.update({'image_roi_coordinates':'' if scenario['polygonicmask'] == scenario_def['polygonicmask'] else scenario['polygonicmask']})
+						analysis_captions.update({'image_roi_coordinates':None if scenario['polygonicmask'] == scenario_def['polygonicmask'] else scenario['polygonicmask']})
 						if not bool(int(scenario['geomaskmode'])):
 							# auto mode : use metadata and/or calculate: 1) no data 2) lat lon point LATER -> 3) lat lon area 4) calculated polygon (use id in dif.roi mode)
 							if 'lat' in source and 'lon' in source:
 								analysis_captions.update({'geo_roi_coordinates':map(float,[source['lat'],source['lon']])})
 								analysis_captions.update({'geo_roi_projection':scenario['geomaskproj']})
 							else:
-								analysis_captions.update({'geo_roi_coordinates':''})
-								analysis_captions.update({'geo_roi_projection':''})
+								analysis_captions.update({'geo_roi_coordinates':None})
+								analysis_captions.update({'geo_roi_projection':None})
 						else:
 							# manual mode: 2) lat,lon point == 4) polygon (do not use id in dif.roi mode) LATER -> 3) lat,lon area
 							analysis_captions.update({'geo_roi_coordinates':scenario['geomask']})
