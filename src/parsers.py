@@ -392,7 +392,7 @@ def writeSetupReport(filename,setup,logger):
 				aoi.append(scenario['polygonicmask'][j])
 			scenario['polygonicmask'] = aoi
 		if isinstance(scenario['polygonicmask'][0],list):
-			to_write_substr += "<tr class='hdr2'><td>Polygon</td><td>Coordinates</td></tr>"
+			to_write_substr += "<tr class='hdr2'><td>Polygon</td><td>Image Coordinates</td></tr>"
 			for j,polygon in enumerate(scenario['polygonicmask']):
 				to_write_substr += "<tr><td>"
 				to_write_substr += str(j+1)
@@ -405,9 +405,9 @@ def writeSetupReport(filename,setup,logger):
 						to_write_substr += "</td></tr>"
 		else:
 			if scenario['polygonicmask'] == [0,0,0,0,0,0,0,0]:
-				to_write_substr += "<tr><td>No polygons selected.</td></tr>"
+				to_write_substr += "<tr><td>No ROI on image selected.</td></tr>"
 			else:
-				to_write_substr += "<tr class='hdr2'><td>Polygon</td><td>Coordinates</td></tr>"
+				to_write_substr += "<tr class='hdr2'><td>Polygon</td><td>Image Coordinates</td></tr>"
 				polygon = scenario['polygonicmask']
 				to_write_substr += "<tr><td>"
 				to_write_substr += "1"
@@ -419,6 +419,71 @@ def writeSetupReport(filename,setup,logger):
 					else:
 						to_write_substr += "</td></tr>"
 		to_write = to_write.replace('<replace:polygonicmask>',to_write_substr)
+
+		to_write_substr = ''
+		if isinstance(scenario['geomask'], dict):
+			to_write_substr += "<tr><td>Coordinate system: "+scenario["geomaskproj"]+"</td></tr>"
+			to_write_substr += "<tr><td>Polygons do not directly correspond to image ROI polygons.</td></tr>"
+		if isinstance(scenario['geomask'][0],list):
+			to_write_substr += "<tr><td>Coordinate system: "+scenario["geomaskproj"]+"</td></tr>"
+			to_write_substr += "<tr><td>Polygons do not directly correspond to image ROI polygons.</td></tr>"
+		else:
+			if scenario['geomask'] == [0,0,0,0,0,0,0,0]:
+				if 'lat' in scenario['source'] and 'lon' in scenario['source']:
+					to_write_substr += "<tr><td>Coordinate system: "+scenario["geomaskproj"]+"</td></tr>"
+					to_write_substr += "<tr><td>Geometry information is retrieved from camera metadata.</td></tr>"
+				else:
+					to_write_substr += "<tr><td>Geometry information is not available.</td></tr>"
+			else:
+				to_write_substr += "<tr><td>Coordinate system: "+scenario["geomaskproj"]+"</td></tr>"
+				to_write_substr += "<tr><td>Polygons do not directly correspond to image ROI polygons.</td></tr>"
+		to_write = to_write.replace('<replace:geomaskproj>',to_write_substr)
+
+		to_write_substr = ''
+		if isinstance(scenario['geomask'], dict):
+			aoi = []
+			for j in scenario['geomask']:
+				aoi.append(scenario['geomask'][j])
+			scenario['geomask'] = aoi
+		if isinstance(scenario['geomask'][0],list):
+			to_write_substr += "<tr class='hdr2'><td>Polygon</td><td>Geolocation Coordinates</td></tr>"
+			for j,polygon in enumerate(scenario['geomask']):
+				to_write_substr += "<tr><td>"
+				to_write_substr += str(j+1)
+				to_write_substr += "</td><td>"
+				for k in polygon:
+					to_write_substr += str(k)
+					if k != polygon[-1]:
+						to_write_substr += ","
+					else:
+						to_write_substr += "</td></tr>"
+		else:
+			if scenario['geomask'] == [0,0,0,0,0,0,0,0]:
+				if 'lat' in scenario['source'] and 'lon' in scenario['source']:
+					to_write_substr += "<tr class='hdr2'><td>Point</td>"
+					to_write_substr += "<td>Geolocation Coordinates</td></tr>"
+					to_write_substr += "<tr><td>"
+					to_write_substr += "1"
+					to_write_substr += "</td><td>"
+					to_write_substr += str(scenario['source']['lat']) + ',' + str(scenario['source']['lon'])
+					to_write_substr += "</td></tr>"
+			else:
+				if len(scenario['geomask']) == 2:
+					to_write_substr += "<tr class='hdr2'><td>Point</td>"
+				else:
+					to_write_substr += "<tr class='hdr2'><td>Polygon</td>"
+				to_write_substr += "<td>Geolocation Coordinates</td></tr>"
+				polygon = scenario['geomask']
+				to_write_substr += "<tr><td>"
+				to_write_substr += "1"
+				to_write_substr += "</td><td>"
+				for j in polygon:
+					to_write_substr += str(j)
+					if j != polygon[-1]:
+						to_write_substr += ","
+					else:
+						to_write_substr += "</td></tr>"
+		to_write = to_write.replace('<replace:geomask>',to_write_substr)
 
 		for j,threshold in enumerate(scenario['thresholds']):
 			to_write = to_write.replace('<replace:thresholds'+str(j)+'>',str(scenario['thresholds'][j]))
