@@ -105,12 +105,13 @@ def readResultsData(fname,logger):
 	# convert lists - dicts
 	for i,analysis_caption in enumerate(analysis_captions):
 		for param in ['image_roi_coordinates','geo_roi_coordinates']:
-			if isinstance(analysis_caption[param],dict):
-				coordict = analysis_caption[param]
-				coordlist = []
-				for j in range(len(coordict)):
-					coordlist.append(coordict[str(j)])
-				analysis_captions[i][param] = coordlist
+			if param in analysis_caption:
+				if isinstance(analysis_caption[param],dict):
+					coordict = analysis_caption[param]
+					coordlist = []
+					for j in range(len(coordict)):
+						coordlist.append(coordict[str(j)])
+					analysis_captions[i][param] = coordlist
 
 	return (analysis_captions, data_captions)
 
@@ -149,12 +150,13 @@ def storeData(fname, analysis_captions, data_captions,logger,visout=False):
 
 		# convert lists - dicts
 		for param in ['image_roi_coordinates','geo_roi_coordinates']:
-			if analysis_captions[param] is not None and isinstance(analysis_captions[param][0],list):
-				coordlist = analysis_captions[param]
-				coordict = {}
-				for j, coord in enumerate(coordlist):
-					coordict.update({str(j):coord})
-				analysis_captions[param] = coordict
+			if param in analysis_captions:
+				if analysis_captions[param] is not None and isinstance(analysis_captions[param][0],list):
+					coordlist = analysis_captions[param]
+					coordict = {}
+					for j, coord in enumerate(coordlist):
+						coordict.update({str(j):coord})
+					analysis_captions[param] = coordict
 
 		#File results (e.g. animations)
  		if datatype == 0:
