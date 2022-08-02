@@ -794,17 +794,21 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 				if len(paths_to_crawl) > 1:
 					logger.set('Crawling through '+str(len(paths_to_crawl))+ ' paths...')
 				for p in paths_to_crawl:
+					if ' ' in host or host[0] == '/':
+						# command in the local machine
+						import subprocess
+						response = subprocess.Popen((host + ' --path ' + p).split(' '), stdout=subprocess.PIPE).communicate()[0]
+					else:
+						if protocol == 'HTTP':
+							url = 'http://'+host+'/'+p
+						if protocol == 'HTTPS':
+							url = 'https://'+host+'/'+p
 
-					if protocol == 'HTTP':
-						url = 'http://'+host+'/'+p
-					if protocol == 'HTTPS':
-						url = 'https://'+host+'/'+p
-
-					try:
-						response = urllib2.urlopen(url,timeout = 5).read()
-					except:
-						#logger.set('Connection failed.')
-						continue
+						try:
+							response = urllib2.urlopen(url,timeout = 5).read()
+						except:
+							#logger.set('Connection failed.')
+							continue
 
 					try:
 						pflist = pattern.findall(response)
@@ -861,6 +865,15 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 			logger.set(str(len(dllist))+" images to be downloaded.")
 			if not len(dllist) == 0:
 				logger.set('Downloading/updating images...' )
+				if ' ' in host or host[0] == '/':
+					# command in the local machine, fix host
+					for arg in host.split(' '):
+						if 'https://' in arg or 'http://' in arg:
+							host = arg.split('://')[1].split('/')[0]
+							break
+						logger.set('Cannot derive correct host from the command constructed: %s ' % host)
+						logger.set('Downloading images will most likely fail.')
+						
 				for i in dllist:
 					f = imglist[i]
 					r = pathlist[i]
