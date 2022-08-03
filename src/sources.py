@@ -316,6 +316,15 @@ def getProxySource(logger,source,proxylist):
 			proxysource.update({key:proxysource[key].replace(proxy[key].replace('*',''),proxy[key+'_proxy'].replace('*',''))})
 			continue
 
+	if ' ' in proxysource['host'] or proxysource['host'][0] == '/':
+		# command in the local machine
+		proxysource['local_host'] = deepcopy(proxysource['host'])
+		try:
+			proxysource['host'] = proxysource['host'].split(' ')[proxysource['host'].split(' ').index('--url')+1].replace('https://','').replace('http://','')
+		except:
+			logger.set("Cannot derive host address from local host command for the protocol. Using unique host value to create folder for downloading.")
+			proxysource['host'] = uuid4()
+
 	logger.set('Camera network proxy for the camera found. Using proxy.')
 	return proxysource
 

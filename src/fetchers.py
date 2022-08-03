@@ -517,6 +517,11 @@ multiprocessing.freeze_support()
 
 def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=0, online=True, download=True, care_tz = True):
 	(protocol, host, username,password,name, remote_path, filenameformat) = (source['protocol'],source['host'],source['username'],source['password'],source['name'],source['path'],source['filenameformat'])
+	if 'local_host' in source:
+		local_host = source['local_host']
+		import subprocess
+	else:
+		local_host = False
 	if 'temporary' in source and source['temporary']:
 		local_path = os.path.join(os.path.join(TmpDir,'tmp_images'),parsers.validateName(source['network'])+'-'+source['protocol']+'-'+source['host']+'-'+parsers.validateName(source['username'])+'-'+parsers.validateName(source['path']))
 	else:
@@ -794,10 +799,8 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 				if len(paths_to_crawl) > 1:
 					logger.set('Crawling through '+str(len(paths_to_crawl))+ ' paths...')
 				for p in paths_to_crawl:
-					if ' ' in host or host[0] == '/':
-						# command in the local machine
-						import subprocess
-						response = subprocess.Popen((host + ' --path ' + p).split(' '), stdout=subprocess.PIPE).communicate()[0]
+					if local_host:
+						response = subprocess.Popen((local_host + ' --path ' + p).split(' '), stdout=subprocess.PIPE).communicate()[0]
 					else:
 						if protocol == 'HTTP':
 							url = 'http://'+host+'/'+p
@@ -865,33 +868,27 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 			logger.set(str(len(dllist))+" images to be downloaded.")
 			if not len(dllist) == 0:
 				logger.set('Downloading/updating images...' )
-				if ' ' in host or host[0] == '/':
-					# command in the local machine, fix host
-					for arg in host.split(' '):
-						if 'https://' in arg or 'http://' in arg:
-							host = arg.split('://')[1].split('/')[0]
-							break
-						logger.set('Cannot derive correct host from the command constructed.')
-						logger.set('Downloading images will most likely fail.')
-						
 				for i in dllist:
 					f = imglist[i]
 					r = pathlist[i]
 
 					if r[0][0] == '/':
-						if protocol == 'HTTP':
-							p = 'http://'+host+r[0]
-						if protocol == 'HTTPS':
-							p = 'https://'+host+r[0]
+						p = r[0]
 					else:
-						if protocol == 'HTTP':
-							p = 'http://'+host+'/'*(r[1][0]!='/')+r[1]+'/'*(r[1][-1]!='/')+r[0]
-						if protocol == 'HTTPS':
-							p = 'https://'+host+'/'*(r[1][0]!='/')+r[1]+'/'*(r[1][-1]!='/')+r[0]
-
+						p = '/'*(r[1][0]!='/')+r[1]+'/'*(r[1][-1]!='/')+r[0]
+						
 					try:
+						if local_host:
+							response = subprocess.Popen((local_host + ' --path ' + p).split(' '), stdout=subprocess.PIPE).communicate()[0]
+						else:
+							if protocol == 'HTTP':
+								p = 'http://'+host+p
+							if protocol == 'HTTPS':
+								p = 'https://'+host+p
+							print(p)
+							response = urllib2.urlopen(p).read()
 						imgfile = open(os.path.join(local_path, f),'wb')
-						imgfile.write(urllib2.urlopen(p).read())
+						imgfile.write(response)
 						success += 1
 						imgfile.close()
 					except:
