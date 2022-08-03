@@ -871,7 +871,7 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 						if 'https://' in arg or 'http://' in arg:
 							host = arg.split('://')[1].split('/')[0]
 							break
-						logger.set('Cannot derive correct host from the command constructed.)
+						logger.set('Cannot derive correct host from the command constructed.')
 						logger.set('Downloading images will most likely fail.')
 						
 				for i in dllist:
