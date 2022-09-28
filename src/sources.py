@@ -316,7 +316,7 @@ def getProxySource(logger,source,proxylist):
 			proxysource.update({key:proxysource[key].replace(proxy[key].replace('*',''),proxy[key+'_proxy'].replace('*',''))})
 			continue
 
-	if ' ' in proxysource['host'] or proxysource['host'][0] == '/':
+	if proxysource['host'] != '' and (' ' in proxysource['host'] or proxysource['host'][0] == '/'):
 		# command in the local machine
 		proxysource['local_host'] = deepcopy(proxysource['host'])
 		try:
