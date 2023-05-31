@@ -83,7 +83,7 @@ def RunPlugin(pfile,imglist,datetimelist,mask,settings,logger,ebp):
 				mask = mask_new
 				mask_new = None
 				mahotas.imsave(maskfname,mask*255)
-			pipe = subprocess.Popen(['sh',pfile] if os.path.splitext(pfile)[1] == '.sh' else [pfile]
+			pipe = subprocess.Popen([['sh',pfile] if os.path.splitext(pfile)[1] == '.sh' else [pfile]][0]
 			    + [fname,maskfname], stdout=subprocess.PIPE)
 			res = pipe.communicate()
 			pipe.wait()

@@ -2141,7 +2141,7 @@ class monimet_gui(Tkinter.Tk):
 						mask = np.dstack((mask,mask,mask)).astype('uint8')
 						mahotas.imsave(os.path.join(TmpDir,'plugintestmsk.jpg'),mask)
 						try:
-							pipe = subprocess.Popen(['sh',ans] if pext == '.sh' else [ans]
+							pipe = subprocess.Popen([['sh',ans] if pext == '.sh' else [ans]][0]
 									+ [os.path.join(TmpDir,'plugintestimg.jpg'),os.path.join(TmpDir,'plugintestmsk.jpg')], stdout=subprocess.PIPE)
 							res = pipe.communicate()
 							pipe.wait()
