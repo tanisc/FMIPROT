@@ -2109,22 +2109,26 @@ class monimet_gui(Tkinter.Tk):
 		self.Message.set("Choosing plugin binary file to add.")
 		if tkMessageBox.askyesno('Add Plugin...','Plug-ins are created by users and independent from the program. File paths of your images and file path of a mask file is passed as arguments to the plug-in binaries. If you have obtained the plug-in from somebody else, use it only of you trust it.\nDo you want to proceed?'):
 			if os.path.sep == '/':
-				pext = ''
+				pext = ['','.sh']
 			else:
-				pext = '.exe'
+				pext = ['.exe']
 			self.file_opt = options = {}
-			if pext == '.exe':
+			options['filetypes'] = [('all files', '.*')]
+			if '.exe' in pext:
 				options['defaultextension'] = '.exe'
-				options['filetypes'] = [ ('Binary files', '.exe'),('all files', '.*')]
-			options['title'] = 'Choose plugin binary file to add...'
+				options['filetypes'] += [ ('Binary files', '.exe')]
+			if '' in pext:
+				options['filetypes'] += [ ('Shell script files', '.sh')]
+			options['title'] = 'Choose plugin binary or shell script file to add...'
 			ans = tkFileDialog.askopenfilename(**self.file_opt)
 			if ans != '' and ans != '.' and ans != ():
 				ans = os.path.normpath(ans)
-				if os.path.splitext(ans)[1] != pext or not os.path.isfile(ans):
+				if os.path.splitext(ans)[1] not in pext or not os.path.isfile(ans):
 					tkMessageBox.showwarning('Error','Chosen file is not an executable binary file.')
 					self.Message.set("Choose plugin binary file is cancelled.")
 					return False
 				else:
+					pext = os.path.splitext(ans)[1]
 					incaux = False
 					if tkMessageBox.askyesno('Add Plugin...','Does the executable need also the files in the same folder and subfolders with it, or is only the executable binary file enough?\nIf you answer \'Yes\', all files in the same directory and all subdirectories will be copied to the plugin directory! ('+PluginsDir+')'):
 						incaux = True
@@ -2137,7 +2141,8 @@ class monimet_gui(Tkinter.Tk):
 						mask = np.dstack((mask,mask,mask)).astype('uint8')
 						mahotas.imsave(os.path.join(TmpDir,'plugintestmsk.jpg'),mask)
 						try:
-							pipe = subprocess.Popen([ans,os.path.join(TmpDir,'plugintestimg.jpg'),os.path.join(TmpDir,'plugintestmsk.jpg')], stdout=subprocess.PIPE)
+							pipe = subprocess.Popen(['sh',ans] if pext == '.sh' else [ans]
+									+ [os.path.join(TmpDir,'plugintestimg.jpg'),os.path.join(TmpDir,'plugintestmsk.jpg')], stdout=subprocess.PIPE)
 							res = pipe.communicate()
 							pipe.wait()
 							(res, err) = (res[0],res[1])

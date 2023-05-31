@@ -28,6 +28,8 @@ else:
 def AddPlugin(plugin):
 	plugindir = os.path.join(PluginsDir,plugin)
 	binfilename = os.path.join(plugindir,plugin+pext)
+	if pext == "" and not os.path.isfile(binfilename) and os.path.isfile(binfilename + '.sh'):
+		binfilename += '.sh'
 	if os.path.isfile(binfilename):
 		calcids.append('Plug-in: '+plugin)
 		calcnames.append('Plug-in: '+plugin)
@@ -53,7 +55,7 @@ def RemovePlugin(plugin):
 	del calccommands[calcids.index('Plug-in: '+plugin)]
 	del calcids[calcids.index('Plug-in: '+plugin)]
 
-def RunPlugin(pfile,imglist,datetimelist,mask,logger,ebp):
+def RunPlugin(pfile,imglist,datetimelist,mask,settings,logger,ebp):
 	if len(imglist) == 0:
 		return False
 	import subprocess
@@ -81,7 +83,8 @@ def RunPlugin(pfile,imglist,datetimelist,mask,logger,ebp):
 				mask = mask_new
 				mask_new = None
 				mahotas.imsave(maskfname,mask*255)
-			pipe = subprocess.Popen([pfile,fname,maskfname], stdout=subprocess.PIPE)
+			pipe = subprocess.Popen(['sh',pfile] if os.path.splitext(pfile)[1] == '.sh' else [pfile]
+			    + [fname,maskfname], stdout=subprocess.PIPE)
 			res = pipe.communicate()
 			pipe.wait()
 			(res, err) = (res[0],res[1])
