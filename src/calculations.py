@@ -4,6 +4,8 @@ import mahotas
 import datetime
 import os
 import h5py
+import csv
+import shutil
 calcids = []
 calcsw = []
 calcnames = []
@@ -62,11 +64,32 @@ def RunPlugin(pfile,imglist,datetimelist,mask,settings,logger,ebp):
 	logger.set('Number of images:'+str(len(imglist)))
 	time = []
 	ebp = bool(int(ebp))
-	maskfname = os.path.join(TmpDir,"plugmask"+os.path.splitext(imglist[0])[1])
+	TmpWorkDir = os.path.join(TmpDir,str(uuid4()))
+	os.makedirs(TmpWorkDir)
+	mask_id = 0
+	maskfname = os.path.join(TmpWorkDir,"mask_" + str(mask_id) + os.path.splitext(imglist[0])[1])
 	mask, pgs, th = mask
 	mahotas.imsave(maskfname,mask*255)
 	res_captions = []
 	res_data = []
+
+	try:
+		# try a dummy list to see if batch processing is supported
+		logger.set('Testing plugin for batch processing.')
+		#raise
+		batch_processing = True
+	except:
+		logger.set('Batch processing failed.')
+		batch_processing = False
+
+	if batch_processing:
+		logger.set('Creating image and mask list to submit to the plugin.')
+		batch_list = [] # ["imagetime","imagefile","maskfile"]
+		batch_list_fname = os.path.join(TmpWorkDir,"batch_list.csv")
+		batch_results_fname = os.path.join(TmpWorkDir,"batch_results.csv")
+	else:
+		logger.set('Submitting images to the plugin (one by one) to get results.')
+
 	for i,fname in enumerate(imglist):
 		try:
 			img = mahotas.imread(fname)
@@ -82,26 +105,82 @@ def RunPlugin(pfile,imglist,datetimelist,mask,settings,logger,ebp):
 			if (mask_new != mask).any():
 				mask = mask_new
 				mask_new = None
+				if batch_processing:
+					mask_id += 1
+					maskfname = os.path.join(TmpWorkDir,"mask_" + str(mask_id) + os.path.splitext(fname)[1])
 				mahotas.imsave(maskfname,mask*255)
-			pipe = subprocess.Popen([['sh',pfile] if os.path.splitext(pfile)[1] == '.sh' else [pfile]][0]
-			    + [fname,maskfname], stdout=subprocess.PIPE)
-			res = pipe.communicate()
-			pipe.wait()
-			(res, err) = (res[0],res[1])
-			if err is not None:
-				logger.set('Error: '+err+': '+res)
-			res = res.replace('\n','')
-			res = res.split(',')
-			(res_title,res) = (res[0],res[1:])
-			for j in range(len(res)/2):
-				if i == 0:
-					res_captions.append(res[j*2])
-					res_data.append([])
-				res_data[j].append(res[j*2+1])
+
+			if batch_processing:
+				batch_list.append([str(datetimelist[i]),fname,maskfname])
+			else:
+				pipe = subprocess.Popen([['sh',pfile] if os.path.splitext(pfile)[1] == '.sh' else [pfile]][0]
+					+ [fname,maskfname], stdout=subprocess.PIPE)
+				res = pipe.communicate()
+				pipe.wait()
+				(res, err) = (res[0],res[1])
+				if err is not None:
+					logger.set('Error: '+err+': '+res)
+				res = res.replace('\n','')
+				res = res.split(',')
+				(res_title,res) = (res[0],res[1:])
+				for j in range(len(res)/2):
+					if i == 0:
+						res_captions.append(res[j*2])
+						res_data.append([])
+					res_data[j].append(res[j*2+1])
 			time = np.append(time,str(datetimelist[i]))
 		except:
 			logger.set("Analyzing " + fname + " failed.")
 		logger.set('Image: |progress:4|queue:'+str(i+1)+'|total:'+str(len(imglist)))
+
+	if batch_processing:
+		# save the list file
+		with open(batch_list_fname, 'w') as csvfile:
+			csvwriter = csv.writer(csvfile)
+			for row in batch_list:
+				csvwriter.writerow(row)
+		logger.set('List file saved at %s' % batch_list_fname)
+
+		# run batch list
+		logger.set('Submitting image and mask list to the plugin. There may be no logging until the plugin ends running.')
+		pipe = subprocess.Popen([['sh',pfile] if os.path.splitext(pfile)[1] == '.sh' else [pfile]][0]
+					+ [batch_list_fname, batch_results_fname], stdout=subprocess.PIPE)
+		while True:
+			nextline = pipe.stdout.readline()
+			if nextline == '' and pipe.poll() is not None:
+				break
+			logger.set('Plugin output: ' + nextline)
+
+		res = pipe.communicate()
+		pipe.wait()
+		
+		(res, err) = (res[0],res[1])
+		if err is not None:
+			logger.set('Error: '+err+': '+res)
+			return False
+		logger.set(res)
+		logger.set('Results should be saved at %s' % batch_results_fname)
+
+		# get res, captions, time(reset)
+		logger.set('Parsing results...')
+		time = []
+		with open(batch_results_fname) as csvfile:
+			csvreader = csv.reader(csvfile)
+			i = 0
+			for res in csvreader:
+				# title, "Time","var0","val0","var1","val1"...
+				(res_title,res_time,res) = (res[0],res[2],res[3:])
+				for j in range(len(res)/2):
+					if i == 0:
+						res_captions.append(res[j*2])
+						res_data.append([])
+					res_data[j].append(res[j*2+1])
+				time = np.append(time,res_time)
+				i += 1
+
+		# Clean tmp files here because this may take space
+		shutil.rmtree(TmpWorkDir)
+
 	output = ["Time",time]
 	for i,caption in enumerate(res_captions):
 		output.append(caption)
