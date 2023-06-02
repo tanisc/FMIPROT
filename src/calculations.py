@@ -66,6 +66,10 @@ def RunPlugin(pfile,imglist,datetimelist,mask,settings,logger,ebp):
 	ebp = bool(int(ebp))
 	TmpWorkDir = os.path.join(TmpDir,str(uuid4()))
 	os.makedirs(TmpWorkDir)
+	
+	batch_list_fname = os.path.join(TmpWorkDir,"batch_list.csv")
+	batch_results_fname = os.path.join(TmpWorkDir,"batch_results.csv")
+
 	mask_id = 0
 	maskfname = os.path.join(TmpWorkDir,"mask_" + str(mask_id) + os.path.splitext(imglist[0])[1])
 	mask, pgs, th = mask
@@ -76,11 +80,41 @@ def RunPlugin(pfile,imglist,datetimelist,mask,settings,logger,ebp):
 	try:
 		# try a dummy list to see if batch processing is supported
 		logger.set('Testing plugin for batch processing.')
-		#raise
+		with open(batch_list_fname, 'w') as csvfile:
+			csvwriter = csv.writer(csvfile)
+			csvwriter.writerow([str(datetimelist[0]),imglist[0],maskfname])
+		logger.set('Test list file saved at %s' % batch_list_fname)
+
+		# run batch list
+		logger.set('Submitting image and mask list to the plugin. There may be no logging until the plugin ends running.')
+		pipe = subprocess.Popen([['sh',pfile] if os.path.splitext(pfile)[1] == '.sh' else [pfile]][0]
+					+ [batch_list_fname, batch_results_fname], stdout=subprocess.PIPE)
+		while True:
+			nextline = pipe.stdout.readline()
+			if nextline == '' and pipe.poll() is not None:
+				break
+			logger.set('Plugin output: ' + nextline)
+
+		res = pipe.communicate()
+		pipe.wait()
+		
+		(res, err) = (res[0],res[1])
+		if err is not None:
+			logger.set('Error: '+err+': '+res)
+			raise
+		logger.set(res)
+		logger.set('Results should be saved at %s' % batch_results_fname)
+		if os.path.exists(batch_results_fname):
+			logger.set('Test successful. Plugin supports batch processing.')
 		batch_processing = True
 	except:
-		logger.set('Batch processing failed.')
+		logger.set('Batch processing test failed.')
 		batch_processing = False
+	
+	# clean files from test
+	for tmpfile in [batch_list_fname, batch_results_fname]:
+		if os.path.exists(tmpfile):
+			os.remove(tmpfile)
 
 	if batch_processing:
 		logger.set('Creating image and mask list to submit to the plugin.')
