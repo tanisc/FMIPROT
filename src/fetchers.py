@@ -515,6 +515,39 @@ def downloadFTP(proxy,connection, username,host,password,local_path,imglist,path
 
 multiprocessing.freeze_support()
 
+def fetchPreviewImage(tkobj, logger, source, proxy, connection, workdir, online=True, download=True, care_tz = True):
+	if source['protocol'] == 'HTTP' or source['protocol'] == 'HTTPS':
+		# '2023-07-03T16:01:38'
+		# '01.08.2018','30.06.2019','05:15','18:15','Latest one year'
+		img, ts, pl = [],[],[]
+		if 'lastimagetime' in source and source['lastimagetime'] is not None and source['lastimagetime']  != '':
+			lastimagetime = parsers.strptime2(source['lastimagetime'])[0]
+			img, ts, pl = fetchImages(tkobj, logger, source, proxy, connection, workdir, [lastimagetime-datetime.timedelta(hours=1).strftime('%d.%m.%Y'),lastimagetime+datetime.timedelta(hours=1).strftime('%d.%m.%Y'),lastimagetime-datetime.timedelta(hours=1).strftime('%H:%M'),lastimagetime+datetime.timedelta(hours=1).strftime('%H:%M'),'Date and time intervals'], count=1, online=online, care_tz=care_tz)
+			if img != []:
+				return (img, ts, pl)
+			
+			lastimageday = lastimagetime.strftime('%d.%m.%Y')
+			lastimagetime = lastimagetime.strftime('%H:%M')
+
+			
+		if 'firstimagetime' in source and source['firstimagetime'] is not None and source['firstimagetime']  != '':
+			firstimageday = parsers.strptime2(source['firstimagetime'])[0].strftime('%d.%m.%Y')
+		else:
+			firstimageday = '01.01.2015'
+
+		days_to_check = [1,2,3] + [365*x for x in [1,2,3,5,7]] + [30*x for x in [6,18,30,42]] + [365*x for x in [10,15,20]]
+		for d in days_to_check:
+			day = (datetime.datetime.now() - datetime.timedelta(days=d))
+			logger.set(day.strftime('%d.%m.%Y'))
+			img, ts, pl = fetchImages(tkobj, logger, source, proxy, connection, workdir, [day.strftime('%d.%m.%Y'),day.strftime('%d.%m.%Y'),'09:00','18:59','Date and time intervals'], count=1, online=online, care_tz=care_tz)
+			if img != []:
+				return (img, ts, pl)
+					
+	else:
+		return fetchImages(tkobj, logger, source, proxy, connection, workdir, [0,0,'00:00','23:59','All'], count=1, online=online, care_tz=care_tz)
+		
+	return ([],[],[])
+
 def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=0, online=True, download=True, care_tz = True):
 	(protocol, host, username,password,name, remote_path, filenameformat) = (source['protocol'],source['host'],source['username'],source['password'],source['name'],source['path'],source['filenameformat'])
 	if 'local_host' in source:

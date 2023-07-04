@@ -5361,9 +5361,7 @@ class monimet_gui(Tkinter.Tk):
 						self.Message.set(source_metadata_names['previewimagetime'] + ' is not supplied in CNIF file or the scenario.')
 				if len(img) == 0:
 					self.Message.set('Looking for a suitable image...')
-					img, ts = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), [0,0,'11:30','12:30','Date and time intervals'], count=1, online=True, care_tz = self.TimeZoneConversion.get())[:2]
-				if len(img) == 0:
-					img, ts = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), [0,0,'00:00','23:59','All'], count=1, online=True, care_tz = self.TimeZoneConversion.get())[:2]
+					img, ts = fetchers.fetchPreviewImage(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), online=True, care_tz = self.TimeZoneConversion.get())[:2]
 				if len(img) == 0:
 					self.Message.set('No suitable file for preview image found for camera: '+source['network'] + ' - ' + source['name'])
 					return (source,scenario)
