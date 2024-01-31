@@ -5815,6 +5815,11 @@ class monimet_gui(Tkinter.Tk):
 					(imglist_uf,datetimelist_uf,pathlist_uf) = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), scenario['temporal'], online=self.imagesdownload.get(),download=False, care_tz = self.TimeZoneConversion.get())
 					if imglist_uf == []:
 						self.Message.set("No pictures found. Scenario is skipped.")
+						filelabel = 'S' + str(s+1).zfill(3)
+						filenames = [filename for filename in os.listdir(resultspath) if filename[:4] == filelabel]
+						self.Message.set("Removing old results data (%s files) from the results directory." % len(filenames))
+						for filename in filenames:
+							os.remove(os.path.join(resultspath,filename))
 						self.Message.set('Scenario: |progress:10|queue:'+str(s+1)+'|total:'+str(len(self.setup)))
 						continue
 					self.Message.set('Analysis: |progress:8|queue:'+str(0)+'|total:'+str(len(scenario['analyses'])))
