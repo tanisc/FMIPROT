@@ -307,7 +307,6 @@ def writeSetupReport(filename,setup,logger):
 		res_data = filename[1:]
 		filename = filename[0]
 	report_f = open(filename,'w')
-
 	report_f.write("<html>\n")
 	#head
 	to_write = open(path.join(ResourcesDir,'html_head.html')).read()
@@ -531,10 +530,13 @@ def writeSetupReport(filename,setup,logger):
 				for k,csvf in enumerate(csva):
 					if csvf is not False:
 						csvres = True
-			if csvres:
-				to_write_substr += "<table class='hdr1'><tbody>\n<tr>\n<td>"
-				to_write_substr += "Results"
-				to_write_substr += "</td>\n</tr>\n</tbody></table>\n"
+			to_write_substr += "<table class='hdr1'><tbody>\n<tr>\n<td>"
+			to_write_substr += "Results"
+			to_write_substr += "</td>\n</tr>\n</tbody></table>\n"
+			if not csvres:
+				to_write_substr += "No results data to show.\n"
+				plts_f.write("No results data to show.\n")
+			else:
 				for j,csva in enumerate(res_data[i]):
 					for k,csvr in enumerate(csva):
 						for l,csvf in enumerate(csvr):
