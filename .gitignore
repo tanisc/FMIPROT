@@ -1,0 +1,8 @@
+*.pyc
+auxdata/
+log/
+plugins/
+previews/
+resources/
+sources/
+tmp/
