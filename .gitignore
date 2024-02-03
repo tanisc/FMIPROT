@@ -1,5 +1,7 @@
 *.pyc
 src/auxdata/
+src/DEMData/
+src/images/
 src/log/
 src/plugins/
 src/previews/*
