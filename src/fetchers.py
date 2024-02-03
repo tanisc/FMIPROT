@@ -566,8 +566,11 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 			local_path = os.path.split(timec[5][0])[0] #imglist, path to local image
 		else:
 			local_path = os.path.join(local_path,str(uuid4()))
-			if not os.path.exists(local_path):
-				os.makedirs(local_path)
+
+	# create local dir here, but remove it if temporary and nofiles found and it is empty in the end
+	if not os.path.exists(local_path):
+		os.makedirs(local_path)
+
 	if host == None:
 		host = ''
 	if username == None:
@@ -1034,6 +1037,11 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 			for i_dt,dt in enumerate(datetimelist):#localize utc
 				datetimelist[i_dt]=dt.astimezone(timezone('UTC'))
 				#all time in utc now
+
+	# remove empty temp image dir (needed for code, but no image found)	
+	if temporary and os.listdir(local_path) == []:
+		os.rmdir(local_path)
+
 	return (imglist,datetimelist,pathlist)
 
 def cleanImages(tkobj, logger, imglist):
