@@ -548,20 +548,26 @@ def fetchPreviewImage(tkobj, logger, source, proxy, connection, workdir, online=
 		
 	return ([],[],[])
 
-def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=0, online=True, download=True, care_tz = True):
+def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=0, online=True, download=True, temporary=False, care_tz = True):
 	(protocol, host, username,password,name, remote_path, filenameformat) = (source['protocol'],source['host'],source['username'],source['password'],source['name'],source['path'],source['filenameformat'])
 	if 'local_host' in source:
 		local_host = source['local_host']
 		import subprocess
 	else:
 		local_host = False
+	# if the source in setup file is temporary (not saved as a network)
 	if 'temporary' in source and source['temporary']:
-		local_path = os.path.join(os.path.join(TmpDir,'tmp_images'),parsers.validateName(source['network'])+'-'+source['protocol']+'-'+source['host']+'-'+parsers.validateName(source['username'])+'-'+parsers.validateName(source['path']))
+		local_path = os.path.join(workdir,'unsaved',parsers.validateName(source['network'])+'-'+source['protocol']+'-'+source['host']+'-'+parsers.validateName(source['username'])+'-'+parsers.validateName(source['path']))
 	else:
-		local_path = os.path.join(workdir,source['networkid']+'-'+parsers.validateName(source['network']))
-		local_path = os.path.join(local_path,parsers.validateName(source['name']))
-	if not os.path.exists(local_path):
-		os.makedirs(local_path)
+		local_path = os.path.join(workdir,source['networkid']+'-'+parsers.validateName(source['network']),parsers.validateName(source['name']))
+	# if downloaded images to be removed after the scenario run (program setting)
+	if temporary:
+		if timec[4] == 'List' and timec[7] != []:
+			local_path = os.path.split(timec[5][0])[0] #imglist, path to local image
+		else:
+			local_path = os.path.join(local_path,str(uuid4()))
+			if not os.path.exists(local_path):
+				os.makedirs(local_path)
 	if host == None:
 		host = ''
 	if username == None:
@@ -1029,6 +1035,22 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 				datetimelist[i_dt]=dt.astimezone(timezone('UTC'))
 				#all time in utc now
 	return (imglist,datetimelist,pathlist)
+
+def cleanImages(tkobj, logger, imglist):
+	if len(imglist) != 0:
+		imglistu = list(set(deepcopy(imglist)))
+		logger.set("Removing (%s) downloaded images to save space." % len(imglistu))
+		for img in imglistu:
+			try:
+				os.remove(img)
+			except:
+				logger.set("IO Error: Cannot remove %s" % img)
+		dir_list = list(set([os.path.split(img)[0] for img in imglistu]))
+		if len(dir_list) == 1:
+			try:
+				os.rmdir(dir_list[0])
+			except:
+				logger.set("IO Error: Cannot remove %s" % dir_list[0])
 
 def checkQuantity(tkobj,logger,source, proxy, connection, remote_path, timec, interval=30, epoch=15):
 

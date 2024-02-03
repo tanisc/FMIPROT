@@ -345,6 +345,8 @@ class monimet_gui(Tkinter.Tk):
 		self.outputmodevariable.trace_variable('w',self.callbackoutputmode)
 		self.imagespath.set(settingv[settings.index('images_path')])
 		self.resultspath.set(settingv[settings.index('results_path')])
+		self.imagesclean = Tkinter.BooleanVar()
+		self.imagesclean.set(bool(float(settingv[settings.index('images_clean')])))
 
 		self.TimeZone = Tkinter.StringVar()
 		self.TimeZone.set(settingv[settings.index('timezone')])
@@ -1731,36 +1733,41 @@ class monimet_gui(Tkinter.Tk):
 		self.MenuItem3 = Tkinter.Entry(self,textvariable=self.imagespath,justify="center")
 		self.MenuItem3.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 		Item = 5
+		self.MenuItem10 = Tkinter.Checkbutton(self,variable=self.imagesclean,wraplength=self.MenuX*0.7,height=self.CheckButtonY,width=self.CheckButtonX,text="Remove images after the scenario is run")
+		self.MenuItem10.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
+		Item = 6
 		self.MenuItem4 = Tkinter.Label(self,wraplength=self.MenuX*0.8,text="Results directory:",anchor="c",bg=self.MenuTitleBgColor,fg=self.MenuTitleTextColor)
 		self.MenuItem4.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.6,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
-		Item = 5
+		Item = 6
 		self.MenuItem5 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="Browse...",anchor="c",command=self.selectResultspath)
 		self.MenuItem5.place(x=self.MenuOSX+self.MenuX*0.7,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.2,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
-		Item = 6
+		Item = 7
 		self.MenuItem6 = Tkinter.Entry(self,textvariable=self.resultspath,justify="center")
 		self.MenuItem6.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
-		Item = 7
+		Item = 8
 		self.MenuItem11 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="Save",anchor="c",command=self.saveStorage)
 		self.MenuItem11.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.8,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
-		Item = 8
+		Item = 9
 		self.MenuItem8 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="Cancel",anchor="c",command=self.cancelStorage)
 		self.MenuItem8.place(x=self.MenuOSX+self.MenuX*0.1,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.4,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
-		Item = 8
+		Item = 9
 		self.MenuItem9 = Tkinter.Button(self,wraplength=self.MenuX*0.8,text="Defaults",anchor="c",command=self.defaultsStorage)
 		self.MenuItem9.place(x=self.MenuOSX+self.MenuX*0.5,y=self.MenuOSY+Item*space*self.MenuY+(Item-1)*self.MenuY*(1.0-(NItems+1)*space)/NItems,width=self.MenuX*0.4,height=self.MenuY*(1.0-(NItems+1)*space)/NItems)
 
 	def updateStorage(self):
-		self.storage = {'results_path': self.resultspath.get(),'images_path': self.imagespath.get()}
+		self.storage = {'results_path': self.resultspath.get(),'images_path': self.imagespath.get(),'images_clean': str(int(self.imagesclean.get()))}
 
 	def cancelStorage(self):
 		self.resultspath.set(self.storage['results_path'])
 		self.imagespath.set(self.storage['images_path'])
+		self.imagesclean.set(self.storage['images_clean'])
 		self.Menu_Main()
 
 	def defaultsStorage(self):
-		from definitions import ImagesDir, ResultsSeparate, ResultsDir
+		from definitions import ImagesDir, ResultsDir
 		self.resultspath.set(ResultsDir)
 		self.imagespath.set(ImagesDir)
+		self.imagesdownload.set(settingsd[settings.index('images_clean')])
 
 	def saveStorage(self):
 		imagespath_pre = deepcopy(self.storage['images_path'])
@@ -1876,7 +1883,7 @@ class monimet_gui(Tkinter.Tk):
 		if 'ftp_proxy' not in proxy:
 			proxy.update({'ftp_proxy':''})
 		parsers.writeSettings(proxy,settingsFile,self.Message)
-		(self.networklist,self.sourcelist) = sources.readSources(self, self.proxy,self.connection, self.Message)
+		(self.networklist,self.sourcelist, self.proxylist) = sources.readSources(self, self.proxy,self.connection, self.Message)
 		self.Menu_Main()
 
 	def Settings_Connection(self):
@@ -5808,11 +5815,13 @@ class monimet_gui(Tkinter.Tk):
 			for s,scenario in enumerate(self.setup):
 				scenario = self.ReplaceOptMenuParams(scenario)
 				csvlist.append([])
+				if self.imagesclean.get():
+					imglist_tmp = []
 				if scn == None or scn == s:
 					source_ = sources.getSource(self.Message,sources.getSources(self.Message,self.sourcelist,scenario['source']['network'],prop='network'),scenario['source']['name'])
 					source = sources.getProxySource(self.Message,source_,self.proxylist)
 					self.Message.set('Analyzing ' + source['name'].replace('_',' ') + ' Camera images:')
-					(imglist_uf,datetimelist_uf,pathlist_uf) = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), scenario['temporal'], online=self.imagesdownload.get(),download=False, care_tz = self.TimeZoneConversion.get())
+					(imglist_uf,datetimelist_uf,pathlist_uf) = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), scenario['temporal'], online=self.imagesdownload.get(),download=False, temporary=self.imagesclean.get(), care_tz = self.TimeZoneConversion.get())
 					if imglist_uf == []:
 						self.Message.set("No pictures found. Scenario is skipped.")
 						filelabel = 'S' + str(s+1).zfill(3)
@@ -5907,7 +5916,9 @@ class monimet_gui(Tkinter.Tk):
 									pathlist.append(pathlista[i])
 							self.Message.set(str(len(datetimelistp))+' images are already processed. '+ str(len(imglist))+' images will be processed. Results of '+ str(len(outputtvd))+' images which do not fit the temporal selection will be deleted.')
 						if analysis['id'] != 'TEMPO01':
-							(imglist,datetimelist,pathlist) = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), scenario['temporal'][:4]+['List',imglist,datetimelist,pathlist], online=self.imagesdownload.get(),download=True, care_tz = self.TimeZoneConversion.get())
+							(imglist,datetimelist,pathlist) = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), scenario['temporal'][:4]+['List',imglist,datetimelist,pathlist], online=self.imagesdownload.get(),download=True, temporary=self.imagesclean.get(), care_tz = self.TimeZoneConversion.get())
+							if self.imagesclean.get():
+								imglist_tmp += imglist
 						outputValid = True
 						if imglist == []:
 							outputValid = False
@@ -6010,7 +6021,9 @@ class monimet_gui(Tkinter.Tk):
 											datetimelist.append(v)
 											pathlist.append(pathlista[i])
 									self.Message.set(str(len(datetimelistp))+' images are already processed. '+ str(len(imglist))+' images will be processed. Results of '+ str(len(outputtvd))+' images which do not fit the temporal selection will be deleted.')
-								(imglist,datetimelist,pathlist) = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), scenario['temporal'][:4]+['List',imglist,datetimelist,pathlist], online=self.imagesdownload.get(),download=True, care_tz = self.TimeZoneConversion.get())
+								(imglist,datetimelist,pathlist) = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), scenario['temporal'][:4]+['List',imglist,datetimelist,pathlist], online=self.imagesdownload.get(),download=True, temporary=self.imagesclean.get(),care_tz = self.TimeZoneConversion.get())
+								if self.imagesclean.get():
+									imglist_tmp += imglist
 								outputValid = True
 								if imglist == []:
 									outputValid = False
@@ -6089,6 +6102,8 @@ class monimet_gui(Tkinter.Tk):
 							csvlist[s][a].append([False])
 				if scn == None:
 					self.Message.set('Scenario: |progress:10|queue:'+str(s+1)+'|total:'+str(len(self.setup)))
+				if self.imagesclean.get():
+					fetchers.cleanImages(self,self.Message,imglist_tmp)
 			if self.outputreportvariable.get():
 				self.setupFileReportFunc([os.path.join(resultspath,'report.html')]+csvlist)
 			if not sysargv['gui']:

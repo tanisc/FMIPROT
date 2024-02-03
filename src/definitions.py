@@ -1,4 +1,4 @@
-version = '0.24.6 (Beta)'
+version = '0.24.7 (Beta)'
 #sysargv
 import argparse
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -105,9 +105,9 @@ if sysargv['cleantemp']:
         print 'Cancelled.'
     os._exit(1)
 #definitions, labels, keys for sources
-settings = ['http_proxy','https_proxy','ftp_proxy','ftp_passive','ftp_numberofconnections','results_path','images_path','images_download','timezone','convert_timezone','generate_report','memory_limit']
-settingsn = ['Proxy address for HTTP connections','Proxy address for HTTPS connections','Proxy address for FTP connections','Use passive connection for FTP','Maximum number of simultaneous FTP connections','Default results directory','Local image directory','Check and download new images from the camera network servers','Timezone offset','Convert time zone of timestamps of the images','Generate setup report with analysis results','Maximum memory size to be used for the heavy applications, where available.']
-settingso = ['(host:port)','(host:port)','(host:port)','(0/1)','(0-10)','(Path to directory)','(Path to directory)','(0/1)','(+HH:MM/-HH:MM or +00:00 for UTC)','(0/1)','(0/1)','MB']
+settings = ['http_proxy','https_proxy','ftp_proxy','ftp_passive','ftp_numberofconnections','results_path','images_path','images_download','images_clean','timezone','convert_timezone','generate_report','memory_limit']
+settingsn = ['Proxy address for HTTP connections','Proxy address for HTTPS connections','Proxy address for FTP connections','Use passive connection for FTP','Maximum number of simultaneous FTP connections','Default results directory','Local image directory','Check and download new images from the camera network servers','Remove images after the scenario is run','Timezone offset','Convert time zone of timestamps of the images','Generate setup report with analysis results','Maximum memory size to be used for the heavy applications, where available.']
+settingso = ['(host:port)','(host:port)','(host:port)','(0/1)','(0-10)','(Path to directory)','(Path to directory)','(0/1)','(0/1)','(+HH:MM/-HH:MM or +00:00 for UTC)','(0/1)','(0/1)','MB']
 source_metadata_hidden = ['host','username','password','path','filenameformat','networkid']
 source_metadata_names = {'network':'Source network','protocol':'Communication protocol','host':'Host address','username':'Username','password':'Password','device':'Device type','channels':'List of channels in the images','name':'Source Name','path':'Path on the server','filenameformat':'Filename convention of the images'}
 source_metadata_names.update({'sharedsources':'Other image sources that produces image including any shared location'})
@@ -117,7 +117,7 @@ source_metadata_names.update({'lastimagetime':'Time of the latest image produced
 source_metadata_names.update({'firstimagetime':'Time of the earliest image'})
 source_metadata_names.update({'previewimagetime':'Time of the image to be used as preview image'})
 
-settingsd = ['','','','1',str(FTPNumCon),ResultsDir,ImagesDir,str(int(ImagesDownload)),'+00:00','0','1','4000']
+settingsd = ['','','','1',str(FTPNumCon),ResultsDir,ImagesDir,str(int(ImagesDownload)),'0','+00:00','0','1','4000']
 
 #create missing dirs and files
 dlist = [AuxDir,DEMDir,ResultsDir,ImagesDir,LogDir,PluginsDir,TmpDir,SourceDir]
