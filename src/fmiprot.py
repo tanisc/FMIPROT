@@ -5917,7 +5917,7 @@ class monimet_gui(Tkinter.Tk):
 							self.Message.set(str(len(datetimelistp))+' images are already processed. '+ str(len(imglist))+' images will be processed. Results of '+ str(len(outputtvd))+' images which do not fit the temporal selection will be deleted.')
 						if analysis['id'] != 'TEMPO01':
 							(imglist,datetimelist,pathlist) = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), scenario['temporal'][:4]+['List',imglist,datetimelist,pathlist], online=self.imagesdownload.get(),download=True, temporary=self.imagesclean.get(), care_tz = self.TimeZoneConversion.get())
-							if self.imagesclean.get():
+							if self.imagesclean.get() and source['protocol'] != 'LOCAL':
 								imglist_tmp += imglist
 						outputValid = True
 						if imglist == []:
@@ -6022,7 +6022,7 @@ class monimet_gui(Tkinter.Tk):
 											pathlist.append(pathlista[i])
 									self.Message.set(str(len(datetimelistp))+' images are already processed. '+ str(len(imglist))+' images will be processed. Results of '+ str(len(outputtvd))+' images which do not fit the temporal selection will be deleted.')
 								(imglist,datetimelist,pathlist) = fetchers.fetchImages(self, self.Message,  source, self.proxy, self.connection, self.imagespath.get(), scenario['temporal'][:4]+['List',imglist,datetimelist,pathlist], online=self.imagesdownload.get(),download=True, temporary=self.imagesclean.get(),care_tz = self.TimeZoneConversion.get())
-								if self.imagesclean.get():
+								if self.imagesclean.get() and source['protocol'] != 'LOCAL':
 									imglist_tmp += imglist
 								outputValid = True
 								if imglist == []:
@@ -6102,7 +6102,7 @@ class monimet_gui(Tkinter.Tk):
 							csvlist[s][a].append([False])
 				if scn == None:
 					self.Message.set('Scenario: |progress:10|queue:'+str(s+1)+'|total:'+str(len(self.setup)))
-				if self.imagesclean.get():
+				if self.imagesclean.get() and source['protocol'] != 'LOCAL': # !! IF LOCAL, DO NOT REMOVE IMAGES!
 					fetchers.cleanImages(self,self.Message,imglist_tmp)
 			if self.outputreportvariable.get():
 				self.setupFileReportFunc([os.path.join(resultspath,'report.html')]+csvlist)
