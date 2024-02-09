@@ -927,7 +927,7 @@ def fetchImages(tkobj, logger, source, proxy, connection, workdir, timec, count=
 								p = 'http://'+host+p
 							if protocol == 'HTTPS':
 								p = 'https://'+host+p
-							print(p)
+							# print(p)
 							response = urllib2.urlopen(p).read()
 						imgfile = open(os.path.join(local_path, f),'wb')
 						imgfile.write(response)
