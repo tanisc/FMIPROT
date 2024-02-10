@@ -379,6 +379,10 @@ def listPathCrawl(remote_path,timec,timelimc):
 			date1 = parsers.strptime2(timec[0],'%d.%m.%Y')[1]
 			date2 = parsers.strptime2(timec[1],'%d.%m.%Y')[1]
 
+	if timec[4] in ['Last 24 hours','Today only','Last 48 hours','Yesterday only','Last one week','Last one month','Last one year']:
+		date1 = parsers.strptime2(timelimc[0].strftime('%Y%m%d'),'%Y%m%d')[1]
+		date2 = parsers.strptime2(timelimc[1].strftime('%Y%m%d'),'%Y%m%d')[1]
+
 	if timelimc[0] != 0 and date1 < timelimc[0]:
 		date1 = timelimc[0]
 	if timelimc[1] != 0 and date2 > timelimc[1]:
