@@ -5844,7 +5844,7 @@ class monimet_gui(Tkinter.Tk):
 						if not bool(int(scenario['geomaskmode'])):
 							# auto mode : use metadata and/or calculate: 1) no data 2) lat lon point LATER -> 3) lat lon area 4) calculated polygon (use id in dif.roi mode)
 							if 'lat' in source and 'lon' in source:
-								analysis_captions.update({'geo_roi_coordinates':map(float,[source['lat'],source['lon']])})
+								analysis_captions.update({'geo_roi_coordinates':map(float,[source['lon'],source['lat']])})
 								analysis_captions.update({'geo_roi_projection':scenario['geomaskproj']})
 							else:
 								analysis_captions.update({'geo_roi_coordinates':None})
