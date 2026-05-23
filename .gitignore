@@ -3,7 +3,6 @@ src/auxdata/
 src/DEMData/
 src/images/
 src/log/
-src/plugins/
 src/previews/*
 !src/previews/0-MONIMET_Demo-Sodankyla_Pine*
 src/resources/settings.ini
