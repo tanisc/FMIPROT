@@ -1,4 +1,4 @@
-version = '0.31.0 (Beta)'
+version = '0.31.1 (Beta)'
 #sysargv
 import argparse
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
