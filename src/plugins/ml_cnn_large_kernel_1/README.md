@@ -1,4 +1,4 @@
-# Custom CNN model for 4 class snow cover monitoring large kernel mode Plugin
+# Custom CNN model for 3 class snow cover monitoring large kernel mode Plugin
 
 > **Warning:** This plugin works in Linux only. There is no Windows support.
 

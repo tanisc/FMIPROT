@@ -1,4 +1,4 @@
-# Custom ANN model for 4 class snow cover monitoring dense mode Plugin
+# Custom ANN model for 3 class snow cover monitoring dense mode Plugin
 
 > **Warning:** This plugin works in Linux only. There is no Windows support.
 
